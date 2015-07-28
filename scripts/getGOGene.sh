@@ -32,5 +32,5 @@ do
   shift
 done
 
-../bin/GO/getGO -GenePrefix ../$SOMName/data/som/units/unit -OutputPrefix ../$SOMName/data/som/GO/GO -Rows $Rows -Cols $Cols -Sanity $Sanity -Gene2GO $Gene2GO -GeneInfo $GeneInfo -GOFile $GOFile
+../bin/GO/getGO -GenePrefix ../$SOMName/data/som/units/unit -OutputPrefix ../$SOMName/data/som/GO/GO -Rows $Rows -Cols $Cols -Sanity $Sanity -Gene2GO $Gene2GO -GeneInfo $GeneInfo -GOFile $GOFile -OutputTotals ../$SOMName/data/totals.txt
 sed -i -e "s/var GOTermsOn = 0;/var GOTermsOn = 1;/g" ../$SOMName/options.js

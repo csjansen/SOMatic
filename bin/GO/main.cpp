@@ -153,6 +153,7 @@ int main(int argc, char* argv[]) {
         cout << "Usage: ./getGO [options] -Rows <Number of rows in your SOM> -Cols <Number of cols in your SOM> -GenePrefix <Input File Location> -Gene2GO <Gene2GO File.  See main README.txt for format> -GeneInfo <GeneInfo File. see main README.txt for format> -GOFile <GO term file. See main README.txt for format> -OutputPrefix <Output File Location>" <<endl;
         cout << "Options: <default>" <<endl;
         cout << "-Sanity: If set to true, only GO terms with 5 genes in the unit will be reported. [true, false] <true>"<<endl;
+		cout << "-OutputTotals: If set to a file location, will output total genes and GO terms in each unit. <>"<<endl;
         return 0;
     }
 
@@ -164,6 +165,7 @@ int main(int argc, char* argv[]) {
     string MusTermsFileName;
 	string outputprefix;
 	string Sanity = "true";
+	string outputTotalsName="";
 	for(int i = 0; i < argc; i++) {
         string temp = argv[i];
         if(temp.compare("-Rows")==0)
@@ -182,6 +184,8 @@ int main(int argc, char* argv[]) {
             outputprefix=argv[i+1];
 		if(temp.compare("-Sanity")==0)
             Sanity=argv[i+1];
+		if(temp.compare("-OutputTotals")==0)
+			outputTotalsName=argv[i+1];
 	}
 
     ifstream GOTermsFile(GOTermsFileName.c_str());
@@ -210,6 +214,7 @@ int main(int argc, char* argv[]) {
 				vector<string> splitz2 = split(line, ':');
 				splitz2[1].erase(0,1);
 				GOIDconversion[GO_ID]=splitz2[1];
+			//	cout<<splitz2[1]<<endl;
 				mode=2;
 			}
 		} else if(mode == 2) {
@@ -223,11 +228,13 @@ int main(int argc, char* argv[]) {
 			} else if(splitz[0].compare("is_a:")==0) {
 				string ID = splitz[1];
 				is_a.push_back(ID);	
+			//	cout<<ID<<endl;
 			}
 		}
 	}
 	cout<<"Go Heirarchy Number: "<<GOTermNumber<<endl;
 	map<string, string> geneIds;
+	map<string, string> geneNames;
     cout<<"Getting gene ids"<<endl;
     int totalGenes=0;
 	string tax_id="";
@@ -241,6 +248,7 @@ int main(int argc, char* argv[]) {
         for(string::size_type i = 0; i < temp.length(); i++)
         	upper+=toupper(temp[i],loc);
         geneIds[upper]=splitz[1];
+		geneNames[splitz[1]]=upper;
             //cout<<upper<<endl;
             //int temp2;
             //cin>>temp2;
@@ -299,29 +307,55 @@ int main(int argc, char* argv[]) {
 			//int geneid;
 			//istringstream(splitz[1])>>geneid;
 			string GoID = splitz[2];
+			bool found = 0;
+			for(int i = 0; i < Goterms[splitz[1]].size(); i++) {
+				if(Goterms[splitz[1]][i].compare(GoID)==0) {
+					found = 1;
+					break;
+				}
+			}
+			if(found) continue;
 			Goterms[splitz[1]].push_back(GoID);
+			//cout<<geneNames[splitz[1]]<<endl;
+			//cout<<GOIDconversion[GoID]<<endl;
 			AllGoTerms.push_back(GoID);
 			AllGoTermsCounts[GoID]++;
 			vector<string> queue=GoHeir[GoID];
 			while(queue.size() != 0) {
 				GoID = queue[queue.size()-1];
+				queue.pop_back();
+				bool found = 0;
+	            for(int i = 0; i < Goterms[splitz[1]].size(); i++) {
+		            if(Goterms[splitz[1]][i].compare(GoID)==0) {
+			            found = 1;
+				        break;
+					}
+				}
+				if(found) continue;
+
 				Goterms[splitz[1]].push_back(GoID);
+				//cout<<GOIDconversion[GoID]<<endl;
 				AllGoTerms.push_back(GoID);
 				AllGoTermsCounts[GoID]++;
-				queue.pop_back();
 				vector<string> moreGO = GoHeir[GoID];
 				for(int i = 0; i < moreGO.size(); i++) {
 					queue.push_back(moreGO[i]);
 				}
 			}
+			//int stop;
+			//cin>>stop;
 		//}
     }
 	cout<<"Lines loaded: "<<lines<<endl;
 	vector<GO> GOs;
+	vector<vector<int> > GOtotals;
+	vector<vector<int> > genetotals;
 	//vector<vector<vector<int> > > GOCoords;
 	//vector<string> GONames;
 	//vector<int> GOTotal;
 	for(int i = 0; i < row; i++) {
+		vector<int> Gototal;
+		vector<int> genetotal;
 		for(int j = 0; j < col; j++) {
 			cout<<"Row: "<<i<<" Col: "<<j<<'\t'<<(inputprefix+"_"+SSTR(i)+"_"+SSTR(j)+".unit")<<endl;
 			ifstream genefile((inputprefix+"_"+SSTR(i)+"_"+SSTR(j)+".unit").c_str());
@@ -346,7 +380,6 @@ int main(int argc, char* argv[]) {
 	        vector<string> uniqueGOTerms;
 			map<string, int> GOTermNumber;
     	    for(int k = 0; k < genes.size(); k++) {
-				//cout<<genes[k]<<endl;
 				string upper="";
 				locale loc;
 	            for(string::size_type i = 0; i < genes[k].length(); i++)
@@ -366,7 +399,9 @@ int main(int argc, char* argv[]) {
 					//}
 	                if(it2 != Goterms.end()) {
     	                vector<string> temp = (vector<string>)it2->second;
+						//cout<<genes[k]<<endl;
         	            for(int k = 0; k < temp.size(); k++) {
+							//cout<<GOIDconversion[temp[k]]<<endl;
             	            enrGOTerms.push_back(temp[k]);
 							GOTermNumber[temp[k]]++;
                 	        bool found = false;
@@ -378,6 +413,8 @@ int main(int argc, char* argv[]) {
     	                    }
         	                if(!found) uniqueGOTerms.push_back(temp[k]);
             	        }
+						//int stop;
+						//cin>>stop;
                 	}
 	            }
     	    }
@@ -385,6 +422,8 @@ int main(int argc, char* argv[]) {
 	        ofstream outfile2((outputprefix+"_"+SSTR(i)+"_"+SSTR(j)+".unit").c_str());
 			vector<string> GOTermNames;
 	        vector<double> biomv;
+			vector<int> Totalnums;
+			double biomvnum = 0;
 			for(int m = 0; m < uniqueGOTerms.size(); m++) {
 				//cout<<m<<'\t'<<enrGOTerms.size()<<'\t'<<AllGoTerms.size()<<endl;
            		int Clusternum = 0;
@@ -404,20 +443,26 @@ int main(int argc, char* argv[]) {
 	            	double annotationFactor = Totalnum/(double)AllGoTerms.size();
 	            	
 					double biom = getBinomPval(enrGOTerms.size(), Clusternum, annotationFactor);
+					//cout<<uniqueGOTerms[m]<<'\t'<<enrGOTerms.size()<<'\t'<<Clusternum<<'\t'<<annotationFactor<<'\t'<<biom<<endl;
+					//int temp;
+					//cin>>temp;
 		        	//cout<<genes.size()<<'\t'<<Clusternum<<'\t'<<annotationFactor<<'\t'<<biom<<endl;
 					GOTermNames.push_back(uniqueGOTerms[m]);
 			    	biomv.push_back(biom);
+					biomvnum++;
+					Totalnums.push_back(Clusternum);
 				} else {
 					GOTermNames.push_back(uniqueGOTerms[m]);
                     biomv.push_back(1);
+					Totalnums.push_back(Clusternum);
 				}
         	}
 			int biocount = 0;
         	for(int m = 0; m < biomv.size(); m++) {
-            	if(biomv[m] < .05/biomv.size() && biomv[m]!=0) {
+            	if(biomv[m] < .05/biomvnum && biomv[m] < .05 && biomv[m]!=0) {
 					biocount++;
 				//cout<<GOTermNames[m]<<'\t'<<biomv[m]<<'\t'<<GOIDconversion[GOTermNames[m]]<<endl;
-                	outfile2<<biomv[m]<<'\t'<<GOTermNames[m]<<'\t'<<GOIDconversion[GOTermNames[m]]<<endl;
+                	outfile2<<biomv[m]<<'\t'<<GOTermNames[m]<<'\t'<<GOIDconversion[GOTermNames[m]]<<'\t'<<Totalnums[m]<<'/'<<genes.size()<<endl;
 					int coordsfound = -1;
 	                for(int k = 0; k < GOs.size(); k++) {
 		                if(GOs[k].name.compare(uniqueGOTerms[m])==0) {
@@ -446,10 +491,13 @@ int main(int argc, char* argv[]) {
 					}
             	}
         	}
+			Gototal.push_back(biocount);
+			genetotal.push_back(genes.size());
 			cout<<"Final amount: "<<biocount<<endl;
         	outfile2.close();
-
 		}
+		GOtotals.push_back(Gototal);
+		genetotals.push_back(genetotal);
 	}
 
 	sort(GOs.begin(), GOs.end(), by_name());
@@ -473,4 +521,14 @@ int main(int argc, char* argv[]) {
         outfile5<<GOs[i].name<<'\t'<<GOs[i].total<<endl;
     }
 	outfile5.close();
+	if(outputTotalsName.compare("")!=0) {
+		ofstream outfile6(outputTotalsName.c_str());
+		for(int i = 0; i < row; i++) {
+			for(int j = 0; j < col; j++) {
+				outfile6<<i<<'\t'<<j<<'\t'<<genetotals[i][j]<<'\t'<<GOtotals[i][j]<<endl;
+				cout<<i<<'\t'<<j<<'\t'<<genetotals[i][j]<<'\t'<<GOtotals[i][j]<<endl;
+			}
+		}
+		outfile6.close();
+	}
 }

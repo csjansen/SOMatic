@@ -113,6 +113,7 @@ int main(int argc, char* argv[]) {
 	cout<<"Outputing maps"<<endl;
 	for(int i = 0; i < labels.size(); i++) {
 		ofstream outmap((prefix+labels[i]+".map").c_str());
+		cout<<prefix+labels[i]+".map"<<endl;
 		for(int row = 0; row < inputMap.size(); row++) {
 			for(int col = 0; col < inputMap[row].size()-1; col++) {
 				outmap<<inputMap[row][col][i]<<'\t';
