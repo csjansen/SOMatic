@@ -5,6 +5,7 @@
 #include <math.h>
 #include <vector>
 #include <map>
+#include <thread>
 
 using namespace std;
 
@@ -36,10 +37,71 @@ bool bedSort(BedNode i, BedNode j) {
 	return i.start < j.start;
 }
 
+int binary_search(vector<BedNode>* chr, int first, int last, BedNode bed) {
+	int index;
+	cout<<first<<endl;
+	if(first > last) index=-1;
+	else {
+		int mid = (first+last)/2;
+		BedNode temp = chr->at(mid);
+		if((temp.start > bed.start && temp.start < bed.stop) || (temp.stop > bed.start && temp.stop < bed.stop) || (temp.start < bed.start && temp.stop > bed.stop) || (temp.start > bed.start && temp.stop < bed.stop)) {
+			index = mid;
+		} else {
+			if(temp.stop > bed.start)
+				index = binary_search(chr, first, mid-1, bed);
+			else
+				index = binary_search(chr, mid+1, last, bed);
+		}
+	}
+	cout<<"returning "<<index<<endl;
+	return index;
+}
+
+void regionCount(map<string, vector<BedNode> >* allPartData, string filename, vector<vector<int> >* counts, int i) {
+	cout<<"Started "<<filename<<endl;
+	ifstream rawDataFile(filename.c_str());
+    string line;
+    vector<BedNode> raw;
+    while(getline(rawDataFile, line)) {
+        if(line[0]=='@') continue;
+        vector<string> splitz = split(line, '\t');
+        BedNode temp;
+        temp.chr = splitz[2];
+        if(temp.chr.compare("*")==0) continue;
+        istringstream(splitz[3])>>temp.start;
+        istringstream(splitz[8])>>temp.stop;
+        temp.stop = temp.start+temp.stop;
+        raw.push_back(temp);
+    }
+    rawDataFile.close();
+    vector<int> regionCount;
+    for(int j = 0; j < allPartData->size(); j++) {
+        regionCount.push_back(0);
+    }
+	cout<<"Counting: "<<filename<<endl;
+    for(int j = 0; j < raw.size(); j++) {
+        BedNode temp = raw[j];
+		cout<<"binary"<<'\t'<<filename<<'\t'<<j<<endl;
+		int index = binary_search(&(allPartData->at(temp.chr)), 0, allPartData->at(temp.chr).size()-1, temp);
+		if(index != -1) {
+			regionCount[index]++;
+		}
+		/*for(int k = 0; k < allPartData->at(temp.chr).size(); k++) {
+            BedNode part = allPartData->at(temp.chr).at(k);
+            if(temp.chr.compare(part.chr)==0 && ((temp.start > part.start && temp.start < part.stop) || (temp.stop > part.start && temp.stop < part.stop) || (temp.start < part.start && temp.stop > part.stop))) {
+                regionCount[k]++;
+            }
+        }*/
+		if(j%10000==0) cout<<j<<"/"<<raw.size()<<'\t'<<filename<<endl;
+    }
+    counts->at(i) = regionCount;
+	cout<<"Finished "<<filename<<endl;
+	return;
+}
 
 int main(int argc, char *argv[]) {
     if(argc < 2) {
-        cout << "Usage: ./regionCounts [options] -RawDataFile <raw file list location> -Output <output file location>" <<endl;
+        cout << "Usage: ./regionCounts [options] -RawDataFile <raw file list location> -Partitions <partition file> -Output <output file location>" <<endl;
         cout << "Options: <default>" <<endl;
         cout << "-MergeRegion: Regions this close together will be merged <0>"<<endl;
         cout << "-MinFeature: Size of smallest partition. <25>"<<endl;
@@ -64,7 +126,9 @@ int main(int argc, char *argv[]) {
         if(temp.compare("-Output")==0)
             trainingFileName=argv[i+1];
         if(temp.compare("-RawDataFile")==0)
-            peakDataFileName=argv[i+1];
+            rawDataFileName=argv[i+1];
+		if(temp.compare("-Partitions")==0)
+			peakDataFileName=argv[i+1];
         if(temp.compare("-IgnoreRandom")==0) {
 			string option = argv[i+1];
 			if(option.compare("On") == 0) {
@@ -79,13 +143,14 @@ int main(int argc, char *argv[]) {
 	
 	ifstream partDataFiles(peakDataFileName.c_str());
 	string line1;
-	vector<BedNode> allPartData;
+	map<string, vector<BedNode> > allPartData;
 	vector<string> chrList;
+	int parts = 0;
 		//vector<BedNode> peakData;
 		while(getline(partDataFiles,line1)) {
 			if(line1[0] == '#') continue;
-			vector<string> splitz = split(line1, '\t');
-			if(splitz.size() < 3) continue;
+			vector<string> splitz = split(line1, ':');
+			if(splitz.size() < 2) continue;
 			BedNode temp;
 			temp.chr = splitz[0];
 			bool found = false;
@@ -98,68 +163,42 @@ int main(int argc, char *argv[]) {
 			if(!found) {
 				chrList.push_back(temp.chr);
 			}
-			istringstream(splitz[1])>>temp.start;
-			istringstream(splitz[2])>>temp.stop;
-			allPartData.push_back(temp);
+			vector<string> splitz2 = split(splitz[1], '-');
+			istringstream(splitz2[0])>>temp.start;
+			istringstream(splitz2[1])>>temp.stop;
+			allPartData[temp.chr].push_back(temp);
+			parts++;
 		}
-		peakDataFile.close();
+		partDataFiles.close();
 		//allPeakData.push_back(peakData);
-
+	cout<<parts<<" partitions loaded."<<endl;
 	cout<<"Reading Raw Data"<<endl;
 	vector<string> fileNames;
 	vector<vector<BedNode> > rawData;
 	ifstream rawDataFiles(rawDataFileName.c_str());
+	int count = 0;
+	vector<thread> threads;
+	vector<vector<int> > regionCounts;
 	while(getline(rawDataFiles,line1)) {
-		ifstream rawDataFile(line1.c_str());
-		fileNames.push_back(line1);
-		string line;
-		vector<BedNode> raw;
-		while(getline(rawDataFile, line)) {
-			if(line[0]=='@') continue;
-			vector<string> splitz = split(line, '\t');
-			BedNode temp;
-			temp.chr = splitz[2];
-			if(temp.chr.compare("*")==0) continue;
-			istringstream(splitz[3])>>temp.start;
-			istringstream(splitz[8])>>temp.stop;
-			temp.stop = temp.start+temp.stop;
-			raw.push_back(temp);
-		}
-		rawDataFile.close();
-		rawData.push_back(raw);
+		threads.push_back(thread(regionCount, &allPartData, line1, &regionCounts, count));
+		regionCounts.push_back(vector<int>());
+		count++;
 	}
 	rawDataFiles.close();
-	
-	cout<<"Counting Regions"<<endl;
-	vector<vector<int> > regionCounts;
-	for(int i = 0; i < rawData.size(); i++) {
-		cout<<fileNames[i]<<endl;
-		vector<int> regionCount;
-		for(int j = 0; j < allPartData.size(); j++) {
-			regionCount.push_back(0);
-		}
-		for(int j = 0; j < rawData[i].size(); j++) {
-			BedNode temp = rawData[i][j];
-			for(int k = 0; k < allPartData.size(); k++) {
-				BedNode part = allPartData[k];
-				if(temp.chr.compare(part.chr)==0 && ((temp.start > part.start && temp.start < part.stop) || (temp.stop > part.start && temp.stop < part.stop) || (temp.start < part.start && temp.stop > part.stop))) {
-					regionCount[k]++;
-				}
-			}
-		}
-		regionCounts.push_back(regionCount);
-	}
+	for (auto& th : threads) th.join();
 	
 	cout<<"Outputing Training Matrix"<<endl;
 	ofstream outfile(trainingFileName.c_str());
-	for(int i = 0; i < allPartData.size(); i++) {
-		BedNode part = allPartData[i];
-		outfile<<part.chr<<':'<<part.start<<'-'<<part.stop;
-		for(int j = 0; j < regionCounts.size(); j++) {
-			double RPKM = ((double)regionCounts[j][i])/((double)rawData[j].size())/(1000000.0);
-			outfile<<'\t'<<RPKM;
+	for(int i = 0; i < chrList.size(); i++) {
+		for(int k = 0; k < allPartData[chrList[i]].size(); k++) {
+			BedNode part = allPartData[chrList[i]][k];
+			outfile<<part.chr<<':'<<part.start<<'-'<<part.stop;
+			for(int j = 0; j < regionCounts.size(); j++) {
+				double RPKM = ((double)regionCounts[j][i])/((double)rawData[j].size())/(1000000.0);
+				outfile<<'\t'<<RPKM;
+			}
+			outfile<<endl;
 		}
-		outfile<<endl;
 	}
 	outfile.close();
 }

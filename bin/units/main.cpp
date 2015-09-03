@@ -88,6 +88,7 @@ int main(int argc, char* argv[]) {
 			int col;
 			istringstream(coords[0])>>row;
 			istringstream(coords[1])>>col;
+			if(row==0 && col ==0) continue;
 			Scorerow.push_back(temp);
 			temp.erase(temp.begin(),temp.end());
 			if(row!=rowcoord) {

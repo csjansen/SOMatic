@@ -49,6 +49,7 @@ mv ../Som_Package ../$SOMName
 cp $SampleList ../$SOMName/data/sample.list
 sed -i -e "s/= 20/= $Rows/g" ../$SOMName/options.js
 sed -i -e "s/= 50/= $Cols/g" ../$SOMName/options.js
+echo ../bin/train/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Timesteps $Timesteps -Topology toroid
 ../bin/train/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Timesteps $Timesteps -Topology toroid
 ../bin/score/scoresom -SOMFile ../$SOMName.som -TrainingMatrix $Matrix -ScoreFile ../$SOMName.score
 ../bin/map/mapsom -SOMFile ../$SOMName.som -SampleList $SampleList -Prefix ../$SOMName/data/som/

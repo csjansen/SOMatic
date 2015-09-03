@@ -160,9 +160,9 @@ int main(int argc, char* argv[]) {
 	string inputprefix;
     int row;
     int col;
-	string GOTermsFileName;
-	string GOFileName;
-    string MusTermsFileName;
+	string GOTermsFileName="";
+	string GOFileName="";
+    string MusTermsFileName="";
 	string outputprefix;
 	string Sanity = "true";
 	string outputTotalsName="";
@@ -187,9 +187,7 @@ int main(int argc, char* argv[]) {
 		if(temp.compare("-OutputTotals")==0)
 			outputTotalsName=argv[i+1];
 	}
-
     ifstream GOTermsFile(GOTermsFileName.c_str());
-    ifstream MusTermsFile(MusTermsFileName.c_str());
 
 	map<string, vector<string> > GoHeir;
 	cout<<"Building GO Heirarchy"<<endl;
@@ -238,6 +236,8 @@ int main(int argc, char* argv[]) {
     cout<<"Getting gene ids"<<endl;
     int totalGenes=0;
 	string tax_id="";
+	if(MusTermsFileName.compare("-GOFile")!=0) {
+    ifstream MusTermsFile(MusTermsFileName.c_str());
     while(getline(MusTermsFile,line)) {
         if(line[0]=='#') continue;
         vector<string> splitz = split(line,'\t');
@@ -286,7 +286,8 @@ int main(int argc, char* argv[]) {
 
     }
     cout<<"Genes Loaded:" << totalGenes<<endl;
-
+	}
+	
 	map<string, vector<string> > Goterms;
     vector<string> AllGoTerms;
 	map<string,int> AllGoTermsCounts;
@@ -300,10 +301,10 @@ int main(int argc, char* argv[]) {
 			//cout<<splitz2[0]<<'\t'<<splitz[3]<<endl;
 			AllGoTerms.push_back(splitz[3]);
 		} else {*/
-			lines++;
 			vector<string> splitz = split(line, '\t');
 			//cout<<tax_id<<" "<<splitz[0]<<endl;
-			if(tax_id.compare(splitz[0])!=0) continue;
+			
+			if(tax_id.compare(splitz[0])!=0&&tax_id.compare("")!=0) continue;
 			//int geneid;
 			//istringstream(splitz[1])>>geneid;
 			string GoID = splitz[2];
@@ -315,6 +316,7 @@ int main(int argc, char* argv[]) {
 				}
 			}
 			if(found) continue;
+			lines++;
 			Goterms[splitz[1]].push_back(GoID);
 			//cout<<geneNames[splitz[1]]<<endl;
 			//cout<<GOIDconversion[GoID]<<endl;
@@ -384,8 +386,8 @@ int main(int argc, char* argv[]) {
 				locale loc;
 	            for(string::size_type i = 0; i < genes[k].length(); i++)
 					upper+=toupper(genes[k][i],loc);
-
-        	    map<string,string>::iterator it1 = geneIds.find(upper);
+				if(MusTermsFileName.compare("-GOFile")!=0) {
+					map<string,string>::iterator it1 = geneIds.find(upper);
 				//cout<<upper<<endl;
 				//cout<<genes[k]<<'\t'<<it1->second<<endl;
 				//	int temp;
@@ -417,6 +419,26 @@ int main(int argc, char* argv[]) {
 						//cin>>stop;
                 	}
 	            }
+				} else {
+					map<string, vector<string> >::iterator it2;
+					it2 = Goterms.find(genes[k]);
+					if(it2 != Goterms.end()) {
+						vector<string> temp = (vector<string>)it2->second;
+						for(int k = 0; k < temp.size(); k++) {
+							enrGOTerms.push_back(temp[k]);
+                            GOTermNumber[temp[k]]++;
+                            bool found = false;
+                            for(int p = 0; p < uniqueGOTerms.size(); p++) {
+                                if(uniqueGOTerms[p].compare(temp[k])==0) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if(!found) uniqueGOTerms.push_back(temp[k]);
+                        }
+					}
+				}
+				
     	    }
 			cout<<"GO terms before enrichment: "<<uniqueGOTerms.size()<<endl;
 	        ofstream outfile2((outputprefix+"_"+SSTR(i)+"_"+SSTR(j)+".unit").c_str());
