@@ -75,6 +75,7 @@ void regionCount(map<string, vector<BedNode> >* allPartData, string filename, ve
     }
     rawDataFile.close();
     vector<int> regionCount;
+	cout<<allPartData->size()<<endl;
     for(int j = 0; j < allPartData->size(); j++) {
         regionCount.push_back(0);
     }
@@ -83,6 +84,7 @@ void regionCount(map<string, vector<BedNode> >* allPartData, string filename, ve
         BedNode temp = raw[j];
 		cout<<"binary"<<'\t'<<filename<<'\t'<<j<<endl;
 		int index = binary_search(&(allPartData->at(temp.chr)), 0, allPartData->at(temp.chr).size()-1, temp);
+		cout<<"returned "<<index<<"/"<<regionCount.size()<<endl;
 		if(index != -1) {
 			regionCount[index]++;
 		}
