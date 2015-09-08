@@ -57,36 +57,49 @@ int binary_search(vector<BedNode>* chr, int first, int last, BedNode bed) {
 	return index;
 }
 
-void regionCount(map<string, vector<BedNode> >* allPartData, string filename, vector<vector<int> >* counts, int i) {
+void regionCount(map<string, vector<BedNode> >* allPartData, string filename, vector<vector<vector<int> > >* counts, int i, vector<string>* chrList) {
 	cout<<"Started "<<filename<<endl;
 	ifstream rawDataFile(filename.c_str());
     string line;
     vector<BedNode> raw;
+	vector<int> chrpos;
     while(getline(rawDataFile, line)) {
         if(line[0]=='@') continue;
         vector<string> splitz = split(line, '\t');
         BedNode temp;
         temp.chr = splitz[2];
         if(temp.chr.compare("*")==0) continue;
+		bool found = false;
+		for(int j = 0; j < chrList->size(); j++) {
+			if(chrList->at(j).compare(temp.chr)==0) {
+				found = true;
+				chrpos.push_back(j);
+				break;
+			}
+		}
+		if(!found) continue;
         istringstream(splitz[3])>>temp.start;
         istringstream(splitz[8])>>temp.stop;
         temp.stop = temp.start+temp.stop;
         raw.push_back(temp);
     }
     rawDataFile.close();
-    vector<int> regionCount;
-	cout<<allPartData->size()<<endl;
+    vector<vector<int> > regionCount;
     for(int j = 0; j < allPartData->size(); j++) {
-        regionCount.push_back(0);
+		vector<int> temp;
+		for(int k = 0; k < allPartData->at(chrList->at(j)).size(); k++) {
+			temp.push_back(0);
+		}
+		regionCount.push_back(temp);
     }
 	cout<<"Counting: "<<filename<<endl;
     for(int j = 0; j < raw.size(); j++) {
         BedNode temp = raw[j];
 		cout<<"binary"<<'\t'<<filename<<'\t'<<j<<endl;
 		int index = binary_search(&(allPartData->at(temp.chr)), 0, allPartData->at(temp.chr).size()-1, temp);
-		cout<<"returned "<<index<<"/"<<regionCount.size()<<endl;
+		cout<<"returned "<<index<<"/"<<regionCount[chrpos[j]].size()<<endl;
 		if(index != -1) {
-			regionCount[index]++;
+			regionCount[chrpos[j]][index]++;
 		}
 		/*for(int k = 0; k < allPartData->at(temp.chr).size(); k++) {
             BedNode part = allPartData->at(temp.chr).at(k);
@@ -180,10 +193,9 @@ int main(int argc, char *argv[]) {
 	ifstream rawDataFiles(rawDataFileName.c_str());
 	int count = 0;
 	vector<thread> threads;
-	vector<vector<int> > regionCounts;
+	vector<vector<vector<int> > > regionCounts;
 	while(getline(rawDataFiles,line1)) {
-		threads.push_back(thread(regionCount, &allPartData, line1, &regionCounts, count));
-		regionCounts.push_back(vector<int>());
+		threads.push_back(thread(regionCount, &allPartData, line1, &regionCounts, count, &chrList));
 		count++;
 	}
 	rawDataFiles.close();
@@ -196,8 +208,10 @@ int main(int argc, char *argv[]) {
 			BedNode part = allPartData[chrList[i]][k];
 			outfile<<part.chr<<':'<<part.start<<'-'<<part.stop;
 			for(int j = 0; j < regionCounts.size(); j++) {
-				double RPKM = ((double)regionCounts[j][i])/((double)rawData[j].size())/(1000000.0);
-				outfile<<'\t'<<RPKM;
+				for(int k = 0; k < regionCounts[j].size(); k++) {
+					double RPKM = ((double)regionCounts[j][k][i])/((double)rawData[j].size())/(1000000.0);
+					outfile<<'\t'<<RPKM;
+				}
 			}
 			outfile<<endl;
 		}

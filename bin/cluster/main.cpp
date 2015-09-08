@@ -215,6 +215,11 @@ int main(int argc, char *argv[]) {
 				}				
 			}
 		}
+		if(mini==-1||minj==-1) {
+			cout<<"-1s?"<<endl;
+			cout<<Clusters.size()<<endl;
+			cout<<mindist<<endl;
+		}
 		cout<<"merging "<<mini<<'\t'<<minj<<endl;	
 		clustervertex temp;
 		for(int i = 0; i < Clusters[mini].contents.size(); i++) {
