@@ -67,13 +67,13 @@ vector <vector<int> > merge(vector <vector<int> > lhs, vector<vector<int> > rhs)
 
 int main(int argc, char *argv[]) {
 	if(argc < 2) {
-        cout << "Usage: ./scoresom -SOMFile <SOM File Location> -Clusters1 <Output file with clusters on SOM units> -Clusters2 <Output file with clusters on profiles>" <<endl;
+        cout << "Usage: ./scoresom -SOMFile <SOM File Location> -Clusters1 <Output file with clusters on SOM units> -Clusters2 <Output file with clusters on profiles> -NoNormalize" <<endl;
         return 0;
     }
 	string somFileName;
     string outFileName1;
     string outFileName2;
-
+	bool Normalize = true;
 	for(int i = 0; i < argc; i++) {
         string temp = argv[i];
         if(temp.compare("-Clusters1")==0)
@@ -82,6 +82,8 @@ int main(int argc, char *argv[]) {
 			somFileName=argv[i+1];
 		if(temp.compare("-Clusters2")==0)
 			outFileName2=argv[i+1];
+		if(temp.compare("-NoNormalize")==0)
+			Normalize = false;
 	}
 	int numRows = 0;
 	int numCols = 0;
@@ -119,16 +121,18 @@ int main(int argc, char *argv[]) {
 		temp.push_back(temp2);
 	}
 	inputMap.push_back(temp);
-	cout<<"Normalizing"<<endl;
-	for(int i = 0; i < inputMap.size(); i++) {
-		for(int j = 0; j < inputMap[i].size(); j++) {
-			double total;
-			for(int k = 0; k < inputMap[i][j].size(); k++) {
-				total+=inputMap[i][j][k];
-			}
-			total /= inputMap[i][j].size();
-			for(int k = 0; k < inputMap[i][j].size(); k++) {
-				inputMap[i][j][k]/=total;
+	if(Normalize) {
+		cout<<"Normalizing"<<endl;
+		for(int i = 0; i < inputMap.size(); i++) {
+			for(int j = 0; j < inputMap[i].size(); j++) {
+				double total;
+				for(int k = 0; k < inputMap[i][j].size(); k++) {
+					total+=inputMap[i][j][k];
+				}
+				total /= inputMap[i][j].size();
+				for(int k = 0; k < inputMap[i][j].size(); k++) {
+					inputMap[i][j][k]/=total;
+				}
 			}
 		}
 	}

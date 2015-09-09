@@ -196,6 +196,7 @@ int main(int argc, char *argv[]) {
 	vector<vector<vector<int> > > regionCounts;
 	while(getline(rawDataFiles,line1)) {
 		threads.push_back(thread(regionCount, &allPartData, line1, &regionCounts, count, &chrList));
+		regionCounts.push_back(vector<vector<int> >());
 		count++;
 	}
 	rawDataFiles.close();
