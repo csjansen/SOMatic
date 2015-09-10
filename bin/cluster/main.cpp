@@ -152,22 +152,25 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	vector<vector<double> > distances;
-	for(int i = 0; i < Clusters.size(); i++) {
+	/*for(int i = 0; i < Clusters.size(); i++) {
 		vector<double> temp;
+		
         for(int j = i+1; j<Clusters.size(); j++) {
 			double dist = 0;
 			temp.push_back(dist);
 		}
 		distances.push_back(temp);
-	}
+	}*/
 	for(int i = 0; i < Clusters.size(); i++) {
-		for(int j = i+1; j<Clusters.size(); j++) {
+		vector<double> temp;
+		for(int j = 0; j<Clusters.size(); j++) {
 			double dist = 0;
 			for(int q = 0; q<inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]].size(); q++) {
                 dist += abs(inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]][q]-inputMap[Clusters[j].contents[0][0]][Clusters[j].contents[0][1]][q]);
 			}
-			distances[i][j-i-1]=dist;
+			temp.push_back(dist);
 		}
+		distances.push_back(temp);
 	}
 
 	while(Clusters.size() > 1) {
@@ -189,10 +192,10 @@ int main(int argc, char *argv[]) {
 							int temp;
 							cin>>temp;
 						}
-						if(Clusters[i].name[k] < Clusters[j].name[p]) 
-							dist = distances[Clusters[i].name[k]][Clusters[j].name[p]-(Clusters[i].name[k])-1];
-						else 
-							dist = distances[Clusters[j].name[p]][Clusters[i].name[k]-(Clusters[j].name[p])-1];
+						//if(Clusters[i].name[k] < Clusters[j].name[p]) 
+							dist = distances[Clusters[i].name[k]][Clusters[j].name[p]];
+						//else 
+							//dist = distances[Clusters[j].name[p]][Clusters[i].name[k]];
 						averagedist+=dist;
 						numdist++;
 						/*if(dist < mintempdist) {
@@ -269,7 +272,24 @@ int main(int argc, char *argv[]) {
 		Clusters.push_back(temp);
 	}
     distances.clear();
-    for(int i = 0; i < Clusters.size(); i++) {
+
+for(int i = 0; i < Clusters.size(); i++) {
+        vector<double> temp;
+        for(int j = 0; j<Clusters.size(); j++) {
+            double dist = 0;
+			for(int p = 0; p<inputMap.size(); p++) {
+				for(int q = 0; q<inputMap[p].size(); q++) {
+					dist += abs(inputMap[p][q][Clusters[i].contents[0][0]]-inputMap[p][q][Clusters[j].contents[0][0]]);
+				}
+			}
+            temp.push_back(dist);
+        }
+        distances.push_back(temp);
+    }
+
+
+
+    /*for(int i = 0; i < Clusters.size(); i++) {
         vector<double> temp;
         for(int j = i+1; j<Clusters.size(); j++) {
             double dist = 0;
@@ -287,7 +307,7 @@ int main(int argc, char *argv[]) {
             }
             distances[i][j-i-1]=dist;
         }
-    }
+    }*/
 	while(Clusters.size() > 1) {
         cout<<Clusters.size()<<" Clusters"<<endl;
         int mini = -1;
@@ -307,10 +327,10 @@ int main(int argc, char *argv[]) {
                             int temp;
                             cin>>temp;
                         }
-                        if(Clusters[i].name[k] < Clusters[j].name[p])
-                            dist = distances[Clusters[i].name[k]][Clusters[j].name[p]-(Clusters[i].name[k])-1];
-                        else
-                            dist = distances[Clusters[j].name[p]][Clusters[i].name[k]-(Clusters[j].name[p])-1];
+                        //if(Clusters[i].name[k] < Clusters[j].name[p])
+                            dist = distances[Clusters[i].name[k]][Clusters[j].name[p]];
+                        //else
+                        //    dist = distances[Clusters[j].name[p]][Clusters[i].name[k]];
                         averagedist+=dist;
                         numdist++;
                         /*if(dist < mintempdist) {
