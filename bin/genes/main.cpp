@@ -88,8 +88,19 @@ map<string, TSSsite>* parseGtfFile(string gtfFileName, string addtochrom) {
             vector<string> attributes = split(splitz[8], ';');
             for(int i = 0; i < attributes.size(); i++) {
                 vector<string> pairItems = split(attributes[i],' ');
-                if(pairItems[1].compare("gene_name")==0) {
+                /*if(pairItems[1].compare("gene_name")==0) {
                     geneName = pairItems[2].substr(1,pairItems[2].size()-2);
+                    break;
+                }*/
+				//cout<<pairItems[0]<<'\t'<<pairItems[1]<<endl;
+				//cout<<pairItems[1].substr(1,pairItems[1].size()-2)<<endl;
+				//int temp;
+                    //cin>>temp;
+				if(pairItems[0].compare("gene_id")==0) {
+                    geneName = pairItems[1].substr(1,pairItems[1].size()-2);
+					//cout<<geneName<<endl;
+					//int temp;
+					//cin>>temp;
                     break;
                 }
             }
@@ -174,7 +185,7 @@ int main(int argc, char* argv[]) {
     string gtfFileName;
 	string outputprefix;
 	string addtochrom="";
-
+	cout<<"Reading Inputs"<<endl;
 	for(int i = 0; i < argc; i++) {
         string temp = argv[i];
         if(temp.compare("-Rows")==0)

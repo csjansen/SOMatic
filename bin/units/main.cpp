@@ -76,7 +76,10 @@ int main(int argc, char* argv[]) {
 	string line;
 	vector<vector<vector<string> > > Scores;
 	vector<vector<string> > Scorerow;
+	vector<vector<vector<double> > > Dists;
+	vector<vector<double> > Distrow;
 	vector<string> temp;
+	vector<double> tempdist;
 	int rowcoord=0;
 	int colcoord=0;
 	cout<<"Inputing Score file"<<endl;
@@ -90,26 +93,36 @@ int main(int argc, char* argv[]) {
 			istringstream(coords[1])>>col;
 			if(row==0 && col ==0) continue;
 			Scorerow.push_back(temp);
+			Distrow.push_back(tempdist);
 			temp.erase(temp.begin(),temp.end());
+			tempdist.erase(tempdist.begin(),tempdist.end());
 			if(row!=rowcoord) {
 				Scores.push_back(Scorerow);
+				Dists.push_back(Distrow);
 				Scorerow.erase(Scorerow.begin(), Scorerow.end());
+				Distrow.erase(Distrow.begin(), Distrow.end());
 			}
 			rowcoord = row;
 		} else {
 			temp.push_back(splitz[1]);
+			string lastvalstr = splitz[splitz.size()-1];
+			double lastval;
+			istringstream(lastvalstr)>>lastval;
+			tempdist.push_back(lastval);
 		}
 	}
 	scoreFile.close();
 	Scorerow.push_back(temp);
+	Distrow.push_back(tempdist);
 	Scores.push_back(Scorerow);
+	Dists.push_back(Distrow);
 	
 	for(int i = 0; i < numRows; i++) {
 		for(int j = 0; j < numCols; j++) {
 			cout<<"Creating "<<prefix+'_'+NumberToString(i)+'_'+NumberToString(j)+".unit"<<endl;
 			ofstream outfile((prefix+'_'+NumberToString(i)+'_'+NumberToString(j)+".unit").c_str());
 			for(int k = 0; k < Scores[i][j].size(); k++) {
-				outfile<<Scores[i][j][k]<<endl;
+				outfile<<Scores[i][j][k]<<'\t'<<Dists[i][j][k]<<endl;
 			}
 			outfile.close();
 		}

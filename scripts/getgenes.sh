@@ -32,5 +32,5 @@ do
   shift
 done
 
-../bin/genes/getgenes -GTFFile $GTFFile -InputPrefix ../$SOMName/data/som/units/unit -OutputPrefix ../$SOMName/data/som/genes/gene -Rows $Rows -Cols $Cols -Method $Method -AddToChrom $AddToChrom
+../bin/genes/getgenes -GTFFile $GTFFile -InputPrefix ../$SOMName/data/som/units/unit -OutputPrefix ../$SOMName/data/som/genes/gene -Rows $Rows -Cols $Cols -Method $Method #-AddToChrom $AddToChrom 
 sed -i -e "s/var GenesOn = 0;/var GenesOn = 1;/g" ../$SOMName/options.js
