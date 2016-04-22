@@ -37,7 +37,10 @@ do
 done
 
 sed -i -e 's/\r/\n/g' $Matrix
-sed -i -e 's/\r/\n/g' $SampleList
+mac2unix $SampleList
+awk '{$1=$1;print}' $SampleList > temp.samples
+SampleList="temp.samples"
+#sed -i -e 's/\r/\n/g' $SampleList
 
 if [ "$Rows" = "auto" ]
 then
