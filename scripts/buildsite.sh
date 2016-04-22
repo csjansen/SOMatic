@@ -36,8 +36,8 @@ do
   shift
 done
 
-sed s/^M//g $Matrix > temp.matrix
-Matrix="temp.matrix"
+sed -i -e 's/\r/\n/g' $Matrix
+sed -i -e 's/\r/\n/g' $SampleList
 
 if [ "$Rows" = "auto" ]
 then
