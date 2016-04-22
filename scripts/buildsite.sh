@@ -36,6 +36,9 @@ do
   shift
 done
 
+sed s/^M//g $Matrix > temp.matrix
+Matrix="temp.matrix"
+
 if [ "$Rows" = "auto" ]
 then
 	../bin/estimateSize/estimateSize -TrainingMatrix $Matrix -Output ../suggestedSize.txt
