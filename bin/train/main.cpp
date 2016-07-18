@@ -79,10 +79,10 @@ vector <vector<int> > hexSurround(vector<double> input, int radius, int numRows,
 		vector<int> temp;
 		temp.push_back(zs[i]);
 		if(temp[0]<0) temp[0]+=numRows;
-		if(temp[0]>=numRows) temp[0]-=numRows;
+		while(temp[0]>=numRows) temp[0]-=numRows;
 		temp.push_back(xs[i]+(zs[i]-(abs(zs[i])%2))/2);
 		if(temp[1]<0) temp[1]+=numCols;
-		if(temp[1]>=numCols) temp[1]-=numCols;
+		while(temp[1]>=numCols) temp[1]-=numCols;
 		result.push_back(temp);
 	}
 	return result;
@@ -227,21 +227,41 @@ vector<double> propagate(vector<double>* trainingVector, int numRows, int numCol
 }
 
 int hexdist(int row1, int col1, int row2, int col2, int rows, int cols) {
-	row1=row1-row2;
-	col1=col1-col2;
-	row2=0;
-	col2=0;
-	//if(row1>rows/2.0) row1-=rows;
-	//if(col1>cols/2.0) col1-=cols;
-	//if(row2>rows/2.0) row2-=rows;
-	//if(col2>cols/2.0) col2-=cols;
+	//row1=row1-row2;
+	//col1=col1-col2;
+	//row2=0;
+	//col2=0;
+	//while(row1>=rows) row1-=rows;
+	//while(col1>=cols) col1-=cols;
+	//while(row2>=rows) row2-=rows;
+	//while(col2>=cols) col2-=cols;
+	if(abs(row1-row2)>=rows/2.0) {
+		if(row1<row2) {
+			row1+=rows;
+		} else {
+			row2+=rows;
+		}
+	}
+	if(abs(col1-col2)>=cols/2.0) {
+        if(col1<col2) {
+            col1+=cols;
+        } else {
+            col2+=cols;
+        }
+    }
 	//Convert odd-r to cube
-	int x1 = col1 - (row1 - (abs(row1)%2))/2;
+	int x1 = col1 - (row1 - (row1&1))/2;
 	int z1 = row1;
 	int y1 = -x1-z1;
-	int x2 = col2 - (row2 - (abs(row2)%2))/2;
+	int x2 = col2 - (row2 - (row2&1))/2;
     int z2 = row2;
     int y2 = -x2-z2;
+	int dist1 = (abs(x1-x2) + abs(y1-y2) + abs(z1-z2))/2;
+	//x1 = col1 - (row1 - (row1&1))/2;
+	//	39      16      0       18      39
+//	cout<<row1<<'\t'<<col1<<'\t'<<row2<<'\t'<<col2<<'\t'<<'\t'<<rows<<'\t'<<cols<<'\t'<<dist1<<endl;
+//	int temp;
+//	cin>>temp;
 	return (abs(x1-x2) + abs(y1-y2) + abs(z1-z2))/2;
 }
 
