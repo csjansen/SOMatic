@@ -509,7 +509,7 @@ cout<<"Getting Go terms"<<endl;
             vector<string> genes;
             while(getline(genefile, line)) {
                 bool found = false;
-                vector<string> splitz = split(line,' ');
+                vector<string> splitz = split(line,'\t');
                 //cout<<splitz[0]<<endl;
                 //int temp;
                 //cin>>temp;
@@ -534,8 +534,11 @@ cout<<"Getting Go terms"<<endl;
                     upper+=toupper(gene[n],loc);
                 map<string,string>::iterator it1 = geneIds.find(upper);
                 //map<string,string>::iterator first = (geneIds.begin());
-                    //for(;first!=geneIds.end();first++)
+                  //  for(;first!=geneIds.end();first++) {
                     //  cout<<upper<<'\t'<<(string)first->first<<endl;
+				//		cout<<upper<<endl;
+				//		cout<<(string)first->first<<endl;
+                	//}
                     //int temp;
                     //cin>>temp;
                 if(it1 != geneIds.end()) {

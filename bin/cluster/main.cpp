@@ -67,7 +67,7 @@ vector <vector<int> > merge(vector <vector<int> > lhs, vector<vector<int> > rhs)
 
 int main(int argc, char *argv[]) {
 	if(argc < 2) {
-        cout << "Usage: ./scoresom -SOMFile <SOM File Location> -Clusters1 <Output file with clusters on SOM units> -Clusters2 <Output file with clusters on profiles> -NoNormalize" <<endl;
+        cout << "Usage: ./cluster -SOMFile <SOM File Location> -Clusters1 <Output file with clusters on SOM units> -Clusters2 <Output file with clusters on profiles> -NoNormalize" <<endl;
         return 0;
     }
 	string somFileName;
