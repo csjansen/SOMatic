@@ -22,12 +22,22 @@ std::vector<std::string> split(const std::string &s, char delim) {
 }
 
 int main(int argc, char* argv[]) {
-	ifstream firstmap(argv[1]);
-	ifstream secondmap(argv[2]);
-	ofstream output(argv[3]);
+	cout<<argv[1]<<endl;
+	ifstream firstmap1(argv[1]);
+	cout<<argv[2]<<endl;
+	ifstream firstmap2(argv[2]);
+	//cout<<argv[3]<<endl;
+	//ifstream firstmap3(argv[3]);
+	cout<<argv[3]<<endl;
+	ifstream secondmap1(argv[3]);
+	cout<<argv[4]<<endl;
+	ifstream secondmap2(argv[4]);
+	//cout<<argv[6]<<endl;
+	//ifstream secondmap3(argv[6]);
+	ofstream output(argv[5]);
 	string line;
-	vector<vector<double> > map1;
-	while(getline(firstmap,line)) {
+	vector<vector<double> > map11;
+	while(getline(firstmap1,line)) {
 		vector<double> temp;
 		vector<string> splitz = split(line,'\t');
 		for(int i = 0; i < splitz.size(); i++) {
@@ -35,11 +45,11 @@ int main(int argc, char* argv[]) {
 			istringstream(splitz[i])>>push;
 			temp.push_back(push);
 		}
-		map1.push_back(temp);
+		map11.push_back(temp);
 	}
-	firstmap.close();
-	vector<vector<double> > map2;
-    while(getline(secondmap,line)) {
+	firstmap1.close();
+	vector<vector<double> > map12;
+    while(getline(firstmap2,line)) {
         vector<double> temp;
         vector<string> splitz = split(line,'\t');
         for(int i = 0; i < splitz.size(); i++) {
@@ -47,14 +57,73 @@ int main(int argc, char* argv[]) {
             istringstream(splitz[i])>>push;
             temp.push_back(push);
         }
-		map2.push_back(temp);
+        map12.push_back(temp);
     }
-	secondmap.close();
-	for(int i = 0; i < map1.size(); i++) {
-		for(int j = 0; j < map1[i].size()-1; j++) {
-			output<<(map1[i][j]-map2[i][j])<<'\t';
+    firstmap2.close();
+	/*vector<vector<double> > map13;
+    while(getline(firstmap3,line)) {
+        vector<double> temp;
+        vector<string> splitz = split(line,'\t');
+        for(int i = 0; i < splitz.size(); i++) {
+            double push;
+            istringstream(splitz[i])>>push;
+            temp.push_back(push);
+        }
+        map13.push_back(temp);
+    }
+    firstmap3.close();
+*/
+	vector<vector<double> > map21;
+    while(getline(secondmap1,line)) {
+        vector<double> temp;
+        vector<string> splitz = split(line,'\t');
+        for(int i = 0; i < splitz.size(); i++) {
+            double push;
+            istringstream(splitz[i])>>push;
+            temp.push_back(push);
+        }
+		map21.push_back(temp);
+    }
+	secondmap1.close();
+
+	vector<vector<double> > map22;
+    while(getline(secondmap2,line)) {
+        vector<double> temp;
+        vector<string> splitz = split(line,'\t');
+        for(int i = 0; i < splitz.size(); i++) {
+            double push;
+            istringstream(splitz[i])>>push;
+            temp.push_back(push);
+        }
+        map22.push_back(temp);
+    }
+    secondmap2.close();
+
+/*	vector<vector<double> > map23;
+    while(getline(secondmap3,line)) {
+        vector<double> temp;
+        vector<string> splitz = split(line,'\t');
+        for(int i = 0; i < splitz.size(); i++) {
+            double push;
+            istringstream(splitz[i])>>push;
+            temp.push_back(push);
+        }
+        map23.push_back(temp);
+    }
+    secondmap3.close();
+*/
+	cout<<"Doing the math."<<endl;
+	cout<<map11[0][0]<<endl;
+	cout<<map12[0][0]<<endl;
+	cout<<map21[0][0]<<endl;
+	cout<<map22[0][0]<<endl;
+	for(int i = 0; i < map11.size(); i++) {
+		for(int j = 0; j < map11[i].size(); j++) {
+			if(j!=0)
+				output<<'\t';
+			output<<(map11[i][j]+map12[i][j])/2.0-(map21[i][j]+map22[i][j])/2.0;
 		}
-		output<<(map1[i][map1.size()-1]-map2[i][map2.size()-1])<<endl;
+		output<<endl;
 	}
 	output.close();
 	return 0;

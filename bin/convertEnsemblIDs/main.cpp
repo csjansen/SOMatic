@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) {
     int col;
     string MusTermsFileName;
 	string outputprefix;
-
+	string TrainingMatrixFileName;
 	for(int i = 0; i < argc; i++) {
         string temp = argv[i];
         if(temp.compare("-Rows")==0)
@@ -146,32 +146,37 @@ int main(int argc, char* argv[]) {
 			inputprefix = argv[i+1];
 		if(temp.compare("-GeneInfo")==0)
             MusTermsFileName = argv[i+1];
+		if(temp.compare("-TrainingMatrix")==0)
+			TrainingMatrixFileName=argv[i+1];
 		if(temp.compare("-OutputPrefix")==0)
             outputprefix = argv[i+1];
 	}
     ifstream MusTermsFile(MusTermsFileName.c_str());
-    map<string, int> geneIds;
-	map<int, string> genenames;
+    map<string, string> geneIds;
+	map<string, string> genenames;
     cout<<"Getting gene ids"<<endl;
     int totalGenes=0;
 	string line;
     while(getline(MusTermsFile,line)) {
         if(line[0]=='#') continue;
         vector<string> splitz = split(line,'\t');
-        int geneid;
-        istringstream(splitz[1])>>geneid;
-			vector<string> splitz2 = split(splitz[5],'|');
-			string temp;
-			for(int i = 0; i < splitz2.size(); i++) {
-				size_t found = splitz2[i].find("Ensembl:");
-				if(found != string::npos) {
-					vector<string> splitz3=split(splitz2[i],':');
-					temp = splitz3[1];
-					break;
-				}
+		vector<string> splitz2 = split(splitz[8],';');
+		string geneid;
+		string genename="";
+		for(int i = 0; i < splitz2.size(); i++) {
+			vector<string> splitz3 = split(splitz2[i],' ');
+		//	cout<<splitz2[i]<<endl;
+			if(splitz3[0].compare("gene_id")==0) {
+				geneid=splitz3[1].substr(1,splitz3[1].length()-2);
 			}
-			geneIds[temp]=geneid;
-			genenames[geneid]=splitz[2];
+			if(splitz3[1].compare("gene_name")==0) {
+                genename=splitz3[2].substr(1,splitz3[2].length()-2);
+            }
+		}
+		if(genename.length()>0)
+			genenames[geneid]=genename;
+			//cout<<line<<endl;
+		//cout<<geneid<<'\t'<<genename<<endl;
 			totalGenes++;
     }
 	cout<<"Genes Loaded:" << totalGenes<<endl;
@@ -181,22 +186,50 @@ int main(int argc, char* argv[]) {
 			ifstream genefile((inputprefix+"_"+SSTR(i)+"_"+SSTR(j)+".unit").c_str());
 			vector<string> genes;
             while(getline(genefile, line)) {
+				vector<string> splitz=split(line,'\t');
                 bool found = false;
                 for(int k = 0; k < genes.size(); k++) {
-                    if(genes[k].compare(line)==0) {
+                    if(genes[k].compare(splitz[0])==0) {
                         found = true;
                         break;
                     }
                 }
-                if(!found)
-                    genes.push_back(line);
+                if(!found) {
+                    genes.push_back(splitz[0]);
+					//cout<<splitz[0]<<endl;
+				}
             }
 			cout<<genes.size()<<endl;
 
 	        ofstream outfile2((outputprefix+"_"+SSTR(i)+"_"+SSTR(j)+".unit").c_str());
 	        for(int k = 0 ; k < genes.size(); k++) {
-				outfile2<<genenames[geneIds[genes[k]]]<<endl;
+				if(genenames[genes[k]].length() == 0) {
+					outfile2<<genes[k]<<endl;
+				} else {
+					outfile2<<genenames[genes[k]]<<endl;
+				}
+				cout<<genes[k]<<endl;
+				cout<<genenames[genes[k]]<<endl;
 			}
+			outfile2.close();
 		}
 	}
+	ifstream TrainingMatrix(TrainingMatrixFileName.c_str());
+	ofstream outTrainingMatrix("TMatrix.out");
+	while(getline(TrainingMatrix,line)) {
+		vector<string> splitz = split(line,'\t');
+		if(splitz.size()==0) continue;
+		if(genenames[splitz[0]].length() == 0) {
+			outTrainingMatrix<<splitz[0];
+        } else {
+			outTrainingMatrix<<genenames[splitz[0]];
+        }
+
+		for(int i = 1; i < splitz.size(); i++) {
+			outTrainingMatrix<<'\t'<<splitz[i];
+		}
+		outTrainingMatrix<<endl;
+	}
+	TrainingMatrix.close();
+	outTrainingMatrix.close();
 }
