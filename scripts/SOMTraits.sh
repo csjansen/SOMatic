@@ -23,5 +23,5 @@ do
   shift
 done
 
-
+echo Rscript ../rscripts/Traits.R --TraitFile $TraitFile --MetaClusterFile ../$SOMName/data/MetaClusters --SOMFile ../$SOMName.som --ClusterNum $Metaclusters --OutputName $Output
 Rscript ../rscripts/Traits.R --TraitFile $TraitFile --MetaClusterFile ../$SOMName/data/MetaClusters --SOMFile ../$SOMName.som --ClusterNum $Metaclusters --OutputName $Output

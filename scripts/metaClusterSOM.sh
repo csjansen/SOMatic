@@ -28,12 +28,13 @@ do
 
   shift
 done
-
+echo $Metaclusters
 sed -i -e "s/var MetaOn = 0/var MetaOn = 1/g" ../$SOMName/options.js
 sed -i -e "s/var MetaClusterNumber = 75/var MetaClusterNumber = $Metaclusters/g" ../$SOMName/options.js
 
 if [ "$Sparse" = 0 ]
 then
+echo ../bin/metasom/metasom -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -Trials $Trials -Outfile ../$SOMName/data/MetaClusters
 ../bin/metasom/metasom -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -Trials $Trials -Outfile ../$SOMName/data/MetaClusters
 fi
 
