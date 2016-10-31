@@ -57,7 +57,7 @@ colnames(Atac)=c("V1","V2",t(samples))
 blueColor=rgb(75,75,200,maxColorValue=255,alpha=255)
 blackColor=rgb(0,0,70,maxColorValue=255,alpha=255)
 yellowColor=rgb(200,200,20,maxColorValue=255,alpha=255)
-matrix_palette <- colorRampPalette(c("blue", "white", "red"))(n = 299)
+matrix_palette <- colorRampPalette(c("blue3", "cyan", "yellow2","red3"))(n = 299)
 HeatAtac3=c()
 Maxsig=0
 for(i in 0:clusternum) {

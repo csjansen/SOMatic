@@ -159,7 +159,7 @@ matrix_vp = viewport(
   default.units="inch", 
   just=c("left","bottom")
 )
-pdf("Traits.pdf", h = matrix_vp_h+.5, w=matrix_vp_w)
+pdf(opt$OutputName, h = matrix_vp_h+.5, w=matrix_vp_w)
 
 print(p1, matrix_vp,newpage=FALSE)
 dev.off()

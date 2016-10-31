@@ -46,9 +46,11 @@ int main(int argc, char* argv[]) {
         cout << "Options: <default>" <<endl;
         cout << "-Rows: Number of rows for your SOM. <20>"<<endl;
         cout << "-Cols: Number of columns for your SOM. <30>"<<endl;
-		cout << "-Metaclusters: Number of metaclusters. <20>"<<endl;
+		cout << "-Metaclusters: Number of metaclusters to start with. <20>"<<endl;
+		cout << "-MetaclustersEnd: Number of metaclusters to end with. <20>"<<endl;
         cout << "-Trials: Number of trials for your metaclustering. The best clustering will be chosen.  <20>"<<endl;
 		cout << "-Sparse: Show this option to use Cos Distance"<<endl;
+		cout << "-Dimensionality: Effective number of dimensions in your sample set. Defaults to the total number of samples."<<endl;
         return 0;
     }
 
@@ -56,10 +58,13 @@ int main(int argc, char* argv[]) {
     int row1=20;
     int col1=30;
 	int kmeans1 = 20;
+	int kmeans2 = 20;
 	int numberOfTrials=20;
 	string ATACSom;
 	string BestClusterName;
 	bool Sparse = false;
+	string geneFilePrefix="";
+	int dimensionality=-1;
 	for(int i = 0; i < argc; i++) {
         string temp = argv[i];
         if(temp.compare("-Rows")==0)
@@ -68,6 +73,8 @@ int main(int argc, char* argv[]) {
             istringstream(argv[i+1])>>col1;
 		if(temp.compare("-Metaclusters")==0)
             istringstream(argv[i+1])>>kmeans1;
+		if(temp.compare("-MetaclustersEnd")==0)
+            istringstream(argv[i+1])>>kmeans2;
 		if(temp.compare("-Trials")==0)
             istringstream(argv[i+1])>>numberOfTrials;
 		if(temp.compare("-SOMFile")==0)
@@ -76,8 +83,27 @@ int main(int argc, char* argv[]) {
             BestClusterName = argv[i+1];
 		if(temp.compare("-Sparse")==0)
 			Sparse = true;
+		if(temp.compare("-genePrefix")==0) 
+			geneFilePrefix=argv[i+1];
+		if(temp.compare("-Dimensionality")==0) 
+			istringstream(argv[i+1])>>dimensionality;
 	}
-
+	cout<<"Opening Gene Files"<<endl;
+	vector<vector<int> > geneCounts;
+	for(int i = 0; i < row1; i++) {
+		vector<int> temp;
+		for(int j = 0; j < col1; j++) {
+			int count = 0;
+			cout<<geneFilePrefix+"_"+SSTR(i)+"_"+SSTR(j)+".unit"<<endl;
+			ifstream geneFile((geneFilePrefix+"_"+SSTR(i)+"_"+SSTR(j)+".unit").c_str());
+			string line;
+			while(getline(geneFile,line)) {
+				count++;
+			}
+			temp.push_back(count);
+		}
+		geneCounts.push_back(temp);
+	}
 	cout<<"Opening SOM file"<<endl;	
     ifstream som1file(ATACSom.c_str());
     vector<vector<double> > Som1;
@@ -96,7 +122,9 @@ int main(int argc, char* argv[]) {
 		temp.push_back(tempcol);
 		temp.push_back(0);
 		temp.push_back(0);
-		allpoints.push_back(temp);
+		for(int i = 0; i < geneCounts[temprow][tempcol]+1; i++) {
+			allpoints.push_back(temp);
+		}
         for(int i = 2; i < splitz.size(); i++) {
             double temp;
             istringstream(splitz[i])>>temp;
@@ -113,23 +141,45 @@ int main(int argc, char* argv[]) {
 	
 	cout<<"Cluster Num: "<<kmeans1<<endl;
 	vector<double> averageRads;
+	int BestKmeans = 0;
 	double BestRad=9999999999;
 	int BestRadIndex=-1;
+	for(int i = kmeans1; i <= kmeans2; i++) {
 	// Run numberOfTrials
 	for(int j = 0; j < numberOfTrials; j++) {
 		double RSS=0;
 		cout<<"Trial: "<<j<<endl;
 		vector<double> Rads;
     	random_shuffle(allpoints.begin(),allpoints.end());
+		cout<<"Midpoints created"<<endl;
 		vector<vector<double> > MidPoints;
 		// Initial Mid Points
-		for(int k = 0; k < kmeans1; k++) {
+		int uniqs = 0;	
+		for(int k = 0; k < i+uniqs; k++) {
 			vector<double> temp;
 			for(int m = 0; m < Som1[0].size(); m++) {
 				temp.push_back(Som1[(int)(allpoints[k][0])*col1+(int)(allpoints[k][1])][m]);
 			}
-			MidPoints.push_back(temp);
-			Rads.push_back(0);
+			bool found = false;
+			for(int m = 0; m < MidPoints.size(); m++) {
+				bool inMidpoint = true;
+				for(int n = 0; n < temp.size(); n++) {
+					if(temp[n]!=MidPoints[m][n]) {
+						inMidpoint=false;
+						break;
+					}
+				}
+				if(inMidpoint) {
+					found = true;
+					break;
+				}
+			}
+			if(!found) {
+				MidPoints.push_back(temp);
+				Rads.push_back(0);
+			}
+			else
+				uniqs++;
 		}
 			
 		cout<<"Clustering"<<endl;
@@ -146,7 +196,7 @@ int main(int argc, char* argv[]) {
         		double lowestdist2=999999999;
 		        int lowestk1=-1;
         		int lowestk2=-1;
-		        for(int m = 0; m < kmeans1; m++) {
+		        for(int m = 0; m <i; m++) {
 					double similarity=0;
 		            double mag1 = 0;
         		    double mag2 = 0;
@@ -190,7 +240,7 @@ int main(int argc, char* argv[]) {
 			}
 			cont=true;
         	//Update
-        	for(int k = 0; k < kmeans1; k++) {
+        	for(int k = 0; k < i; k++) {
             	vector<double> totals1;
 			    int count = 0;
             	for(int m = 0; m < Som1[0].size(); m++) totals1.push_back(0);
@@ -206,12 +256,13 @@ int main(int argc, char* argv[]) {
 				}
         	}
 		}
-		int K = kmeans1;
+		int K = i;
         int N = allpoints.size();
         int P = Som1[0].size();
 
 		//rebuild clusters to be adjacient
 		//Calculating Distance Matrix
+		cout<<"Calculating Distance Matrix"<<endl;
 		double DistMatrix[N][K];
 		for(int n = 0; n < N; n++) {
 			for(int k = 0; k < K; k++) {
@@ -242,6 +293,7 @@ int main(int argc, char* argv[]) {
 				}
 			}
 		}
+		cout<<"Assigning Closest Points"<<endl;
 		//assign closest points
 		int pointlist[row1][col1];
 		for(int k = 0; k < row1; k++) {
@@ -264,30 +316,37 @@ int main(int argc, char* argv[]) {
         }
 		for(int k = 0; k < K; k++) {
 			double lowest = 99999999;
-			double seclowest = 99999999;
+			//double seclowest = 99999999;
 			double lowestindex = -1;
-			double seclowestind = -1;
+			//double seclowestind = -1;
 			for(int n = 0; n < N; n++) {
-				if(DistMatrix[(int)allpoints[n][0]*col1+(int)allpoints[n][1]][k]<lowest) {
-					seclowest=lowest;
+				//cout<<N<<'\t'<<n<<'\t'<<k<<endl;
+				//cout<<(int)allpoints[n][0]*col1+(int)allpoints[n][1];
+				if(DistMatrix[(int)allpoints[n][0]*col1+(int)allpoints[n][1]][k]<lowest || lowestindex==-1) {
+			//		seclowest=lowest;
 					lowest = DistMatrix[(int)allpoints[n][0]*col1+(int)allpoints[n][1]][k];
-					seclowestind=lowestindex;
+			//		seclowestind=lowestindex;
 					lowestindex=n;
-				} else if(DistMatrix[(int)allpoints[n][0]*col1+(int)allpoints[n][1]][k]<seclowest) {
-					seclowest = DistMatrix[n][k];
-					seclowestind=n;
+			//	} else if(DistMatrix[(int)allpoints[n][0]*col1+(int)allpoints[n][1]][k]<seclowest) {
+			//		seclowest = DistMatrix[n][k];
+			//		seclowestind=n;
 				}
 			}
+			//cout<<"after"<<endl;
+			//cout<<lowestindex<<endl;
+			//cout<<allpoints.size()<<endl;
+			//cout<<(int)(allpoints[lowestindex][0])*col1+(int)(allpoints[lowestindex][1])<<endl;
 			points[k].push_back(Som1[(int)(allpoints[lowestindex][0])*col1+(int)(allpoints[lowestindex][1])]);
 			points2[k].push_back(allpoints[lowestindex]);
 			points3[k]=allpoints[lowestindex];
 			pointlist[(int)allpoints[lowestindex][0]][(int)allpoints[lowestindex][1]]=k;
 		}
 		//build adjecency list
+		cout<<"Building Adj List"<<endl;
 		bool done = false;
 		bool recalc=true;
 		vector<vector<vector<double> > > adj;
-		for(double r = .001; !done; r+=.001) {
+		for(double r = .01; !done; r+=.01) {
 			if(recalc) {
 				recalc=false;
 				adj.clear();
@@ -381,7 +440,7 @@ int main(int argc, char* argv[]) {
 							points2[k].push_back(adj[k][n]);
 							pointlist[(int)adj[k][n][0]][(int)adj[k][n][1]]=k;
 							recalc=true;		
-							r=.001;	
+							r=.01;	
 						}
 					}
 				}
@@ -398,6 +457,7 @@ int main(int argc, char* argv[]) {
 		for(int n = 0; n < N; n++) {
 			allpoints[n][2]=pointlist[(int)allpoints[n][0]][(int)allpoints[n][1]];
 		}
+		cout<<"Calculating AIC"<<endl;
 		//Calculate AIC
 	    //Nc contains number of objects in each cluster
     	for(int k = 0; k < K; k++) {
@@ -406,18 +466,43 @@ int main(int argc, char* argv[]) {
 		for(int k = 0; k < K; k++) {
 			cout<<k<<'\t'<<Nc[k]<<endl;
 		}
+		//Calculate Midpoint of points
+		vector<vector<double> > Mids;
+		for(int k = 0; k < K; k++) {
+			vector<double> temp;
+			for(int p = 0; p < P; p++) {
+				temp.push_back(0);
+			}
+			for(int p = 0; p < P; p++) {
+				for(int n = 0; n < points[k].size(); n++) {
+					temp[p]+=points[k][n][p];
+				}
+				if(points[k].size()>0)
+					temp[p]/=points[k].size();
+			}
+			Mids.push_back(temp);
+		}
+		cout<<"MidPoint"<<endl;
+		for(int p = 0; p < P; p++) {
+			cout<<Mids[0][p]<<endl;
+		}
     	//Vc is a P x K matrix that contains variances by cluster
 	    double Vc[P][K];
     	for(int p = 0; p < P; p++) {
         	for(int k = 0; k < K; k++) {
                 double Var=0;
                	for(int n = 0; n < points[k].size(); n++) {
-                   	Var+=pow(points[k][n][p]-MidPoints[k][p],2);
+                   	Var+=pow(points[k][n][p]-Mids[k][p],2);
                 }
-				Var = Var/(points[k].size());
+				if(points[k].size() >0)
+					Var = Var/(points[k].size());
 				Vc[p][k]=Var;
 			}
 		}
+		cout<<"Variances in first cluster"<<endl;
+		for(int p = 0; p < P; p++) {
+            cout<<Vc[p][0]<<endl;
+        }
 		// Mid is the mid point of the whole SOM
 		double Mid[P];
 		for(int p = 0; p < P; p++) {
@@ -425,47 +510,78 @@ int main(int argc, char* argv[]) {
 		}
 		for(int n = 0; n < N; n++) {
 			for(int p = 0; p < P; p++) {
-				Mid[p]+=Som1[n][p];
+				Mid[p]+=Som1[allpoints[n][0]*col1+allpoints[n][1]][p];
 			}
 		}
-		for(int p = 0; p < P; p++) {
-            Mid[p]=Mid[p]/N;
-        }
+		cout<<"Midpoint of SOM"<<endl;
+		if(N>0)
+			for(int p = 0; p < P; p++) {
+				Mid[p]=Mid[p]/N;
+			cout<<Mid[p]<<endl;
+			}
 		//V is a P x 1 matrix that contains variances for whole sample
 		double V[P];
 		for(int p = 0; p < P; p++) {
 			double Var = 0;
 			for(int n = 0; n < N; n++) {
-				Var += pow(Som1[n][p]-Mid[p],2);
+				Var += pow(Som1[allpoints[n][0]*col1+allpoints[n][1]][p]-Mid[p],2);
 			}
 			V[p]=Var/(N-1);
 		}
+		cout<<"Variances in whole SOM"<<endl;
+        for(int p = 0; p < P; p++) {
+            cout<<V[p]<<endl;
+        }
 		//Compute log-like LL, 1 x K 
+		cout<<"LL"<<endl;
 		double LL[K];
 		for(int k = 0; k < K; k++) {
 			double csum = 0;
 			for(int p = 0; p < P; p++) {
-				csum+=log(Vc[p][k]+V[p])/2;
+				csum+=log(Vc[p][k]+V[p])/2.0;
 			}
 			LL[k]=-1*Nc[k] * csum;
+			cout<<LL[k]<<endl;
 		}
 		//Compute AIC and BIC
 		double rsum = 0;
 		for(int k = 0; k < K; k++) {
 			rsum+=LL[k];
 		}
-		double AIC = -2 * rsum+4*K*P;
+		cout<<rsum<<endl;
+		double AIC;
+		if(dimensionality==-1) 
+			AIC = -2 * rsum+4*K*P;
+		else { 
+			AIC=-2*rsum+4*K*dimensionality;
+			cout<<"Dimensionality: "<<dimensionality<<endl;
+		}
 		double BIC = -2*rsum+2*K*P*log(N);
+		cout<<AIC<<'\t'<<BIC<<endl;
 		if(BestRad>AIC) {
+			BestKmeans=i;
 			BestRad=AIC;
 			BestRadIndex=j;
 			AllPointsStorage=allpoints;
 		}
 	}
+	}
+	cout<<"Cluster Number: "<<BestKmeans<<endl;
 	ofstream outfile2(BestClusterName.c_str());
-	outfile2<<"# Cluster Number: "<<kmeans1<<endl;
+	outfile2<<"# Cluster Number: "<<BestKmeans<<endl;
+	vector<vector<double> > uniq;
 	for(int j = 0; j < AllPointsStorage.size(); j++) {
-		outfile2<<AllPointsStorage[j][0]<<'\t'<<AllPointsStorage[j][1]<<'\t'<<AllPointsStorage[j][2]<<endl;
+		bool found = false;
+		for(int i = 0; i < uniq.size(); i++) {
+			if(uniq[i][0]==AllPointsStorage[j][0]&&uniq[i][1]==AllPointsStorage[j][1]) {
+				found = true;
+				break;
+			}
+		}
+		if(!found) {
+			outfile2<<AllPointsStorage[j][0]<<'\t'<<AllPointsStorage[j][1]<<'\t'<<AllPointsStorage[j][2]<<endl;
+			uniq.push_back(AllPointsStorage[j]);
+		}
 	}		
 	outfile2.close();
 }	
