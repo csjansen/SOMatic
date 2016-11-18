@@ -139,12 +139,12 @@ int main(int argc, char* argv[]) {
 	vector<int> RSSindexs;
 	vector<vector<double> > AllPointsStorage;
 	
-	cout<<"Cluster Num: "<<kmeans1<<endl;
 	vector<double> averageRads;
 	int BestKmeans = 0;
 	double BestRad=9999999999;
 	int BestRadIndex=-1;
 	for(int i = kmeans1; i <= kmeans2; i++) {
+		cout<<"Cluster Num: "<<i<<endl;
 	// Run numberOfTrials
 	for(int j = 0; j < numberOfTrials; j++) {
 		double RSS=0;
