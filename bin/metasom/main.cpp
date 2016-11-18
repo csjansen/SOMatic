@@ -131,7 +131,7 @@ int main(int argc, char* argv[]) {
             Som1Row.push_back(temp);
         }
         Som1.push_back(Som1Row);
-        if(Som1Row.size()==0) cout<<line<<endl;
+    //    if(Som1Row.size()==0) cout<<line<<endl;
     }
 	vector<double> finalAverageRads;
 	vector<double> RSSs;
@@ -233,7 +233,7 @@ int main(int argc, char* argv[]) {
         		}
 				if(lowestdist > Rads[lowestk1]) Rads[lowestk1]=lowestdist;
 			}
-			cout<<count<<endl;
+	//		cout<<count<<endl;
 			if(finished) break;
 			for(int k = 0; k < Rads.size(); k++) {
 				Rads[k]=0;
@@ -463,9 +463,9 @@ int main(int argc, char* argv[]) {
     	for(int k = 0; k < K; k++) {
         	Nc[k]=points[k].size();
 	    }
-		for(int k = 0; k < K; k++) {
-			cout<<k<<'\t'<<Nc[k]<<endl;
-		}
+		//for(int k = 0; k < K; k++) {
+		//	cout<<k<<'\t'<<Nc[k]<<endl;
+		//}
 		//Calculate Midpoint of points
 		vector<vector<double> > Mids;
 		for(int k = 0; k < K; k++) {
@@ -482,10 +482,10 @@ int main(int argc, char* argv[]) {
 			}
 			Mids.push_back(temp);
 		}
-		cout<<"MidPoint"<<endl;
-		for(int p = 0; p < P; p++) {
-			cout<<Mids[0][p]<<endl;
-		}
+		//cout<<"MidPoint"<<endl;
+		//for(int p = 0; p < P; p++) {
+		//	cout<<Mids[0][p]<<endl;
+		//}
     	//Vc is a P x K matrix that contains variances by cluster
 	    double Vc[P][K];
     	for(int p = 0; p < P; p++) {
@@ -499,10 +499,10 @@ int main(int argc, char* argv[]) {
 				Vc[p][k]=Var;
 			}
 		}
-		cout<<"Variances in first cluster"<<endl;
-		for(int p = 0; p < P; p++) {
-            cout<<Vc[p][0]<<endl;
-        }
+		//cout<<"Variances in first cluster"<<endl;
+		//for(int p = 0; p < P; p++) {
+        //    cout<<Vc[p][0]<<endl;
+        //}
 		// Mid is the mid point of the whole SOM
 		double Mid[P];
 		for(int p = 0; p < P; p++) {
@@ -513,12 +513,12 @@ int main(int argc, char* argv[]) {
 				Mid[p]+=Som1[allpoints[n][0]*col1+allpoints[n][1]][p];
 			}
 		}
-		cout<<"Midpoint of SOM"<<endl;
-		if(N>0)
-			for(int p = 0; p < P; p++) {
-				Mid[p]=Mid[p]/N;
-			cout<<Mid[p]<<endl;
-			}
+		//cout<<"Midpoint of SOM"<<endl;
+		//if(N>0)
+		//	for(int p = 0; p < P; p++) {
+		//		Mid[p]=Mid[p]/N;
+		//	cout<<Mid[p]<<endl;
+		//	}
 		//V is a P x 1 matrix that contains variances for whole sample
 		double V[P];
 		for(int p = 0; p < P; p++) {
@@ -528,12 +528,12 @@ int main(int argc, char* argv[]) {
 			}
 			V[p]=Var/(N-1);
 		}
-		cout<<"Variances in whole SOM"<<endl;
-        for(int p = 0; p < P; p++) {
-            cout<<V[p]<<endl;
-        }
+		//cout<<"Variances in whole SOM"<<endl;
+        //for(int p = 0; p < P; p++) {
+        //    cout<<V[p]<<endl;
+        //}
 		//Compute log-like LL, 1 x K 
-		cout<<"LL"<<endl;
+		//cout<<"LL"<<endl;
 		double LL[K];
 		for(int k = 0; k < K; k++) {
 			double csum = 0;
@@ -541,14 +541,14 @@ int main(int argc, char* argv[]) {
 				csum+=log(Vc[p][k]+V[p])/2.0;
 			}
 			LL[k]=-1*Nc[k] * csum;
-			cout<<LL[k]<<endl;
+		//	cout<<LL[k]<<endl;
 		}
 		//Compute AIC and BIC
 		double rsum = 0;
 		for(int k = 0; k < K; k++) {
 			rsum+=LL[k];
 		}
-		cout<<rsum<<endl;
+		//cout<<rsum<<endl;
 		double AIC;
 		if(dimensionality==-1) 
 			AIC = -2 * rsum+4*K*P;
@@ -557,7 +557,7 @@ int main(int argc, char* argv[]) {
 			cout<<"Dimensionality: "<<dimensionality<<endl;
 		}
 		double BIC = -2*rsum+2*K*P*log(N);
-		cout<<AIC<<'\t'<<BIC<<endl;
+		cout<<AIC<<endl;
 		if(BestRad>AIC) {
 			BestKmeans=i;
 			BestRad=AIC;
