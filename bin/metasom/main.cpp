@@ -514,11 +514,11 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		//cout<<"Midpoint of SOM"<<endl;
-		//if(N>0)
-		//	for(int p = 0; p < P; p++) {
-		//		Mid[p]=Mid[p]/N;
+		if(N>0)
+			for(int p = 0; p < P; p++) {
+				Mid[p]=Mid[p]/N;
 		//	cout<<Mid[p]<<endl;
-		//	}
+			}
 		//V is a P x 1 matrix that contains variances for whole sample
 		double V[P];
 		for(int p = 0; p < P; p++) {
@@ -551,7 +551,7 @@ int main(int argc, char* argv[]) {
 		//cout<<rsum<<endl;
 		double AIC;
 		if(dimensionality==-1) 
-			AIC = -2 * rsum+4*K*P;
+			AIC = -2*rsum+4*K*P;
 		else { 
 			AIC=-2*rsum+4*K*dimensionality;
 			cout<<"Dimensionality: "<<dimensionality<<endl;

@@ -49,7 +49,7 @@ for(i in 0:clusternum) {
   HeatAtac3 = rbind(HeatAtac3,HeatAtac2)
 }
 cors=cor(t(HeatAtac3),sample)
-pvals = 2*pt(-abs(cors/(sqrt((1-cors^2)/(61)))),df=62)
+pvals = 2*pt(-abs(cors/(sqrt((1-cors^2)/(clusternum-1)))),df=clusternum+1)
 #for each trait
 #traitpvals=c()
 #traiteigens = c()

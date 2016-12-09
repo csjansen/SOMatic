@@ -3,6 +3,9 @@
 #$ -q sam,bio
 #$ -pe openmp 1
 
+
+./Som_Meta_Clusters -Rows 20 -Cols 30 -SOMFile ../../ -Metaclusters 100 -Trials 20 -Outfile FusionATAC.AIC.v11.100.cluster
+
 # ./Som_density_kmeans rows cols somfile mincluster maxcluster numberoftrials outfile1 AIC_output BIC_output BIC_centroids_output BIC_centroids_after_reclustering_output_file
 
 
@@ -18,7 +21,6 @@
 #./Som_density_kmeans 20 30 /samlab/csjansen/SOMatic/XenoRNAFusion.20x30.v10.som 2 40 20 Xeno.v9.AIC.cluster Xeno.v9.BIC.cluster RNA_centroids RNA_PostCentroids
 #./Som_density_kmeans 20 30 /samlab/csjansen/SOMatic/XenoRNAFusion.20x30.v9.som 75 75 5 Xeno.v9.AIC.75.cluster Xeno.v9.BIC.75.cluster RNA_centroids RNA_PostCentroids
 #./Som_Meta_Clusters 20 35 /samlab/csjansen/SOMatic/FusionRNA.CosDist.20x35.v7.som 70 70 20 FusionRNA.AIC.v7.70.cluster FusionRNA.BIC.v7.60.cluster RNA_centroids RNA_PostCentroids
-./Som_Meta_Clusters -Rows 40 -Cols 60 -SOMFile /samlab/csjansen/SOMatic/FusionATAC.CosDist.40x60.v11.som -Metaclusters 100 -Trials 20 -Outfile FusionATAC.AIC.v11.100.cluster
 #	done
 #done
 #./Som_density_kmeans ../Somatic_Splice/Fusion.CosDist.txt 40 60 20 35 FusionClusters5.txt /samlab/csjansen/SOMatic/FusionRNA.CosDist.20x35.v4/data/som/units/unit /samlab/csjansen/SOMatic/FusionATAC.CosDist.40x60.v4.som /samlab/csjansen/SOMatic/FusionRNA.CosDist.20x35.v4.som GOHL60/GO_ 5

@@ -79,7 +79,8 @@ void regionCount(map<string, vector<BedNode> >* allPartData, string filename, ve
 		}
 		if(!found) continue;
         istringstream(splitz[3])>>temp.start;
-        istringstream(splitz[8])>>temp.stop;
+		temp.stop=splitz[9].size()
+//        istringstream(splitz[8])>>temp.stop;
         temp.stop = temp.start+temp.stop;
         raw.push_back(temp);
     }

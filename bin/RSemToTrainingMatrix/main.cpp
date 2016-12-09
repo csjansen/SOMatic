@@ -58,21 +58,14 @@ int main(int argc, char *argv[]) {
         if(temp.compare("-RsemFileList")==0)
             peakDataFileName=argv[i+1];
     }
-	vector<string> prefixMaker = split(peakDataFileName,'/');
-	string prefix="";
-	for(int i = 0; i < prefixMaker.size()-1; i++) {
-		prefix+=prefixMaker[i]+"/";
-	}
 	cout<<"Reading RSem Data"<<endl;
-	
 	ifstream RsemDataFiles(peakDataFileName.c_str());
 	string line1;
 	vector<string> geneList;
 	vector<vector<double> > RsemData;
 
 	while(getline(RsemDataFiles,line1)) {
-		ifstream RsemDataFile((prefix+line1).c_str());
-		cout<<line1<<endl;
+		ifstream RsemDataFile((line1).c_str());
 		string line;
 		vector<double> rsem;
 		while(getline(RsemDataFile, line)) {

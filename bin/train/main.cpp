@@ -340,7 +340,7 @@ int main(int argc, char *argv[]) {
 		dataMap[fields[0]]=temp;
 		dataKeys.push_back(fields[0]);
 		count++;
-		if(count%100000==0) 
+		if(count%10000==0) 
 		cout<<"line: "<<count<<endl;
 	}	
 	cout<<"Done!"<<endl;
