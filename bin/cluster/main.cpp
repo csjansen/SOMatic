@@ -166,8 +166,12 @@ int main(int argc, char *argv[]) {
 		for(int j = 0; j<Clusters.size(); j++) {
 			double dist = 0;
 			for(int q = 0; q<inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]].size(); q++) {
-                dist += abs(inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]][q]-inputMap[Clusters[j].contents[0][0]][Clusters[j].contents[0][1]][q]);
+                dist += pow(inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]][q]-inputMap[Clusters[j].contents[0][0]][Clusters[j].contents[0][1]][q],2);
 			}
+			if(dist<0) {
+				cout<<dist<<endl;
+			}
+			dist=sqrt(dist);
 			temp.push_back(dist);
 		}
 		distances.push_back(temp);
@@ -188,7 +192,6 @@ int main(int argc, char *argv[]) {
 					for(int p = 0; p<Clusters[j].name.size(); p++) {
 						double dist = 0;
 						if(Clusters[j].name[p]==Clusters[i].name[k]) {
-							cout<<j<<'\t'<<p<<'\t'<<i<<'\t'<<k<<'\t'<<Clusters[j].name[p]<<endl;
 							int temp;
 							cin>>temp;
 						}
@@ -205,7 +208,8 @@ int main(int argc, char *argv[]) {
 						}*/
 					}
 				}
-				averagedist/=numdist;
+				if(numdist>0)
+					averagedist/=numdist;
 				if(averagedist < mindist || mindist==-1) {
 					//cout<<mintempdist<<'\t'<<i<<'\t'<<j<<'\t'<<mink<<'\t'<<minp<<endl;
 					/*for(int q = 0; q<inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]].size(); q++) {
@@ -279,9 +283,10 @@ for(int i = 0; i < Clusters.size(); i++) {
             double dist = 0;
 			for(int p = 0; p<inputMap.size(); p++) {
 				for(int q = 0; q<inputMap[p].size(); q++) {
-					dist += abs(inputMap[p][q][Clusters[i].contents[0][0]]-inputMap[p][q][Clusters[j].contents[0][0]]);
+					dist += pow(inputMap[p][q][Clusters[i].contents[0][0]]-inputMap[p][q][Clusters[j].contents[0][0]],2);
 				}
 			}
+			dist=sqrt(dist);
             temp.push_back(dist);
         }
         distances.push_back(temp);
@@ -340,6 +345,7 @@ for(int i = 0; i < Clusters.size(); i++) {
                         }*/
                     }
                 }
+				if(numdist>0)
                 averagedist/=numdist;
                 if(averagedist < mindist || mindist == -1) {
                     //cout<<mintempdist<<'\t'<<i<<'\t'<<j<<'\t'<<mink<<'\t'<<minp<<endl;
