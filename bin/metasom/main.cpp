@@ -122,9 +122,8 @@ int main(int argc, char* argv[]) {
 		temp.push_back(tempcol);
 		temp.push_back(0);
 		temp.push_back(0);
-		for(int i = 0; i < geneCounts[temprow][tempcol]+1; i++) {
-			allpoints.push_back(temp);
-		}
+		temp.push_back(geneCounts[temprow][tempcol]+1);
+		allpoints.push_back(temp);
         for(int i = 2; i < splitz.size(); i++) {
             double temp;
             istringstream(splitz[i])>>temp;
@@ -133,6 +132,7 @@ int main(int argc, char* argv[]) {
         Som1.push_back(Som1Row);
     //    if(Som1Row.size()==0) cout<<line<<endl;
     }
+	
 	vector<double> finalAverageRads;
 	vector<double> RSSs;
 	vector<double> RSSsb;
@@ -259,11 +259,14 @@ int main(int argc, char* argv[]) {
 		int K = i;
         int N = allpoints.size();
         int P = Som1[0].size();
-
+		cout<<K<<endl;
+		cout<<N<<endl;
+		cout<<P<<endl;
 		//rebuild clusters to be adjacient
 		//Calculating Distance Matrix
-		cout<<"Calculating Distance Matrix"<<endl;
+		cout<<"Calculating Distance Matrix..."<<endl;
 		double DistMatrix[N][K];
+		cout<<"Allocated"<<endl;
 		for(int n = 0; n < N; n++) {
 			for(int k = 0; k < K; k++) {
 				DistMatrix[(int)allpoints[n][0]*col1+(int)allpoints[n][1]][k]=0;

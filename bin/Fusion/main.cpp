@@ -52,66 +52,85 @@ std::vector<std::string> split(const std::string &s, char delim) {
 }
 
 
-map<string, TSSsite>* parseGtfFile(string gtfFileName, string geneidtype) {
+map<string, TSSsite>* parseGtfFile(string gtfFileName, string geneidtype, bool Xeno) {
 	ifstream gtffile(gtfFileName.c_str());
     map<string, TSSsite>* TSSsites=new map<string, TSSsite>();
 	string line;
 	int counter=0;
+	cout<<Xeno<<endl;
 	while(getline(gtffile,line)) {
-		if(line[0]=='#') continue;
-		vector<string> splitz = split(line, '\t');
-		if(splitz[2].compare("exon")==0) {
-			string geneName;
-			vector<string> attributes = split(splitz[8], ';');
-			bool protein_coding=false;
-			bool protein_coding_gene=false;
-			for(int i = 0; i < attributes.size(); i++) {
-				vector<string> pairItems = split(attributes[i],' ');
-				if(geneidtype.compare("gene_id")!=0) {
-					if(pairItems[1].compare("gene_name")==0) {
-						geneName = pairItems[2].substr(1,pairItems[2].size()-2);
-					}
-				} else {
+		if(!Xeno) {
+			if(line[0]=='#') continue;
+			vector<string> splitz = split(line, '\t');
+			if(splitz[2].compare("exon")==0) {
+				string geneName;
+				vector<string> attributes = split(splitz[8], ';');
+				bool protein_coding=false;
+				bool protein_coding_gene=false;
+				for(int i = 0; i < attributes.size(); i++) {
+					vector<string> pairItems = split(attributes[i],' ');
+					if(geneidtype.compare("gene_id")!=0) {
+						if(pairItems[1].compare("gene_name")==0) {
+							geneName = pairItems[2].substr(1,pairItems[2].size()-2);
+						}
+					} else {
 		//		cout<<pairItems[0]<<'\t'<<pairItems[1]<<endl;
 					
-					if(pairItems[0].compare("gene_id")==0) {
-						vector<string> splitz2 = split(pairItems[1].substr(1,pairItems[1].size()-2),'.');
-						geneName = splitz2[0];
+						if(pairItems[0].compare("gene_id")==0) {
+							vector<string> splitz2 = split(pairItems[1].substr(1,pairItems[1].size()-2),'.');
+							geneName = splitz2[0];
 		//				cout<<geneName<<endl;
 		//				int temp;
 		//				cin>>temp;
+						}
 					}
-				}
-					
-				if(pairItems[1].compare("gene_type")==0) {
-					string splitz2 = pairItems[2];
-					if(splitz2.compare("\"protein_coding\"")==0) protein_coding_gene=true;
-				}
-				if(pairItems[1].compare("transcript_type")==0) {
-					string splitz2 = pairItems[2];
+						
+					if(pairItems[1].compare("gene_type")==0) {
+						string splitz2 = pairItems[2];
+						if(splitz2.compare("\"protein_coding\"")==0) protein_coding_gene=true;
+					}
+					if(pairItems[1].compare("transcript_type")==0) {
+						string splitz2 = pairItems[2];
 					//cout<<splitz2<<endl;
-					if(splitz2.compare("\"protein_coding\"")==0) protein_coding=true;
+						if(splitz2.compare("\"protein_coding\"")==0) protein_coding=true;
 					//if(protein_coding) cout<<"coding"<<endl;
 					//int temp;
 					//cin>>temp;
+					}
 				}
-			}
 					//int temp;
 					//cin>>temp;
-			TSSsite record = TSSsites->operator[](geneName);
-			if(!protein_coding&&protein_coding_gene) continue;
-			record.strand = splitz[6];
-			record.chrom = splitz[0];
-			int pos;
-			if(record.strand.compare("+")==0) {
-				istringstream(splitz[3])>>pos;
-				if(pos < record.pos || record.pos == 0) record.pos = pos;
-			} else {
-				istringstream(splitz[4])>>pos;
-				if(pos > record.pos || record.pos == 0) record.pos = pos;
+				TSSsite record = TSSsites->operator[](geneName);
+				if(!protein_coding&&protein_coding_gene) continue;
+				record.strand = splitz[6];
+				record.chrom = splitz[0];
+				int pos;
+				if(record.strand.compare("+")==0) {
+					istringstream(splitz[3])>>pos;
+					if(pos < record.pos || record.pos == 0) record.pos = pos;
+				} else {
+					istringstream(splitz[4])>>pos;
+					if(pos > record.pos || record.pos == 0) record.pos = pos;
+				}
+				TSSsites->operator[](geneName) = record;
+				counter++;
 			}
-			TSSsites->operator[](geneName) = record;
-			counter++;
+		} else {
+			if(counter>0) {
+				vector<string> splitz = split(line,'\t');
+				TSSsite temp;
+				string genename = splitz[0];
+				if(genename.compare("unnamed")==0) {
+					genename = splitz[0];
+				}
+				vector<string> chromsplitz = split(splitz[2],':');
+				vector<string> startsplitz = split(chromsplitz[1],'-');
+				temp.chrom = chromsplitz[0];
+				istringstream(startsplitz[0])>>temp.pos;
+				temp.strand = '+';
+				TSSsites->operator[](genename) = temp;
+			}
+			counter++;	
 		}
 	}
 	cout<<"GTF Genes: "<<counter<<endl;
@@ -259,6 +278,7 @@ int main(int argc, char* argv[]) {
 	int col2;
 	string outfileName;
 	string gtfFileName;
+	bool Xeno = false;
 	for(int i = 0; i < argc; i++) {
         string temp = argv[i];
         if(temp.compare("-UnitPrefix1")==0)
@@ -283,6 +303,8 @@ int main(int argc, char* argv[]) {
 			gtfFileName = argv[i+1];	
         if(temp.compare("-GeneIDType")==0)
 			geneidtype = argv[i+1];	
+		if(temp.compare("-Xeno")==0)
+			Xeno=true;
 	}
 
 	cout<<prefix1<<" rows: "<<row1<<" cols: "<<col1<<endl;
@@ -290,7 +312,7 @@ int main(int argc, char* argv[]) {
 	if(type.compare("ATACxRNA")==0) {
 		cout<<"ATACxRNA"<<endl;
 		cout<<gtfFileName<<endl;
-		map<string, TSSsite>* TSSsites = parseGtfFile(gtfFileName, geneidtype);
+		map<string, TSSsite>* TSSsites = parseGtfFile(gtfFileName, geneidtype,Xeno);
 		ofstream outfile(outfileName.c_str());
 		vector<vector<int> > AtacSizes;
 		vector<vector<int> > RNASizes;
@@ -309,14 +331,15 @@ int main(int argc, char* argv[]) {
 				ifstream AtacUnit((prefix1+"_"+SSTR(AtacRow)+"_"+SSTR(AtacCol)+".unit").c_str());
 				string line;
 				while(getline(AtacUnit,line)) {
+//					cout<<line<<endl;
 					genomicRegion temp;
 					vector<string> frist = split(line,'\t');
 					vector<string> splitz = split(frist[0],':');
 					if(splitz.size() == 1) continue;
 					temp.chrom = splitz[0];
 					vector<string> splitz2 = split(splitz[1],'-');
-					istringstream(splitz[1])>>temp.start;
-					istringstream(splitz[2])>>temp.stop;
+					istringstream(splitz2[0])>>temp.start;
+					istringstream(splitz2[1])>>temp.stop;
 					//cout<<temp.start<<'\t'<<temp.stop<<'\t'<<line<<endl;
 					//istringstream(splitz[1])>>temp.start;
 					//istringstream(splitz[2])>>temp.stop;

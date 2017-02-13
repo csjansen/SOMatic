@@ -455,6 +455,7 @@ int main(int argc, char* argv[]) {
 			row<<MetaClusters[i][k][0];
 			stringstream col;
 			col<<MetaClusters[i][k][1];
+			cout<<UnitPrefix+"_"+row.str()+"_"+col.str()+".unit"<<endl;
 			ifstream UnitFile((UnitPrefix+"_"+row.str()+"_"+col.str()+".unit").c_str());
 			string line;
 			while(getline(UnitFile,line)) {

@@ -184,6 +184,7 @@ int main(int argc, char *argv[]) {
 		double mindist = -1;
 		for(int i = 0; i < Clusters.size(); i++) {
 			for(int j = i+1; j<Clusters.size(); j++) {
+				//cout<<i<<'\t'<<j<<endl;
 				double averagedist = 0;
 				int numdist = 0;
 				int mink = -1;
@@ -211,7 +212,7 @@ int main(int argc, char *argv[]) {
 				if(numdist>0)
 					averagedist/=numdist;
 				if(averagedist < mindist || mindist==-1) {
-					//cout<<mintempdist<<'\t'<<i<<'\t'<<j<<'\t'<<mink<<'\t'<<minp<<endl;
+					//cout<<i<<'\t'<<j<<'\t'<<mink<<'\t'<<minp<<endl;
 					/*for(int q = 0; q<inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]].size(); q++) {
 						cout<<inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]][q]<<'\t';
 					}

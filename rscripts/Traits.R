@@ -8,22 +8,22 @@ option_list = list(
   );
 opt_parser = OptionParser(option_list=option_list);
 opt=parse_args(opt_parser);
-sample<-read.delim(opt$TraitFile);
-#sample <- read.delim("/bio/csjansen/TraitFiles/trait_note_modified_withindex2.txt")
-#sample <- read.delim("/bio/csjansen/TraitFiles/Trait2.txt")
+#sample<-read.delim(opt$TraitFile);
+sample <- read.delim("/bio/csjansen/TraitFiles/sample3.Xeno.list")
+sample=sample[,-2]#sample <- read.delim("/bio/csjansen/TraitFiles/Trait2.txt")
 
 #sample <- read.delim("/bio/csjansen/TraitFiles/sample3.Xeno.list")
-clusters2<- read.delim(opt$MetaClusterFile, header=F)
-#clusters2<- read.delim("/bio/csjansen/SOM_Meta_Clusters/BennyRNAAIC4060.300.cluster", header=F)
+#clusters2<- read.delim(opt$MetaClusterFile, header=F)
+clusters2<- read.delim("/bio/csjansen/SOMatic/XenoRNAFusion.20x30.v10/data/MetaClusters", header=F)
 #clusters2<- read.delim("/bio/csjansen/SOM_Meta_Clusters/Xeno.v9.AIC.75.cluster", header=F)
 clusters2<-clusters2[-1,]
-Atac <- read.delim(opt$SOMFile, header=F, comment.char="#")
-#Atac <- read.delim("/bio/zengw/SOM/SOMatic/Bcl11b_SOM_combat_Gata3KD_removed_log_scale_40by60.som", header=F, comment.char="#")
+#Atac <- read.delim(opt$SOMFile, header=F, comment.char="#")
+Atac <- read.delim("/bio/csjansen/SOMatic/XenoRNAFusion.20x30.v10.som", header=F, comment.char="#")
 #samples <- read.delim("/bio/zengw/SOM/SOMatic/Bcl11b_SOM_combat_Gata3KD_removed_log_scale_40by60/data/sample.list", header=F, comment.char="#")
 
 #Atac <- read.delim("/samlab/csjansen/SOMatic/XenoRNAFusion.20x30.v9.som", header=F, comment.char="#")
-clusternum = opt$ClusterNum-1
-#clusternum <- 101
+#clusternum = opt$ClusterNum-1
+clusternum <- 34
 #clusternum <- 299
 suppressPackageStartupMessages(library(reshape2))
 suppressPackageStartupMessages(library(ggplot2))
@@ -159,7 +159,7 @@ matrix_vp = viewport(
   default.units="inch", 
   just=c("left","bottom")
 )
-pdf(opt$OutputName, h = matrix_vp_h+.5, w=matrix_vp_w)
-
+#pdf(opt$OutputName, h = matrix_vp_h+.5, w=matrix_vp_w)
+pdf("/pub/public-www/csjansen/XenoRNATrait.pdf", h = matrix_vp_h+.5, w=matrix_vp_w)
 print(p1, matrix_vp,newpage=FALSE)
 dev.off()

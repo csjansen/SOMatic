@@ -123,7 +123,6 @@ double getBinomPval(int n, int k, double p)
 }
 
 
-
 int main(int argc, char* argv[]) {
  if(argc < 2) {
         cout << "Usage: ./convertEnsemblGeneIDs -Rows <Number of rows in your SOM> -Cols <Number of cols in your SOM> -InputPrefix <Input File Location> -GeneInfo <ENSEMBL geneID file> -OutputPrefix <Output File Location>" <<endl;
@@ -171,13 +170,12 @@ int main(int argc, char* argv[]) {
 				}
 			}*/
 			genenames[splitz[0]]=splitz[2];
+			cout<<splitz[2]<<'\t'<<genenames[splitz[2]]<<endl;
 			totalGenes++;
     }
 	cout<<"Genes Loaded:" << totalGenes<<endl;
-	for(int i = 0; i < row; i++) {
-		for(int j = 0; j < col; j++) {
-			cout<<"Row: "<<i<<" Col: "<<j<<" "<<(inputprefix+"_"+SSTR(i)+"_"+SSTR(j)+".unit")<<endl;
-			ifstream genefile((inputprefix+"_"+SSTR(i)+"_"+SSTR(j)+".unit").c_str());
+			//cout<<"Row: "<<i<<" Col: "<<j<<" "<<(inputprefix+"_"+SSTR(i)+"_"+SSTR(j)+".unit")<<endl;
+			ifstream genefile((inputprefix).c_str());
 			vector<string> genes;
             while(getline(genefile, line)) {
                /* bool found = false;
@@ -188,18 +186,19 @@ int main(int argc, char* argv[]) {
                     }
                 }
                 if(!found)*/
-                    genes.push_back(line);
+					vector<string> splitz = split(line,'\t');
+                    genes.push_back(splitz[0]);
+					cout<<genenames[splitz[0]]<<endl;
             }
 			cout<<genes.size()<<endl;
 
-	        ofstream outfile2((outputprefix+"_"+SSTR(i)+"_"+SSTR(j)+".unit").c_str());
+	        ofstream outfile2((outputprefix).c_str());
 	        for(int k = 0 ; k < genes.size(); k++) {
+				cout<<genes[k]<<'\t'<<genenames[genes[k]]<<endl;
 				if(genenames[genes[k]].compare("")==0) {
 					outfile2<<genes[k]<<endl;
 				} else {
 					outfile2<<genenames[genes[k]]<<endl;
 				}
 			}
-		}
-	}
 }

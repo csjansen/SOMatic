@@ -126,7 +126,7 @@ double getBinomPval(int n, int k, double p)
 
 int main(int argc, char* argv[]) {
  if(argc < 2) {
-        cout << "Usage: ./convertEnsemblGeneIDs -Rows <Number of rows in your SOM> -Cols <Number of cols in your SOM> -InputPrefix <Input File Location> -GeneInfo <ENSEMBL geneID file> -OutputPrefix <Output File Location>" <<endl;
+        cout << "Usage: ./convertEnsemblGeneIDs -InputFile <Input File Location> -GeneInfo <ENSEMBL geneID file> -OutputFile <Output File Location>" <<endl;
         return 0;
     }
 
@@ -138,17 +138,11 @@ int main(int argc, char* argv[]) {
 	string TrainingMatrixFileName;
 	for(int i = 0; i < argc; i++) {
         string temp = argv[i];
-        if(temp.compare("-Rows")==0)
-			istringstream(argv[i+1])>>row;
-		if(temp.compare("-Cols")==0)
-            istringstream(argv[i+1])>>col;
-		if(temp.compare("-InputPrefix")==0)
+		if(temp.compare("-InputFile")==0)
 			inputprefix = argv[i+1];
 		if(temp.compare("-GeneInfo")==0)
             MusTermsFileName = argv[i+1];
-		if(temp.compare("-TrainingMatrix")==0)
-			TrainingMatrixFileName=argv[i+1];
-		if(temp.compare("-OutputPrefix")==0)
+		if(temp.compare("-OutputFile")==0)
             outputprefix = argv[i+1];
 	}
     ifstream MusTermsFile(MusTermsFileName.c_str());
@@ -180,10 +174,7 @@ int main(int argc, char* argv[]) {
 			totalGenes++;
     }
 	cout<<"Genes Loaded:" << totalGenes<<endl;
-	for(int i = 0; i < row; i++) {
-		for(int j = 0; j < col; j++) {
-			cout<<"Row: "<<i<<" Col: "<<j<<endl;
-			ifstream genefile((inputprefix+"_"+SSTR(i)+"_"+SSTR(j)+".unit").c_str());
+			ifstream genefile((inputprefix).c_str());
 			vector<string> genes;
             while(getline(genefile, line)) {
 				vector<string> splitz=split(line,'\t');
@@ -201,7 +192,7 @@ int main(int argc, char* argv[]) {
             }
 			cout<<genes.size()<<endl;
 
-	        ofstream outfile2((outputprefix+"_"+SSTR(i)+"_"+SSTR(j)+".unit").c_str());
+	        ofstream outfile2((outputprefix).c_str());
 	        for(int k = 0 ; k < genes.size(); k++) {
 				if(genenames[genes[k]].length() == 0) {
 					outfile2<<genes[k]<<endl;
@@ -212,9 +203,7 @@ int main(int argc, char* argv[]) {
 				cout<<genenames[genes[k]]<<endl;
 			}
 			outfile2.close();
-		}
-	}
-	ifstream TrainingMatrix(TrainingMatrixFileName.c_str());
+	/*ifstream TrainingMatrix(TrainingMatrixFileName.c_str());
 	ofstream outTrainingMatrix("TMatrix.out");
 	while(getline(TrainingMatrix,line)) {
 		vector<string> splitz = split(line,'\t');
@@ -231,5 +220,5 @@ int main(int argc, char* argv[]) {
 		outTrainingMatrix<<endl;
 	}
 	TrainingMatrix.close();
-	outTrainingMatrix.close();
+	outTrainingMatrix.close();*/
 }
