@@ -53,15 +53,20 @@ int main(int argc, char *argv[]) {
 	cout<<"Open Cluster File"<<endl;
 	while(getline(clusterFile,line)) {
 		vector<string> splitz = split(line,'\t');
+//		cout<<line<<endl;
 		int tempPos;
 		istringstream(splitz[0])>>tempPos;
 		double tempDistance;
 		istringstream(splitz[1])>>tempDistance;
+//		cout<<tempDistance<<endl;
 		posOrder.push_back(tempPos);
 		distanceOrder.push_back(tempDistance);
 		if(maxDistance < tempDistance) maxDistance=tempDistance;
+//		cout<<maxDistance<<endl;
 	}
 	cout<<"done"<<endl;
+//	cout<<maxDistance<<endl;
+//	cout<<cutLevel<<endl;
 	double limit = maxDistance*cutLevel/100.0;
 	cout<<"Limit: "<<limit<<endl;
 	clusterFile.close();
@@ -76,7 +81,7 @@ int main(int argc, char *argv[]) {
 	vector<vector<int> > clusters;
 	vector<int> temp;
 	while(posOrder.size()>0) {
-		cout<<posOrder.size()<<endl;
+		//cout<<posOrder.size()<<endl;
 		// Find smallest value remaining that isn't 0
 		int mini = 0;
 		double minDist = 1000000;	
@@ -92,7 +97,7 @@ int main(int argc, char *argv[]) {
 		//begin adding closest values till one is over the limit
 		bool cont = true;
 		while(cont && posOrder.size()>0) {
-			cout<<posOrder.size()<<endl;
+//			cout<<posOrder.size()<<endl;
 			double compDist = 100000000;
 			int compi=0;
 			if(mini>0) {
@@ -105,7 +110,6 @@ int main(int argc, char *argv[]) {
 					compi=mini;
 				}
 			}
-			cout<<compDist<<'\t'<<compi<<endl;
 			if(compDist <= limit) {
 				temp.push_back(compi);
 				posOrder.erase(posOrder.begin()+compi);
@@ -121,6 +125,7 @@ int main(int argc, char *argv[]) {
 		}	
 	}
 	ofstream outputFile(outputFileLocation.c_str());
+	cout<<"Dimensionality: "<<clusters.size()<<endl;
 	outputFile<<"#\t"<<clusters.size()<<endl;
 	for(int i = 0; i < clusters.size(); i++) {
 		for(int j = 0; j < clusters[i].size(); j++) {

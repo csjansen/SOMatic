@@ -28,4 +28,4 @@ do
 done
 
 
-Rscript ../rscripts/MetaClusterReports.R --MetaClusterFile ../$SOMName/data/MetaClusters --SOMFile ../$SOMName.som --ClusterNum $Metaclusters --SampleList ../$SOMName/data/sample.list --TrainingMatrix $TrainingMatrix --GeneFilePrefix ../$SOMName/data --OutputPrefix $OutputPrefix
+Rscript ../rscripts/MetaClusterReports.R --MetaClusterFile ../$SOMName/data/MetaClusters --SOMFile ../$SOMName.som --ClusterNum $Metaclusters --SampleList ../$SOMName/data/sample.list --TrainingMatrix $TrainingMatrix --GeneFilePrefix ../$SOMName/data --OutputPrefix $OutputPrefix --OutputHeatmap ../$SOMName/data/MetaclusterHeatmap

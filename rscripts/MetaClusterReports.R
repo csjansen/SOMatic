@@ -6,7 +6,8 @@ option_list = list(
   make_option(c("--SampleList"),type="character",default=NULL,help="Sample List used in SOM run"),
   make_option(c("--TrainingMatrix"),type="character",default=NULL,help="Training Matrix file used in SOM run"),
   make_option(c("--GeneFilePrefix"),type="character",default=NULL,help="Folder that contains output fron MetaClusterGO"),
-  make_option(c("--OutputPrefix"),type="character",default="Traits.pdf",help="Outfile File Name")
+  make_option(c("--OutputPrefix"),type="character",default="Traits.pdf",help="Outfile File Name"),
+  make_option(c("--OutputHeatmap"),type="character",default="Heatmap",help="Heatmap location")
 );
 opt_parser = OptionParser(option_list=option_list);
 opt=parse_args(opt_parser);
@@ -68,6 +69,7 @@ for(i in 0:clusternum) {
   HeatAtac2 = colSums(HeatAtac)/nrow(HeatAtac)
   HeatAtac3 = rbind(HeatAtac3,HeatAtac2)
 }
+write.table(HeatAtac3, file=opt$OutputHeatmap,sep="\t",col.names=FALSE,quote=FALSE,row.names=FALSE)
 trainingMatrix[trainingMatrix>Maxsig]=Maxsig
 base_size = 8
 Minsig = 0
@@ -252,7 +254,6 @@ matrix_gene = viewport(
   h = matrix_genes_h, 
   w = matrix_genes_w, 
   default.units="inch", 
-  just=c("left","bottom")
 )
 matrix_box_x = matrix_genes_x+grow_labels_inches-.1
 matrix_box_y = matrix_genes_h
@@ -344,3 +345,4 @@ if(dorows) {
 dev.off()
 
 }
+library("optparse")

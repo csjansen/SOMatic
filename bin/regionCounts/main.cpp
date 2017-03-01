@@ -61,7 +61,7 @@ int binary_search(vector<BedNode>* chr, int first, int last, BedNode bed) {
 	return index;
 }
 
-void regionCount(map<string, vector<BedNode> >* allPartData, string filename, vector<vector<vector<int> > >* counts, int i, vector<string>* chrList, vector<int>* totalRegions) {
+void regionCount(map<string, vector<BedNode> >* allPartData, string filename, vector<vector<vector<int> > >* counts, int i, vector<string>* chrList, vector<int>* totalRegions, bool addChr) {
 	cout<<"Started "<<filename<<endl;
 	ifstream rawDataFile(filename.c_str());
     string line;
@@ -73,7 +73,8 @@ void regionCount(map<string, vector<BedNode> >* allPartData, string filename, ve
         vector<string> splitz = split(line, '\t');
         BedNode temp;
         temp.chr = splitz[2];
-		temp.chr="chr"+temp.chr;
+		if(addChr)
+			temp.chr="chr"+temp.chr;
 		//cout<<temp.chr<<endl;
         if(temp.chr.compare("*")==0) continue;
 		bool found = false;
@@ -138,6 +139,7 @@ int main(int argc, char *argv[]) {
         cout << "-IgnoreRandom: Ignores random chromosomes.  <Off> [Off, On]"<<endl;
         cout << "-PadRegion: Pads regions to this minimum size. <0>"<<endl;
 		cout << "-LogScale: Log scale RPKM"<<endl;
+		cout << "-AddChr: Add \"chr\" to chromosomes in sam files to compare to training matrix."<<endl;
 		return 0;
     }
     int mergeRegion=0;
@@ -148,6 +150,7 @@ int main(int argc, char *argv[]) {
 	string peakDataFileName;
     string trainingFileName;
 	bool logScale = false;
+	bool addChr = false;
     for(int i = 0; i < argc; i++) {
         string temp = argv[i];
         if(temp.compare("-MergeRegion")==0)
@@ -170,6 +173,8 @@ int main(int argc, char *argv[]) {
             istringstream(argv[i+1])>>padRegion;
 		 if(temp.compare("-LogScale")==0)
             logScale=true;
+		if(temp.compare("-AddChr")==0)
+			addChr=true;
     }
 	
 	cout<<"Reading Partition Data"<<endl;
@@ -183,7 +188,7 @@ int main(int argc, char *argv[]) {
 		while(getline(partDataFiles,line1)) {
 	//		cout<<line1<<endl;
 			if(line1[0] == '#') continue;
-			vector<string> splitz = split(line1, '\t');
+			vector<string> splitz = split(line1, ':');
 			if(splitz.size() < 2) continue;
 			BedNode temp;
 			temp.chr = splitz[0];
@@ -197,9 +202,9 @@ int main(int argc, char *argv[]) {
 			if(!found) {
 				chrList.push_back(temp.chr);
 			}
-			//vector<string> splitz2 = split(splitz[1], '-');
-			istringstream(splitz[1])>>temp.start;
-			istringstream(splitz[2])>>temp.stop;
+			vector<string> splitz2 = split(splitz[1], '-');
+			istringstream(splitz2[0])>>temp.start;
+			istringstream(splitz2[1])>>temp.stop;
 			allPartData[temp.chr].push_back(temp);
 			parts++;
 		}
@@ -215,7 +220,7 @@ int main(int argc, char *argv[]) {
 	vector<vector<vector<int> > > regionCounts;
 	vector<int> totalRegions;
 	while(getline(rawDataFiles,line1)) {
-		threads.push_back(thread(regionCount, &allPartData, line1, &regionCounts, count, &chrList,&totalRegions));
+		threads.push_back(thread(regionCount, &allPartData, line1, &regionCounts, count, &chrList,&totalRegions,addChr));
 		regionCounts.push_back(vector<vector<int> >());
 		totalRegions.push_back(0);
 		count++;
