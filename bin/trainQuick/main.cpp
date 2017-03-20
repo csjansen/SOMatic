@@ -21,6 +21,7 @@
 #include <math.h>
 #include <vector>
 #include <map>
+#include <chrono>
 
 using namespace std;
 
@@ -318,6 +319,7 @@ int main(int argc, char *argv[]) {
 		double multiplier = -1 * log(radius) / float(timesteps);
 		cout<<"Beginning Training"<<endl;
 		random_shuffle(dataOrder, dataOrder+linesTraining);
+			 std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 		for(int j = 0; j < timesteps; j++) {
 			int trainingNum = dataOrder[j%linesTraining];
 			string trainingID = dataKeys[trainingNum];
@@ -328,16 +330,27 @@ int main(int argc, char *argv[]) {
 			double decay = exp(j * multiplier);
 			double timeLearningRate = learningRate * decay;
 			int timeRadius = int(radius * decay);
-	
+//	std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
+  //          std::cout << "1 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
+    //        begin = std::chrono::steady_clock::now();
 			// Finding Winning Unit
 			double* winUnit = propagate(trainingVector,numRows,numCols,colsTraining, trainingMap, sparse);
+//end= std::chrono::steady_clock::now();
+  //          std::cout << "2 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
+    //        begin = std::chrono::steady_clock::now();
 			//cout<<"Found... Getting Neighbors: "<<winUnit[0]<<" "<<winUnit[1]<<endl;
 			int neighborCount=0;
 			int** winUnitNeighbors = hexSurround(winUnit,timeRadius,numRows, numCols,&neighborCount);
-			//cout<<"Got them.  Updating winning unit."<<endl;
+//end= std::chrono::steady_clock::now();
+      //     std::cout << "3 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
+        //    begin = std::chrono::steady_clock::now();			
+//cout<<"Got them.  Updating winning unit."<<endl;
 			for(int k = 0; k < colsTraining; k++) {
 				trainingMap[(int)(winUnit)[0]][(int)(winUnit)[1]][k] += timeLearningRate * (trainingVector[k] - trainingMap[(int)(winUnit)[0]][(int)(winUnit)[1]][k]);
 			}
+//end= std::chrono::steady_clock::now();
+  //          std::cout << "4 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
+    //        begin = std::chrono::steady_clock::now();
 			//cout<<"Changing neighbors"<<endl;
 			for(int i = 0; i < neighborCount; i++) {
 				if(winUnitNeighbors[i][0]!=winUnit[0]||winUnitNeighbors[i][1]!=winUnit[1]) {
@@ -356,8 +369,15 @@ int main(int argc, char *argv[]) {
 			}
 			delete [] winUnitNeighbors;
 			delete [] winUnit;
-
+  //          std::cout << "5 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
+    //        begin = std::chrono::steady_clock::now();
+	//	int temp;
+//	cin>>temp;
 			if((j+1) % 100000 == 0) {
+				std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
+				std::cout << "Average timestep: (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /(1000000.0*100000) <<std::endl;
+            begin = std::chrono::steady_clock::now();
+    //
 				double totalScore = 0;
 				double ta = 0;
 		        for(int i = 0; i < linesTraining; i++) {
@@ -395,7 +415,7 @@ int main(int argc, char *argv[]) {
 				cout << "time " << j+1 << " radius " << timeRadius<< " learn " << timeLearningRate<<endl;
 				cout << "Total Score: "<<totalScore<<endl;;	
 				// Find Embeded feature
-				double ea = 0;
+/*				double ea = 0;
 				for(int fe = 0; fe < colsTraining; fe++) {
 					double meanMap=0;
 					double varMap=0;
@@ -430,7 +450,7 @@ int main(int argc, char *argv[]) {
 				}
 				ea /= (double)colsTraining;
 				cout<<"ea: "<<ea<<endl;
-				cout<<"ta: "<<ta<<endl;
+				cout<<"ta: "<<ta<<endl;*/
 			}
 		}
 		for(int j = 0; j <numRows; j++) {

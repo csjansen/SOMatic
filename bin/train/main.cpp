@@ -21,6 +21,7 @@
 #include <math.h>
 #include <vector>
 #include <map>
+#include <chrono>
 
 using namespace std;
 
@@ -381,22 +382,34 @@ int main(int argc, char *argv[]) {
 		cout<<"Beginning Training"<<endl;
 		random_shuffle(dataKeys.begin(), dataKeys.end());
 		for(int j = 0; j < timesteps; j++) {
+			std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 			string trainingID = dataKeys[j % dataKeys.size()];
 			vector<double> trainingVector = dataMap[trainingID];
 			double decay = exp(j * multiplier);
 			double timeLearningRate = learningRate * decay;
 			int timeRadius = int(radius * decay);
-	
+	std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
+            std::cout << "1 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
+            begin = std::chrono::steady_clock::now();
 			// Finding Winning Unit
 			//cout<<"Finding Winning Unit"<<endl;
 			vector<double> winUnit = propagate(&(trainingVector),numRows,numCols, &trainingMap, sparse);
+			end= std::chrono::steady_clock::now();
+            std::cout << "1 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
+            begin = std::chrono::steady_clock::now();
 			//cout<<"Found... Getting Neighbors: "<<winUnit[0]<<" "<<winUnit[1]<<endl;
 			//vector<vector<int> > winUnitNeighbors = hexSurround(winUnit,timeRadius,numRows, numCols);
 			vector<vector<int> > winUnitNeighbors = hexSurround(winUnit,2,numRows, numCols);
+			end= std::chrono::steady_clock::now();
+            std::cout << "1 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
+            begin = std::chrono::steady_clock::now();
 			//cout<<"Got them.  Updating winning unit."<<endl;
 			for(int k = 0; k < trainingVector.size(); k++) {
 				trainingMap[(int)(winUnit)[0]][(int)(winUnit)[1]][k] += timeLearningRate * (trainingVector[k] - trainingMap[(int)(winUnit)[0]][(int)(winUnit)[1]][k]);
 			}
+			end= std::chrono::steady_clock::now();
+            std::cout << "1 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
+            begin = std::chrono::steady_clock::now();
 			//cout<<"Changing neighbors"<<endl;
 //			for(int dist = 1; dist<timeRadius+1;dist++) {
 //				float theWeight = timeLearningRate * exp(-0.5*pow(dist,2)/pow(radius+1,2));
@@ -420,6 +433,8 @@ int main(int argc, char *argv[]) {
 						}
 					}
 				}
+			end= std::chrono::steady_clock::now();
+            std::cout << "1 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
 //			}
 			//cout<<"done"<<endl;
 			//Score
@@ -446,6 +461,8 @@ int main(int argc, char *argv[]) {
 						for(int u = 0; u < dataMap[winnerMap[row][col][k]].size(); u++) {
 							tempScore+=pow(dataMap[winnerMap[row][col][k]][u]-trainingMap[row][col][u],2);
 						}*/
+			int temp;
+		cin>>temp;
 			if((j+1) % 100000 == 0) {
 			double totalScore = 0;
 			double ta = 0;

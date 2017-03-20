@@ -195,7 +195,7 @@ int main(int argc, char* argv[]) {
 	        ofstream outfile2((outputprefix).c_str());
 	        for(int k = 0 ; k < genes.size(); k++) {
 				cout<<genes[k]<<'\t'<<genenames[genes[k]]<<endl;
-				if(genenames[genes[k]].compare("")==0) {
+			if(genenames[genes[k]].compare("")==0 || genenames[genes[k]].compare("unnamed")==0) {
 					outfile2<<genes[k]<<endl;
 				} else {
 					outfile2<<genenames[genes[k]]<<endl;
