@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 				}
 			}
 			if(compDist <= limit) {
-				temp.push_back(compi);
+				temp.push_back(posOrder[compi]);
 				posOrder.erase(posOrder.begin()+compi);
 				distanceOrder.erase(distanceOrder.begin()+compi);
 			} else {

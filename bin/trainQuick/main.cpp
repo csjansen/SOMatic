@@ -376,7 +376,7 @@ int main(int argc, char *argv[]) {
 			if((j+1) % 100000 == 0) {
 				std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
 				std::cout << "Average timestep: (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /(1000000.0*100000) <<std::endl;
-            begin = std::chrono::steady_clock::now();
+            /*begin = std::chrono::steady_clock::now();
     //
 				double totalScore = 0;
 				double ta = 0;
@@ -388,8 +388,8 @@ int main(int argc, char *argv[]) {
 
 		            double* winUnit = propagate(winVect,numRows,numCols,colsTraining, trainingMap, sparse);
 					totalScore += winUnit[4];
-				    int dist = hexdist(winUnit[2],winUnit[3],winUnit[0],winUnit[1],numRows,numCols);
-					if(dist<=1) ta++;
+				    //int dist = hexdist(winUnit[2],winUnit[3],winUnit[0],winUnit[1],numRows,numCols);
+					//if(dist<=1) ta++;
 	            }
 		        ta /= (double)linesTraining;
 				totalScore/=(double)linesTraining;
@@ -412,8 +412,10 @@ int main(int argc, char *argv[]) {
 					outfile.close();
 					bestScore = totalScore;
 				}		
+				end=std::chrono::steady_clock::now();
+				std::cout << "Scoring took: (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /(1000000.0) <<std::endl;
+				begin = std::chrono::steady_clock::now();*/
 				cout << "time " << j+1 << " radius " << timeRadius<< " learn " << timeLearningRate<<endl;
-				cout << "Total Score: "<<totalScore<<endl;;	
 				// Find Embeded feature
 /*				double ea = 0;
 				for(int fe = 0; fe < colsTraining; fe++) {
@@ -453,6 +455,44 @@ int main(int argc, char *argv[]) {
 				cout<<"ta: "<<ta<<endl;*/
 			}
 		}
+		cout<<"Scoring trial"<<endl;
+		begin = std::chrono::steady_clock::now();
+        double totalScore = 0;
+        for(int i = 0; i < linesTraining; i++) {
+        	double winVect[colsTraining];
+            for(int k = 0; k < colsTraining; k++) {
+           		winVect[k]=dataMap[i][k];
+            }
+
+            double* winUnit = propagate(winVect,numRows,numCols,colsTraining, trainingMap, sparse);
+            totalScore += winUnit[4];
+                    //int dist = hexdist(winUnit[2],winUnit[3],winUnit[0],winUnit[1],numRows,numCols);
+                    //if(dist<=1) ta++;
+        }
+        totalScore/=(double)linesTraining;
+        if(!sparse) totalScore /= colsTraining;
+        if(totalScore < bestScore && totalScore!=0) {
+            	ofstream outfile(somFile.c_str());
+                outfile<<"# "<<numRows<<" rows\t"<<numCols<<" cols\t"<<colsTraining<<" dimensions\ttoroid topology"<<endl;
+                for(int row = 0; row < numRows; row++) {
+                	for(int col = 0; col <numCols; col++) {
+                    	outfile<<row<<'\t'<<col<<'\t';
+                        for(int k = 0; k < colsTraining; k++) {
+                        	outfile.precision(5);
+                            outfile<<fixed<<trainingMap[row][col][k];
+                            if(k != colsTraining-1)
+                               outfile<<'\t';
+                        }
+                        outfile<<endl;
+                    }
+                }
+                outfile.close();
+                bestScore = totalScore;
+           }
+		
+           std::chrono::steady_clock::time_point end=std::chrono::steady_clock::now();
+           std::cout << "Scoring took: (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /(1000000.0) <<std::endl;
+           begin = std::chrono::steady_clock::now();		
 		for(int j = 0; j <numRows; j++) {
             for(int k = 0; k <numCols; k++) {
 				delete [] trainingMap[j][k];
