@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
 		cout << "-LearningRate: Set Learning Rate <.2>"<<endl; 
 		return 0;
 	}
-	double bestScore = 1000000;
+	double bestScore = -1;
 	int numRows=20;
 	int numCols=30;
 	string trainingFileName;
@@ -471,7 +471,8 @@ int main(int argc, char *argv[]) {
         }
         totalScore/=(double)linesTraining;
         if(!sparse) totalScore /= colsTraining;
-        if(totalScore < bestScore && totalScore!=0) {
+        if((totalScore < bestScore && totalScore!=0)||bestScore==-1) {
+			cout<<"outputing SOM file"<<endl;
             	ofstream outfile(somFile.c_str());
                 outfile<<"# "<<numRows<<" rows\t"<<numCols<<" cols\t"<<colsTraining<<" dimensions\ttoroid topology"<<endl;
                 for(int row = 0; row < numRows; row++) {
