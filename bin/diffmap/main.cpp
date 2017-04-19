@@ -2,6 +2,7 @@
 #include<fstream>
 #include<vector>
 #include<sstream>
+#include<math.h>
 using namespace std;
 
 //Move to util header
@@ -31,10 +32,10 @@ int main(int argc, char* argv[]) {
 	vector<string> firstMapFileNames;
 	vector<string> secondMapFileNames;
 	while(getline(firstmaps,line)) {
-		firstMapFileNames.push_back(line);
+		firstMapFileNames.push_back(line+".map");
 	}	
 	while(getline(secondmaps,line)) {
-        secondMapFileNames.push_back(line);
+        secondMapFileNames.push_back(line+".map");
     }
 	firstmaps.close();
 	secondmaps.close();
@@ -49,6 +50,7 @@ int main(int argc, char* argv[]) {
 			for(int j = 0; j < splitz.size(); j++) {
 				double num;
 				istringstream(splitz[j])>>num;
+	//			num = exp(num)-1;
 				if(i==0) {
 					temp.push_back(num);
 				} else {
@@ -65,11 +67,13 @@ int main(int argc, char* argv[]) {
         ifstream mapFile(secondMapFileNames[i].c_str());
         int row = 0;
         while(getline(mapFile,line)) {
+			//cout<<line<<endl;
             vector<string> splitz = split(line,'\t');
             vector<double> temp;
             for(int j = 0; j < splitz.size(); j++) {
                 double num;
                 istringstream(splitz[j])>>num;
+	//			num = exp(num)-1;
                 if(i==0) {
                     temp.push_back(num);
                 } else {

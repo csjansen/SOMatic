@@ -201,7 +201,8 @@ int main(int argc, char* argv[]) {
 		if(temp.compare("-InputPrefix")==0)
             inputprefix = argv[i+1];
 		if(temp.compare("-AddToChrom")==0)
-            addtochrom = argv[i+1];
+			if(i+1 < argc)
+	            addtochrom = argv[i+1];
 	}
 
 	
@@ -235,10 +236,11 @@ int main(int argc, char* argv[]) {
 				regions.push_back(temp);
             }
 			vector<string> foundgenes;
+			if(regions.size()>0 && TSSregions.size()>0)
+				cout<<"Compare the format of these: "<<regions[0].chrom<<'\t'<<TSSregions[0].chrom<<endl;
 			for(int i = 0; i < regions.size(); i++) {
 				vector<int> found;
 				for(int j = 0; j < TSSregions.size(); j++) {
-					//cout<<regions[i].chrom<<'\t'<<TSSregions[j].chrom<<endl;
 					//int temp;
 					//cin>>temp;
 					if(regions[i].chrom.compare(TSSregions[j].chrom)==0 && ((regions[i].start<=TSSregions[j].start && regions[i].stop >= TSSregions[j].start)||(regions[i].start <= TSSregions[j].stop && regions[i].stop >= TSSregions[j].stop)||(regions[i].start>=TSSregions[j].start && regions[i].stop <= TSSregions[j].stop)||(regions[i].start<=TSSregions[j].start&&regions[i].stop>=TSSregions[j].stop))) {

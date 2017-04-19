@@ -79,11 +79,11 @@ int main(int argc, char* argv[]) {
             istringstream(splitz[i+1])>>RNACol;
             istringstream(splitz[i+2])>>AtacCount;
             //cout<<RNARow<<'\t'<<RNACol<<endl;
-            for(int j = 0; j < AtacCount; j++) {
-                allgenes[SSTR(AtacRow)+"."+SSTR(AtacCol)+"."+SSTR(RNARow)+"."+SSTR(RNACol)].push_back(splitz[i+j*2+3]);
-                allregions[SSTR(AtacRow)+"."+SSTR(AtacCol)+"."+SSTR(RNARow)+"."+SSTR(RNACol)].push_back(splitz[i+j*2+1+3]);
-            }
-            for(int j = 0; j < AtacCount; j++) {
+            //for(int j = 0; j < AtacCount; j++) {
+              //  allgenes[SSTR(AtacRow)+"."+SSTR(AtacCol)+"."+SSTR(RNARow)+"."+SSTR(RNACol)].push_back(splitz[i+j*2+3]);
+                //allregions[SSTR(AtacRow)+"."+SSTR(AtacCol)+"."+SSTR(RNARow)+"."+SSTR(RNACol)].push_back(splitz[i+j*2+1+3]);
+            //}
+     //       for(int j = 0; j < AtacCount; j++) {
                 vector<double> temp;
                 temp.push_back(AtacRow);
                 temp.push_back(AtacCol);
@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
                 temp.push_back(-1);
                 pointcounts[SSTR(AtacRow)+"."+SSTR(AtacCol)+"."+SSTR(RNARow)+"."+SSTR(RNACol)]++;
                 allpoints.push_back(temp);
-            }
+       //     }
             i+=2*AtacCount+3;
         }
     }
