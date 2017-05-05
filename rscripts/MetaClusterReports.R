@@ -7,7 +7,8 @@ option_list = list(
   make_option(c("--TrainingMatrix"),type="character",default=NULL,help="Training Matrix file used in SOM run"),
   make_option(c("--GeneFilePrefix"),type="character",default=NULL,help="Folder that contains output fron MetaClusterGO"),
   make_option(c("--OutputPrefix"),type="character",default="Traits.pdf",help="Outfile File Name"),
-  make_option(c("--OutputHeatmap"),type="character",default="Heatmap",help="Heatmap location")
+  make_option(c("--OutputHeatmap"),type="character",default="Heatmap",help="Heatmap location"),
+  make_option(c("--ShowSegments"),type="character",default="1",help="Show segments")
 );
 opt_parser = OptionParser(option_list=option_list);
 opt=parse_args(opt_parser);
@@ -25,11 +26,13 @@ print(1)
 samples <- read.delim(opt$SampleList, header=F, comment.char="#")
 print(1)
 #samples <- read.delim("/samlab/csjansen/SOMatic/XenoRNAFusion.20x30.v9/data/sample.list", header=F, comment.char="#")
-trainingMatrix <- read.delim(opt$TrainingMatrix, header=T, comment.char="#")
+if(opt$ShowSegments=="1") {
+	trainingMatrix <- read.delim(opt$TrainingMatrix, header=T, comment.char="#")
+	colnames(trainingMatrix)=c("ProbeID",as.matrix(samples))
+}
 #trainingMatrix <- read.delim("/samlab/csjansen/RSemToTrainingMatrix/TrainingMatrixFixed",header=F, comment.char="#")
 #GeneFilePrefix = "/bio/csjansen/SOM_Meta_Clusters_GO/Cluster-102.2/Genes_"
 GeneFilePrefix = paste0(opt$GeneFilePrefix,"/Genes_")
-colnames(trainingMatrix)=c("ProbeID",as.matrix(samples))
 #clusternum <- 101
 #Atac <- read.delim("/bio/zengw/SOM/SOMatic/Bcl11b_SOM_combat_Gata3KD_removed_log_scale_40by60.som", header=F, comment.char="#")
 #clusters2<- read.delim("/bio/csjansen/SOM_Meta_Clusters/BennyRNAAIC40606.cluster", header=F)
@@ -70,7 +73,14 @@ for(i in 0:clusternum) {
   HeatAtac3 = rbind(HeatAtac3,HeatAtac2)
 }
 write.table(HeatAtac3, file=opt$OutputHeatmap,sep="\t",col.names=FALSE,quote=FALSE,row.names=FALSE)
-trainingMatrix[trainingMatrix>Maxsig]=Maxsig
+dist = "euclidean"
+hclust = "complete"
+df2 = melt(as.matrix(HeatAtac3))
+
+colDist = dist(t(HeatAtac3))
+
+colHC = hclust(colDist, method=hclust)
+write.table(colHC$order, file=paste0(opt$OutputHeatmap,"Order"),sep="\t",col.names=FALSE,quote=FALSE,row.names=FALSE)
 base_size = 8
 Minsig = 0
 for(i in 0:clusternum) {
@@ -81,11 +91,15 @@ colnames(geneListFile)=c("ProbeID","row","col")
 #for(j in 1:nrow(geneListFile)) {
 #  geneListNames=c(geneListNames,paste0(geneListFile[j],paste0(" ",paste0(paste0(toString(HeatAtac[j,1]),','),toString(HeatAtac[j,2])))))
 #}
+dfgenes=c()
+if(opt$ShowSegments=="1") {
+trainingMatrix[trainingMatrix>Maxsig]=Maxsig
 geneList = join(geneListFile,trainingMatrix)
 geneList2 = geneList[,-1]
 geneList2 = geneList2[,-1]
 geneList2 = geneList2[,-1]
 dfgenes = melt(as.matrix(geneList2))
+}
 #for(j in 1:nrow(dfgenes)) {
 #  dfgenes[j,1]=toString(geneList[dfgenes[j,1],1])
 #}
@@ -101,7 +115,6 @@ HeatAtac = data.matrix(HeatAtac[,4:ncol(HeatAtac)])
 rownames(HeatAtac)=rownames1
 HeatAtac2 = colSums(HeatAtac)/nrow(HeatAtac)
 df = melt(as.matrix(HeatAtac))
-df2 = melt(as.matrix(HeatAtac3))
 dfbox = melt(as.matrix(HeatAtac2))
 
 colSide_by = NULL#}
@@ -114,8 +127,7 @@ row_metadata = NULL
 merge_row_mdata_on = NULL
 col_dendro = TRUE
 row_dendro = TRUE
-dist = "euclidean"
-hclust = "complete"
+
 height = NULL
 width = NULL
 rowSide_by=NULL
@@ -133,8 +145,6 @@ row_mdata_header = c(merge_row_mdata_on, setdiff(row_mdata_header, intersect(col
 
 
 same_mdata = FALSE
-colDist = dist(t(HeatAtac3), method=dist)
-colHC = hclust(colDist, method=hclust)
 colHC_data = dendro_data(as.dendrogram(colHC))
 col_ggdendro = ggplot(segment(colHC_data))
 col_ggdendro = col_ggdendro + geom_segment(aes(x=x, y=y, xend=xend, yend=yend))
@@ -202,6 +212,10 @@ p1 = p1 + guides(fill=guide_colourbar(
 ))
 p1_legend = g_legend(p1)
 p1 = p1 + theme(legend.position = "none")
+
+genebox=c()
+grow_labels_inches=1.5
+if(opt$ShowSegments=="1") {
 gcol_labels = colnames(HeatAtac)
 gcol_limits = colnames(HeatAtac)
 gcol_limits = colnames(HeatAtac)[colHC$order]
@@ -209,6 +223,7 @@ gcol_labels = col_labels[colHC$order]
 grow_labels = make.unique(as.character(paste0(paste0(paste0(paste0(paste0(geneList$ProbeID," ("),geneList$row),","),geneList$col),")")))
 grow_limits = grow_labels
 grow_labels_inches = 1.5*max(strwidth(grow_labels, units="in", cex=base_size*(as.numeric(theme_get()$axis.text$size))*par()$cex/par()$ps))
+
 
 genebox=ggplot(dfgenes, aes(x=Var2, y=Var1))
 genebox=genebox+geom_tile(aes(fill=value))
@@ -228,6 +243,7 @@ genebox = genebox + guides(fill=guide_colourbar(
 ))
 #genebox_legend = g_legend(p1)
 genebox = genebox + theme(legend.position = "none")
+}
 #genebox = genebox + theme()
 box=ggplot(dfbox, aes(x=Var1, y=value))
 box = box + geom_bar(stat="identity")
@@ -244,17 +260,24 @@ box = box + labs(x=NULL, y=NULL)
 #box_legend = g_legend(box)
 #box = box + theme(legend.position = "none")
 #print(box)
+matrix_genes_x=0
+matrix_genes_y=0
+matrix_genes_h=0
+matrix_genes_w=0
+matrix_genes_w = .15* ncol(HeatAtac) + row_labels_inches
+if(opt$ShowSegments=="1") {
 matrix_genes_x = .1
 matrix_genes_y = 0
 matrix_genes_h = base_size/72.27 * nrow(geneList2) + col_labels_inches
-matrix_genes_w = .15* ncol(HeatAtac) + row_labels_inches
 matrix_gene = viewport(
   y = matrix_genes_y,
   x = matrix_genes_x, 
   h = matrix_genes_h, 
   w = matrix_genes_w, 
-  default.units="inch", 
+  default.units="inch",
+  just=c("left","bottom") 
 )
+}
 matrix_box_x = matrix_genes_x+grow_labels_inches-.1
 matrix_box_y = matrix_genes_h
 matrix_box_h = 3
@@ -269,6 +292,7 @@ matrix_box = viewport(
 )
 ColSides = list(); ColSide_legends = list()
 RowSides = list(); RowSide_legends = list()
+
 matrix_vp_y = max(0, as.numeric(strwidth(rowSide_by, "in")) - col_labels_inches)+matrix_box_h+matrix_box_y
 #matrix_vp_x = max(0, as.numeric(strwidth(colSide_by, "in")) - row_labels_inches)
 matrix_vp_x = matrix_genes_x+grow_labels_inches-row_labels_inches
@@ -325,12 +349,20 @@ rowDendro_vp = viewport(
   default.units = "inch",
   just = c("left", "bottom")
 )
+total_h=0
+if(opt$ShowSegments=="1") {
 total_h = matrix_vp_y + matrix_vp_h + 0.25*length(colSide_by) + max(col_dendro_h, matrix_scale_h)
+} else {
+total_h = matrix_vp_y + matrix_vp_h + 0.25*length(colSide_by) + max(col_dendro_h, matrix_scale_h)
+
+}
 total_w = matrix_vp_x + matrix_vp_w + 0.25*length(rowSide_by) + max(row_dendro_w, matrix_scale_w)
 legend_width_inch = 0
 total_w = total_w + legend_width_inch
 pdf(paste0(paste0(opt$OutputPrefix,toString(i)),".pdf"), h = total_h, w=total_w)
+if(opt$ShowSegments=="1") {
 print(genebox, matrix_gene, newpage=FALSE)
+}
 print(box, matrix_box, newpage=FALSE)
 
 print(p1, matrix_vp, newpage=FALSE)

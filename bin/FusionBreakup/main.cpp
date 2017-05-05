@@ -410,7 +410,7 @@ int main(int argc, char* argv[]) {
 	vector<vector<double> > allpoints;
     map<string,vector<string> > allgenes;
     map<string,vector<string> > allregions;
-	map<string,string> regionToGene;
+	map<string,vector<string> > regionToGene;
     cout<<"Opening file"<<endl;
     map<string,int> pointcounts;
     while(getline(ConnectionsFile, line)) {
@@ -430,7 +430,13 @@ int main(int argc, char* argv[]) {
             for(int j = 0; j < AtacCount; j++) {
                 allgenes[SSTR(AtacRow)+"\t"+SSTR(AtacCol)+"\t"+SSTR(RNARow)+"\t"+SSTR(RNACol)].push_back(splitz[i+j*2+3]);
                 allregions[SSTR(AtacRow)+"\t"+SSTR(AtacCol)+"\t"+SSTR(RNARow)+"\t"+SSTR(RNACol)].push_back(splitz[i+j*2+1+3]);
-				regionToGene[splitz[i+j*2+1+3]]=splitz[i+j*2+3];
+				if(regionToGene.find(splitz[i+j*2+1+3])!=regionToGene.end())
+					regionToGene[splitz[i+j*2+1+3]].push_back(splitz[i+j*2+3]);	
+				else {
+					vector<string> temp;
+					temp.push_back(splitz[i+j*2+3]);
+					regionToGene[splitz[i+j*2+1+3]]=temp;
+				}
             }
             for(int j = 0; j < AtacCount; j++) {
                 vector<double> temp;
@@ -565,8 +571,19 @@ int main(int argc, char* argv[]) {
 				vector<string> splitz = split(RegionsInEachCluster[i][j][k],':');
 				vector<string> splitz2 = split(splitz[1],'-');
 				outfile2<<splitz[0]<<'\t'<<splitz2[0]<<'\t'<<splitz2[1]<<endl;
-				outfile3<<splitz[0]<<'\t'<<splitz2[0]<<'\t'<<splitz2[1]<<'\t'<<regionToGene[RegionsInEachCluster[i][j][k]]<<endl;
-				ComboTotalFile<<splitz[0]<<'\t'<<splitz2[0]<<'\t'<<splitz2[1]<<'\t'<<SSTR(i)+"_"+SSTR(j)<<endl;
+				for(int n = 0; n < regionToGene[RegionsInEachCluster[i][j][k]].size(); n++)
+				{
+					int found = -1;
+					for(int m = 0; m < GenesInEachCluster[i][j].size(); m++) {
+						if(GenesInEachCluster[i][j][m].compare(regionToGene[RegionsInEachCluster[i][j][k]][n])==0)
+							found = m;
+					}
+					if(found >-1)
+					{
+						outfile3<<splitz[0]<<'\t'<<splitz2[0]<<'\t'<<splitz2[1]<<'\t'<<regionToGene[RegionsInEachCluster[i][j][k]][n]<<endl;
+						ComboTotalFile<<splitz[0]<<'\t'<<splitz2[0]<<'\t'<<splitz2[1]<<'\t'<<SSTR(i)+"_"+SSTR(j)<<endl;
+					}
+				}
 			}
 			if(j==0)
                 RegionTotalFile<<RegionsInEachCluster[i][j].size();

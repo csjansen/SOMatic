@@ -140,12 +140,12 @@ vector<genomicRegion> GetRegRegions(map<string, TSSsite>* TSSsites, vector<strin
         int start;
         int stop;
         if(CompareType.compare("TwoClosest")==0) {
-            int prevdist = 1000000;
-            if(TSS.pos < 1000000) start = 0;
-            else start = TSS.pos - 1000000;
-            int nextdist = 1000000;
-            if(TSS.pos < 1000000) stop = 0;
-            else stop = TSS.pos + 1000000;
+            int prevdist = 50000;
+            if(TSS.pos < 50000) start = 0;
+            else start = TSS.pos - 50000;
+            int nextdist = 50000;
+            if(TSS.pos < 50000) stop = 0;
+            else stop = TSS.pos + 50000;
 
             for(map<string, TSSsite>::iterator looper = TSSsites->begin(); looper != TSSsites->end(); looper++) {
                 TSSsite tester = looper->second;

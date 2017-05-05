@@ -74,14 +74,14 @@ map<string, TSSsite>* parseGtfFile(string gtfFileName, string geneidtype, bool X
 							geneName = pairItems[2].substr(1,pairItems[2].size()-2);
 						}
 					} else {
-		//		cout<<pairItems[0]<<'\t'<<pairItems[1]<<endl;
+//				cout<<pairItems[0]<<'\t'<<pairItems[1]<<endl;
 					
-						if(pairItems[0].compare("gene_id")==0) {
-							vector<string> splitz2 = split(pairItems[1].substr(1,pairItems[1].size()-2),'.');
-							geneName = splitz2[0];
-		//				cout<<geneName<<endl;
-		//				int temp;
-		//				cin>>temp;
+						if(pairItems[1].compare("gene_id")==0) {
+							vector<string> splitz2 = split(pairItems[2].substr(1,pairItems[2].size()-2),'.');
+							geneName = pairItems[2].substr(1,pairItems[2].size()-2);
+//						cout<<geneName<<endl;
+//						int temp;
+//						cin>>temp;
 						}
 					}
 						
