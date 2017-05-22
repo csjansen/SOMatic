@@ -38,12 +38,13 @@ LinkedReplicates = opt$LinkedReplicates
 #rows <- 40
 #cols <- 60
 #clusters2<-clusters2[-1,]
-asamples=c()
-bsamples=c()
-for(i in 1:((ncol(HypoFile)-1)/2)) {
-  asamples = cbind(asamples,HypoFile[HypoFile[,2*(i)]==1,1])
-  bsamples = cbind(bsamples,HypoFile[HypoFile[,2*(i)+1]==1,1])
+asamples=HypoFile[HypoFile[,2*(i)]==1,1]
+bsamples=HypoFile[HypoFile[,2*(i)+1]==1,1]
+for(i in 2:((ncol(HypoFile)-1)/2)) {
+  asamples = cbind.data.frame(asamples,HypoFile[HypoFile[,2*(i)]==1,1])
+  bsamples = cbind.data.frame(bsamples,HypoFile[HypoFile[,2*(i)+1]==1,1])
 }
+#print(ncol(HypoFile))
 if (!require("reshape2")) {
   install.packages("reshape2", dependencies = TRUE)
   suppressPackageStartupMessages(library(reshape2))
@@ -72,9 +73,13 @@ if (!require("plyr")) {
 #bsamples=list(as.matrix(bsamples))
 alist=c()
 names=c()
+print(bsamples)
 for(i in 1:ncol(asamples)) {
-  anums=match(HypoFile[asamples[,i],1],samples$V1)
-  bnums=match(HypoFile[bsamples[,i],1],samples$V1)
+#i=121
+#print(ncol(asamples))
+  anums=match(asamples[,i],samples$V1)
+  bnums=match(bsamples[,i],samples$V1)
+#print(asamples)
   traitpvals=c()
   traitnegs=c()
   for(j in 0:clusternum) {
@@ -134,7 +139,18 @@ for(i in 1:ncol(asamples)) {
         dsubs=c(dsubs,as[,n]-bs[,n])
       }
     }
-    
+    print(i)
+    print(j)
+    if(length(csubs)<3){
+      print(i)
+      print(j)
+      csubs=c(0,0)
+    }
+    if(length(asubs)<3){
+      print(i)
+      print(j)
+      asubs=c(0,0)
+    }
     utest=wilcox.test(csubs,c(asubs,bsubs),alternative="greater")
     #boxplot(csubs,c(asubs,bsubs),names=c("With Trait", "Without Trait"),ylab="Expression",ylim=c(0,100))
     
@@ -215,7 +231,7 @@ if(sum(ind)==0) {
     h = matrix_vp_h, 
     w = matrix_vp_w, 
     default.units="inch", 
-    just=c("left","bottom") 
+    just=c("left","bottom")
   )
 
   pdf(OutputName, h = matrix_vp_h+.25, w=matrix_vp_w)
