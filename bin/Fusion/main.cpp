@@ -57,7 +57,7 @@ map<string, TSSsite>* parseGtfFile(string gtfFileName, string geneidtype, bool X
     map<string, TSSsite>* TSSsites=new map<string, TSSsite>();
 	string line;
 	int counter=0;
-	cout<<Xeno<<endl;
+	string temptext = "";
 	while(getline(gtffile,line)) {
 		if(!Xeno) {
 			if(line[0]=='#') continue;
@@ -70,11 +70,14 @@ map<string, TSSsite>* parseGtfFile(string gtfFileName, string geneidtype, bool X
 				for(int i = 0; i < attributes.size(); i++) {
 					vector<string> pairItems = split(attributes[i],' ');
 					if(geneidtype.compare("gene_id")!=0) {
+						if(pairItems[0].compare("gene_id")==0) {
+							temptext = pairItems[1].substr(1,pairItems[1].size()-2);
+						}
 						if(pairItems[1].compare("gene_name")==0) {
-							geneName = pairItems[2].substr(1,pairItems[2].size()-2);
+							geneName = temptext+"_"+pairItems[2].substr(1,pairItems[2].size()-2);
+//							cout<<geneName<<endl;
 						}
 					} else {
-//				cout<<pairItems[0]<<'\t'<<pairItems[1]<<endl;
 					
 						if(pairItems[1].compare("gene_id")==0) {
 							vector<string> splitz2 = split(pairItems[2].substr(1,pairItems[2].size()-2),'.');
@@ -133,7 +136,7 @@ map<string, TSSsite>* parseGtfFile(string gtfFileName, string geneidtype, bool X
 			counter++;	
 		}
 	}
-	cout<<"GTF Genes: "<<counter<<endl;
+	cout<<"GTF Genes: "<<TSSsites.size()<<endl;
 	return TSSsites;
 }
 
@@ -381,7 +384,7 @@ int main(int argc, char* argv[]) {
 								//cout<< AtacRegions[Atacs].start<<'\t'<<regions[RnaRow*col2+RnaCol][RNAs].start<<endl;
 								//int temp = 0;
 								//cin>>temp;
-								if(AtacRegions[Atacs].chrom.compare(regions[RnaRow*col2+RnaCol][RNAs].chrom)==0) {
+								if(AtacRegions[Atacs].chrom.compare("chr"+regions[RnaRow*col2+RnaCol][RNAs].chrom)==0) {
 									if((AtacRegions[Atacs].start>=regions[RnaRow*col2+RnaCol][RNAs].start && AtacRegions[Atacs].start<=regions[RnaRow*col2+RnaCol][RNAs].stop)||(AtacRegions[Atacs].start>=regions[RnaRow*col2+RnaCol][RNAs].stop && AtacRegions[Atacs].stop <= regions[RnaRow*col2+RnaCol][RNAs].stop)||(AtacRegions[Atacs].start<=regions[RnaRow*col2+RnaCol][RNAs].start && AtacRegions[Atacs].stop >= regions[RnaRow*col2+RnaCol][RNAs].stop)) {
 										//cout<<regions[RnaRow*col2+RnaCol][RNAs].gene<<endl;
 										//int temp;

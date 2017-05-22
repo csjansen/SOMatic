@@ -59,7 +59,7 @@ vector <vector<int> > merge(vector <vector<int> > lhs, vector<vector<int> > rhs)
 }
 
 
-int** hexSurround(double input[], int radius, int numRows, int numCols, int* count) {
+int** hexSurround(double input[], int radius, int numRows, int numCols, int* count, string topology) {
 	int** result=0;
 	(*count) = 0;
 	for(int i = -1*radius; i <= radius; i++) {
@@ -88,13 +88,15 @@ int** hexSurround(double input[], int radius, int numRows, int numCols, int* cou
 			//cout<<i<<'\t'<<j<<'\t'<<dz<<endl;
 		}
 	}
-	for(int i = 0; i < (*count); i++) {
-		result[i][0]=zs[i];
-		if(result[i][0]<0) result[i][0]+=numRows;
-		while(result[i][0]>=numRows) result[i][0]-=numRows;
-		result[i][1]=xs[i]+(zs[i]-(abs(zs[i])%2))/2;
-		if(result[i][1]<0) result[i][1]+=numCols;
-		while(result[i][1]>=numCols) result[i][1]-=numCols;
+	if(topology.compare("toroid")==0) {
+		for(int i = 0; i < (*count); i++) {
+			result[i][0]=zs[i];
+			while(result[i][0]<0) result[i][0]+=numRows;
+			while(result[i][0]>=numRows) result[i][0]-=numRows;
+			result[i][1]=xs[i]+(zs[i]-(abs(zs[i])%2))/2;
+			while(result[i][1]<0) result[i][1]+=numCols;
+			while(result[i][1]>=numCols) result[i][1]-=numCols;
+		}
 	}
 	return result;
 }
@@ -167,7 +169,7 @@ double* propagate(double* trainingVector, int numRows, int numCols, int colsTrai
 	return winUnit;
 }
 
-int hexdist(int row1, int col1, int row2, int col2, int rows, int cols) {
+int hexdist(int row1, int col1, int row2, int col2, int rows, int cols, string topology ) {
 	if(abs(row1-row2)>=rows/2.0) {
 		if(row1<row2) {
 			row1+=rows;
@@ -321,6 +323,7 @@ int main(int argc, char *argv[]) {
 		random_shuffle(dataOrder, dataOrder+linesTraining);
 			 std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 		for(int j = 0; j < timesteps; j++) {
+//			cout<<j<<endl;
 			int trainingNum = dataOrder[j%linesTraining];
 			string trainingID = dataKeys[trainingNum];
 			double trainingVector[colsTraining];
@@ -336,14 +339,14 @@ int main(int argc, char *argv[]) {
 			// Finding Winning Unit
 			double* winUnit = propagate(trainingVector,numRows,numCols,colsTraining, trainingMap, sparse);
 //end= std::chrono::steady_clock::now();
-  //          std::cout << "2 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
+  //         std::cout << "2 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
     //        begin = std::chrono::steady_clock::now();
-			//cout<<"Found... Getting Neighbors: "<<winUnit[0]<<" "<<winUnit[1]<<endl;
+//			cout<<"Found... Getting Neighbors: "<<winUnit[0]<<" "<<winUnit[1]<<endl;
 			int neighborCount=0;
-			int** winUnitNeighbors = hexSurround(winUnit,timeRadius,numRows, numCols,&neighborCount);
+			int** winUnitNeighbors = hexSurround(winUnit,timeRadius,numRows, numCols,&neighborCount,topology);
 //end= std::chrono::steady_clock::now();
-      //     std::cout << "3 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
-        //    begin = std::chrono::steady_clock::now();			
+  //         std::cout << "3 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
+    //        begin = std::chrono::steady_clock::now();			
 //cout<<"Got them.  Updating winning unit."<<endl;
 			for(int k = 0; k < colsTraining; k++) {
 				trainingMap[(int)(winUnit)[0]][(int)(winUnit)[1]][k] += timeLearningRate * (trainingVector[k] - trainingMap[(int)(winUnit)[0]][(int)(winUnit)[1]][k]);
@@ -351,17 +354,21 @@ int main(int argc, char *argv[]) {
 //end= std::chrono::steady_clock::now();
   //          std::cout << "4 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
     //        begin = std::chrono::steady_clock::now();
-			//cout<<"Changing neighbors"<<endl;
+	//		cout<<"Changing neighbors"<<endl;
 			for(int i = 0; i < neighborCount; i++) {
 				if(winUnitNeighbors[i][0]!=winUnit[0]||winUnitNeighbors[i][1]!=winUnit[1]) {
 					int unit[2];
 					unit[0] = winUnitNeighbors[i][0];
 					unit[1] = winUnitNeighbors[i][1];
-					int dist = hexdist(unit[0],unit[1],winUnit[0],winUnit[1],numRows,numCols);
+					int dist = hexdist(unit[0],unit[1],winUnit[0],winUnit[1],numRows,numCols,topology);
 					float theWeight = timeLearningRate * exp(-0.5*pow(dist,2)/pow(radius+1,2));
+	//				cout<<"before dist"<<endl;
 					for(int k = 0; k < colsTraining; k++) {
+	//					cout<<k<<endl;
+	//					cout<<unit[0]<<'\t'<<unit[1]<<endl;
 						trainingMap[unit[0]][unit[1]][k] += theWeight*(trainingVector[k]-trainingMap[unit[0]][unit[1]][k]);
 					}
+	//				cout<<"after dist"<<endl;
 				}
 			}
 			for(int k = 0; k < neighborCount; k++) {
@@ -369,11 +376,11 @@ int main(int argc, char *argv[]) {
 			}
 			delete [] winUnitNeighbors;
 			delete [] winUnit;
-  //          std::cout << "5 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
-    //        begin = std::chrono::steady_clock::now();
+      //      std::cout << "5 - Time difference (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 <<std::endl;
+        //    begin = std::chrono::steady_clock::now();
 	//	int temp;
 //	cin>>temp;
-			if((j+1) % 100000 == 0) {
+			if((j+1) % 10000 == 0) {
 				std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
 				std::cout << "Average timestep: (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /(1000000.0*100000) <<std::endl;
             /*begin = std::chrono::steady_clock::now();

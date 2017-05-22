@@ -9,14 +9,14 @@ then
   echo "-Cols: Number of columns you'd like in your SOM "
   echo "-GTFFile: Gene annotations file.  See README.txt for file format "
   echo "Options: [choices] <default>"
-  echo "-Method: GREAT algorithm of choice. [TwoClosest] <TwoClosest>"
+  echo "-Method: GREAT algorithm of choice. [TwoClosest,OneClosest] <OneClosest>"
   echo "--AddToChrom: If your gtf file uses a different format for it's chromosomes, this option allows you to add text to all the chromosomes in the gtf file. <>"
 
   exit          # Exit and explain usage.
                             # Usage: scriptname -options
                             # Note: dash (-) necessary
 fi
-Method="TwoClosest"
+Method="OneClosest"
 AddToChrom=""
 while (( "$#" )); 
 do

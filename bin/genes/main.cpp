@@ -165,6 +165,29 @@ vector<genomicRegion> GetRegRegions(map<string, TSSsite>* TSSsites, vector<strin
             temp.start = start;
             temp.stop = stop;
             regions.push_back(temp);
+        } else if (CompareType.compare("OneClosest")==0) {
+            float distance1=50000;
+            float distance2=50000;
+            for(map<string, TSSsite>::iterator looper = TSSsites->begin(); looper != TSSsites->end(); looper++) {
+                TSSsite tester = looper->second;
+                if(TSS.chrom.compare(tester.chrom)!=0) continue;
+                if(TSS.pos < tester.pos && tester.pos-TSS.pos < distance1) distance1=tester.pos-TSS.pos;
+                if(TSS.pos > tester.pos && TSS.pos-tester.pos < distance2) distance2=TSS.pos-tester.pos;
+            }
+            if(distance2!=50000)
+                start = TSS.pos-distance2/2;
+            else
+                start = TSS.pos-distance2;
+            if(distance1!=50000)
+                stop = TSS.pos+distance1/2;
+            else
+                stop = TSS.pos+distance1;
+            genomicRegion temp;
+            temp.gene = genes[i];
+            temp.chrom = TSS.chrom;
+            temp.start = start;
+            temp.stop = stop;
+            regions.push_back(temp);
         }
     }
     return regions;
@@ -175,7 +198,7 @@ int main(int argc, char* argv[]) {
 	if(argc < 2) {
         cout << "Usage: ./getgenes [options] -GTFFile <Gene Anotation (GTF) File Location> -InputPrefix <Input File Location> -OutputPrefix <Output File Location> -Rows <Number of rows in your SOM> -Cols <Number of columns in your SOM>" <<endl;
         cout << "Options: <default>" <<endl;
-        cout << "-Method <Gene-Genomic Coordinates Matching Algorithm> (Currently only supports TwoClosest) <TwoClosest>"<<endl;
+        cout << "-Method [OneClosest, TwoClosest] <TwoClosest>"<<endl;
         return 0;
     }
 	string inputprefix;

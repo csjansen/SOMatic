@@ -179,6 +179,9 @@ int main(int argc, char *argv[]) {
 		}
 		temp.push_back(temp2);
 	}
+	if(numCols==0) {
+		numCols = lastcol+1;
+	}
 	inputMap.push_back(temp);
 	cout<<"Opening data file"<<endl;
 	int dimension = -1;

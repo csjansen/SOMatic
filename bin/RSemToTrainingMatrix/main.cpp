@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
     int minFeature=25;
 	int ignoreRandom = 0;
 	int padRegion = 0;
+	bool LogTransform = false;
 	string rawDataFileName;
 	string peakDataFileName;
     string trainingFileName;
@@ -57,6 +58,8 @@ int main(int argc, char *argv[]) {
             trainingFileName=argv[i+1];
         if(temp.compare("-RsemFileList")==0)
             peakDataFileName=argv[i+1];
+		if(temp.compare("-LogTransform")==0)
+			LogTransform = true;
     }
 	cout<<"Reading RSem Data"<<endl;
 	ifstream RsemDataFiles(peakDataFileName.c_str());
@@ -113,6 +116,8 @@ int main(int argc, char *argv[]) {
 		outfile<<gene;
 		for(int j = 0; j < RsemData.size(); j++) {
 			double RPKM = RsemData[j][i];
+			if(LogTransform)
+				RPKM=log(RPKM+1);
 			outfile<<'\t'<<RPKM;
 		}
 		outfile<<endl;

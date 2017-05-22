@@ -344,7 +344,7 @@ int main(int argc, char *argv[]) {
 		if(count%10000==0) 
 		cout<<"line: "<<count<<endl;
 	}	
-	cout<<"Done!"<<endl;
+	cout<<"Done! "<<dataKeys.size()<<endl;
 	int radius;
         if(numCols > numRows)   radius = numCols/2;
         else            radius = numRows/2;
@@ -380,8 +380,11 @@ int main(int argc, char *argv[]) {
 		// train
 		double multiplier = -1 * log(radius) / float(timesteps);
 		cout<<"Beginning Training"<<endl;
+		cout<<"datakeys "<<dataKeys.size()<<endl;
 		random_shuffle(dataKeys.begin(), dataKeys.end());
+		cout<<"Timesteps "<<timesteps<<endl;
 		for(int j = 0; j < timesteps; j++) {
+			cout<<j<<endl;
 			std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 			string trainingID = dataKeys[j % dataKeys.size()];
 			vector<double> trainingVector = dataMap[trainingID];
@@ -463,7 +466,7 @@ int main(int argc, char *argv[]) {
 						}*/
 			int temp;
 		cin>>temp;
-			if((j+1) % 100000 == 0) {
+			if((j+1) % 10000 == 0) {
 			double totalScore = 0;
 			double ta = 0;
             for(int i = 0; i < dataKeys.size(); i++) {
