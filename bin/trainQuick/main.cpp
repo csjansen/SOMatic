@@ -382,10 +382,10 @@ int main(int argc, char *argv[]) {
 //	cin>>temp;
 			if((j+1) % 10000 == 0) {
 				std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
-				std::cout << "Average timestep: (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /(1000000.0*100000) <<std::endl;
-            /*begin = std::chrono::steady_clock::now();
+				std::cout << "Average timestep: (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /(1000000.0*10000) <<std::endl;
+            begin = std::chrono::steady_clock::now();
     //
-				double totalScore = 0;
+			/*	double totalScore = 0;
 				double ta = 0;
 		        for(int i = 0; i < linesTraining; i++) {
 					double winVect[colsTraining];

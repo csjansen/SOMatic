@@ -38,8 +38,8 @@ LinkedReplicates = opt$LinkedReplicates
 #rows <- 40
 #cols <- 60
 #clusters2<-clusters2[-1,]
-asamples=HypoFile[HypoFile[,2*(i)]==1,1]
-bsamples=HypoFile[HypoFile[,2*(i)+1]==1,1]
+asamples=HypoFile[HypoFile[,2*(1)]==1,1]
+bsamples=HypoFile[HypoFile[,2*(1)+1]==1,1]
 for(i in 2:((ncol(HypoFile)-1)/2)) {
   asamples = cbind.data.frame(asamples,HypoFile[HypoFile[,2*(i)]==1,1])
   bsamples = cbind.data.frame(bsamples,HypoFile[HypoFile[,2*(i)+1]==1,1])
@@ -73,7 +73,7 @@ if (!require("plyr")) {
 #bsamples=list(as.matrix(bsamples))
 alist=c()
 names=c()
-print(bsamples)
+#print(bsamples)
 for(i in 1:ncol(asamples)) {
 #i=121
 #print(ncol(asamples))
@@ -139,8 +139,8 @@ for(i in 1:ncol(asamples)) {
         dsubs=c(dsubs,as[,n]-bs[,n])
       }
     }
-    print(i)
-    print(j)
+    #print(i)
+    #print(j)
     if(length(csubs)<3){
       print(i)
       print(j)
@@ -199,6 +199,15 @@ if(sum(ind)==0) {
   row_limits=row_labels
   col_labels=colnames(alist2)
   col_limits=col_labels
+  if(ncol(alist)>1) {
+    colDist = dist(t(alist2), method="euclidean")
+    colHC = hclust(colDist, method="complete")
+    colHC_data = dendro_data(as.dendrogram(colHC))
+    
+    
+    col_limits = col_limits[colHC$order]
+    col_labels = col_labels[colHC$order]
+  }
   if(nrow(alist)>1) {
     rowDist = dist(alist2, method="euclidean")
     rowHC = hclust(rowDist, method="complete")
@@ -238,4 +247,15 @@ if(sum(ind)==0) {
   print(p1, matrix_vp, newpage=FALSE)
 
   dev.off()
+  colHC_data = dendro_data(as.dendrogram(colHC))
+  col_ggdendro = ggplot(segment(colHC_data))
+  col_ggdendro = col_ggdendro + geom_segment(aes(x=x, y=y, xend=xend, yend=yend))
+  p1 = p1 + theme(axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
+  col_ggdendro = col_ggdendro + scale_x_continuous(expand=c(0,0), labels=col_labels, limits=col_limits) 
+  col_ggdendro = col_ggdendro + scale_y_continuous(expand=c(0,0), labels=NULL)
+  col_ggdendro = col_ggdendro + theme(plot.margin=unit(c(0.10, 0.00, 0.00, 0.01), "inch"))
+  col_ggdendro = col_ggdendro + theme_dendro()
+  col_ggdendro = col_ggdendro + labs(x=NULL, y=NULL)
+  pdf("ColDendro.pdf",h=5,w=8)
+  
 }

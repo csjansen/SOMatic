@@ -190,7 +190,8 @@ if(dorows) {
 row_labels_inches = 1.5*max(strwidth(row_labels, units="in", cex=base_size*(as.numeric(theme_get()$axis.text$size))*par()$cex/par()$ps))
 col_labels_inches = 1.50*max(strwidth(col_labels, units="in", cex=base_size*(as.numeric(theme_get()$axis.text$size))*par()$cex/par()$ps))
 #row_labels_inches2 = strwidth("timepoint", units="in", cex=base_size*(as.numeric(theme_get()$axis.text$size))*par()$cex/par()$ps)
-matrix_fill_limits = NULL  
+matrix_fill_limits = NULL 
+df$value[df$value>100]=100 
 p1 = ggplot(df, aes(x=Var2, y=Var1))
 p1 = p1 + geom_tile(aes(fill=value))
 p1 = p1 + theme(axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
