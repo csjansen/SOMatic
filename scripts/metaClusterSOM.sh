@@ -36,12 +36,14 @@ done
 
 if [ "$Sparse" = 0 ]
 then
-../bin/metasomThread/metasom -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -MetaclustersEnd $MetaclustersEnd -Trials $Trials -Outfile ../$SOMName/data/MetaClusters -genePrefix ../$SOMName/data/som/units/unit -Dimensionality $Dimensionality
+../bin/metasom/metasom -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -MetaclustersEnd $MetaclustersEnd -Trials $Trials -Outfile ../$SOMName/data/MetaClusters -genePrefix ../$SOMName/data/som/units/unit -Dimensionality $Dimensionality
+#../bin/metasomThread/metasom -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -MetaclustersEnd $MetaclustersEnd -Trials $Trials -Outfile ../$SOMName/data/MetaClusters -genePrefix ../$SOMName/data/som/units/unit -Dimensionality $Dimensionality
 fi
 
 if [ "$Sparse" = 1 ]
 then
-../bin/metasomTread/metasom -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -MetaclustersEnd $MetaclustersEnd -Trials $Trials -Outfile ../$SOMName/data/MetaClusters -genePrefix ../$SOMName/data/som/units/unit -Sparse -Dimensionality $Dimensionality
+../bin/metasom/metasom -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -MetaclustersEnd $MetaclustersEnd -Trials $Trials -Outfile ../$SOMName/data/MetaClusters -genePrefix ../$SOMName/data/som/units/unit -Sparse -Dimensionality $Dimensionality
+#../bin/metasomTread/metasom -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -MetaclustersEnd $MetaclustersEnd -Trials $Trials -Outfile ../$SOMName/data/MetaClusters -genePrefix ../$SOMName/data/som/units/unit -Sparse -Dimensionality $Dimensionality
 fi
 
 #../bin/metasomgene/metasomgene -UnitPrefix ../$SOMName/data/som/units/unit -MetaclusterFile ../$SOMName/data/MetaClusters -OutPrefix ../$SOMName/data/ -Rows $Rows -Cols $Cols -Metaclusters $Metaclusters
