@@ -488,6 +488,11 @@ int main(int argc, char* argv[]) {
 	}
 	while(getline(ClusterFile,line)) {
 		vector<string> splitz = split(line,'\t');
+		if(splitz.size() < 5) {
+			cout<<splitz.size()<<endl;
+			cout<<line<<endl;
+			continue;
+		}
 		int ATACCluster;
 		int RNACluster;
 		istringstream(splitz[4])>>ATACCluster;

@@ -73,7 +73,6 @@ vector <vector<int> > hexSurround(vector<double> input, int radius, int numRows,
 			xs.push_back(x+i);
 			ys.push_back(y+j);
 			zs.push_back(z+dz);
-			//cout<<i<<'\t'<<j<<'\t'<<dz<<endl;
 		}
 	}
 	for(int i = 0; i < xs.size(); i++) {

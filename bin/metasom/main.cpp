@@ -157,8 +157,9 @@ int main(int argc, char* argv[]) {
 		int uniqs = 0;	
 		for(int k = 0; k < i+uniqs; k++) {
 			vector<double> temp;
+			int sizer = allpoints.size();
 			for(int m = 0; m < Som1[0].size(); m++) {
-				temp.push_back(Som1[(int)(allpoints[k][0])*col1+(int)(allpoints[k][1])][m]);
+				temp.push_back(Som1[(int)(allpoints[k%sizer][0])*col1+(int)(allpoints[k%sizer][1])][m]);
 			}
 			bool found = false;
 			for(int m = 0; m < MidPoints.size(); m++) {

@@ -85,14 +85,18 @@ base_size = 8
 Minsig = 0
 for(i in 0:clusternum) {
 #i=33
-geneListFile = read.delim(paste0(GeneFilePrefix,toString(i)), header=F, comment.char="#")
-colnames(geneListFile)=c("ProbeID","row","col")
 #geneListNames = c()
 #for(j in 1:nrow(geneListFile)) {
 #  geneListNames=c(geneListNames,paste0(geneListFile[j],paste0(" ",paste0(paste0(toString(HeatAtac[j,1]),','),toString(HeatAtac[j,2])))))
 #}
 dfgenes=c()
+if(file.info(paste0(GeneFilePrefix,toString(i)))$size == 0) {
+	next
+}
+
 if(opt$ShowSegments=="1") {
+geneListFile = read.delim(paste0(GeneFilePrefix,toString(i)), header=F, comment.char="#")
+colnames(geneListFile)=c("ProbeID","row","col")
 trainingMatrix[trainingMatrix>Maxsig]=Maxsig
 geneList = join(geneListFile,trainingMatrix)
 geneList2 = geneList[,-1]
@@ -199,7 +203,7 @@ p1 = p1 + scale_x_discrete(expand=c(0,0), limits=col_limits, labels=col_labels)
 p1 = p1 + scale_y_discrete(expand=c(0,0), limits=row_limits, labels=row_labels)
 print(Minsig)
 print(Maxsig)
-p1 = p1 + scale_fill_gradientn(colours=matrix_palette, limits=c(Minsig,100))
+p1 = p1 + scale_fill_gradientn(colours=matrix_palette, limits=c(Minsig,Maxsig))
 #p1 = p1 + scale_fill_gradientn(colours=matrix_palette)
 p1 = p1 + theme(plot.margin=unit(c(0.00, 0.00, 0.00, 0.00),"inch"))
 p1 = p1 + labs(x=NULL, y=NULL)
@@ -207,7 +211,7 @@ p1 = p1 + guides(fill=guide_colourbar(
   title.position="top", 
   direction="horizontal", 
   title.hjust=0, 
-  title=paste0("Meta Cluster ",toString(i))
+  title=paste0("Metacluster ",toString(i))
   #	draw.ulim=FALSE,
   #	draw.llim=FALSE
 ))
@@ -332,7 +336,7 @@ matrix_scale_vp = viewport(
   just = c("left", "bottom")
 )
 
-col_dendro_h = .5
+col_dendro_h = 4
 colDendro_vp = viewport(
   y = matrix_vp_y + matrix_vp_h-0.25*length(colSide_by),#-1.5*base_size/72.27
   x = matrix_vp_x + row_labels_inches+.01,

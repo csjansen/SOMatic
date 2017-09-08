@@ -77,7 +77,7 @@ map<string, TSSsite>* parseGtfFile(string gtfFileName, string geneidtype, bool X
 							geneName = temptext+"_"+pairItems[2].substr(1,pairItems[2].size()-2);
 //							cout<<geneName<<endl;
 						}
-					} else {
+					} else if(geneidtype.compare("gene_name")!=0) {
 					
 						if(pairItems[1].compare("gene_id")==0) {
 							vector<string> splitz2 = split(pairItems[2].substr(1,pairItems[2].size()-2),'.');
@@ -87,7 +87,6 @@ map<string, TSSsite>* parseGtfFile(string gtfFileName, string geneidtype, bool X
 //						cin>>temp;
 						}
 					}
-						
 					if(pairItems[1].compare("gene_type")==0) {
 						string splitz2 = pairItems[2];
 						if(splitz2.compare("\"protein_coding\"")==0) protein_coding_gene=true;
@@ -119,7 +118,34 @@ map<string, TSSsite>* parseGtfFile(string gtfFileName, string geneidtype, bool X
 				counter++;
 			}
 		} else {
-			if(counter>0) {
+			if(line[0]=='#') {
+				continue;
+			}
+			vector<string> splitz = split(line,'\t');
+			if(splitz[2].compare("gene")==0) {
+				TSSsite temp;
+				string strand = splitz[6];
+				int start;
+				int stop;
+				istringstream(splitz[3])>>start;
+				istringstream(splitz[4])>>stop;
+				temp.chrom = splitz[0];
+				//cout<<temp.chrom<<endl;
+				//cout<<start<<endl;
+				//cout<<stop<<endl;
+				if(strand.compare("+")==0) {
+					temp.pos = start;
+				} else {
+					temp.pos=stop;
+				}
+				vector<string> splitz1 = split(splitz[8],';');
+				vector<string> splitz2 = split(splitz1[0],'=');
+				vector<string> splitz3 = split(splitz1[1],'=');
+				string genename =splitz2[1]+"-"+splitz3[1];
+				TSSsites->operator[](genename) = temp;
+				
+			}
+			/*if(counter>0) {
 				vector<string> splitz = split(line,'\t');
 				TSSsite temp;
 				string genename = splitz[0];
@@ -133,10 +159,10 @@ map<string, TSSsite>* parseGtfFile(string gtfFileName, string geneidtype, bool X
 				temp.strand = '+';
 				TSSsites->operator[](genename) = temp;
 			}
-			counter++;	
+			counter++;	*/
 		}
 	}
-	cout<<"GTF Genes: "<<TSSsites.size()<<endl;
+	cout<<"GTF Genes: "<<TSSsites->size()<<endl;
 	return TSSsites;
 }
 
@@ -384,7 +410,7 @@ int main(int argc, char* argv[]) {
 								//cout<< AtacRegions[Atacs].start<<'\t'<<regions[RnaRow*col2+RnaCol][RNAs].start<<endl;
 								//int temp = 0;
 								//cin>>temp;
-								if(AtacRegions[Atacs].chrom.compare("chr"+regions[RnaRow*col2+RnaCol][RNAs].chrom)==0) {
+								if(AtacRegions[Atacs].chrom.compare(regions[RnaRow*col2+RnaCol][RNAs].chrom)==0) {
 									if((AtacRegions[Atacs].start>=regions[RnaRow*col2+RnaCol][RNAs].start && AtacRegions[Atacs].start<=regions[RnaRow*col2+RnaCol][RNAs].stop)||(AtacRegions[Atacs].start>=regions[RnaRow*col2+RnaCol][RNAs].stop && AtacRegions[Atacs].stop <= regions[RnaRow*col2+RnaCol][RNAs].stop)||(AtacRegions[Atacs].start<=regions[RnaRow*col2+RnaCol][RNAs].start && AtacRegions[Atacs].stop >= regions[RnaRow*col2+RnaCol][RNAs].stop)) {
 										//cout<<regions[RnaRow*col2+RnaCol][RNAs].gene<<endl;
 										//int temp;

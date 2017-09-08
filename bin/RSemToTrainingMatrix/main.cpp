@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 				}
 			}
 			double temp;
-			istringstream(splitz[4])>>temp;
+			istringstream(splitz[6])>>temp;
 			rsem.push_back(temp);
 		}
 		while(rsem.size() < geneList.size()) {

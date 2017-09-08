@@ -43,13 +43,13 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
 	random_shuffle(index.begin(),index.end());
 	vector<vector<double> > MidPoints;
 	vector<double> Rads;
-        cout<<"Assignment: "<<trial<<endl;
+        //cout<<"Assignment: "<<trial<<endl;
     // Initial Mid Points
     int uniqs = 0;
     for(int k = 0; k < clusternum+uniqs; k++) {
     	vector<double> temp;
         for(int m = 0; m < Som1->at(0).size(); m++) {
-        	temp.push_back(Som1->at((int)(allpoints->at(k)[0])*col1+(int)(allpoints->at(k)[1]))[m]);
+        	temp.push_back(Som1->at((int)(allpoints->at(index[k])[0])*col1+(int)(allpoints->at(index[k])[1]))[m]);
         }
         bool found = false;
         for(int m = 0; m < MidPoints.size(); m++) {
@@ -73,10 +73,20 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
 		}
     }
 	bool finished = false;
+	bool finished2 = false;
     int iter = 0;
     bool cont = false;
+	vector<vector<vector<double> > > points;
+    vector<vector<vector<double> > > points2;
+    vector<vector<double> > points3;
+	int pointlist[row1][col1];
+    int Nc[allpoints->size()];
+	int K = clusternum;
+    int N = allpoints->size();
+    int P = Som1->at(0).size();
+	vector<vector<double> > DistMatrix;
+	while(!finished2) {
     while(!finished) {
-    	finished = true;
         int count=0;
         //Assignment
         for(int k = 0; k < allpoints->size(); k++) {
@@ -122,14 +132,31 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
             }
             if(lowestdist > Rads[lowestk1]) Rads[lowestk1]=lowestdist;
        	}
+		for(int k = 0; k < clusternum; k++) {
+			int count = 0;
+			for(int m = 0; m < allpoints->size(); m++) {
+                if((int)(allpoints->at(m)[2])==k) {
+                    count++;
+                }
+            }
+			if(count==0) {
+				int index = rand() % (allpoints->size());
+				for(int n = 0; n < Som1->at(0).size(); n++) {
+					MidPoints[k][n]=Som1->at((int)(allpoints->at(index)[0])*col1+(int)(allpoints->at(index)[1]))[n];
+				}
+				allpoints->at(index)[2]=k;
+				finished=false;
+			}
+		}
     //      cout<<count<<endl;
        	if(finished) break;
 		for(int k = 0; k < Rads.size(); k++) {
         	Rads[k]=0;
         }
-		cout<<"Update: "<<trial<<endl;
+		//cout<<"Update: "<<trial<<endl;
         cont=true;
 		for(int k = 0; k < clusternum; k++) {
+		//	cout<<k<<endl;
         	vector<double> totals1;
             int count = 0;
             for(int m = 0; m < Som1->at(0).size(); m++) totals1.push_back(0);
@@ -139,6 +166,7 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
                    	count++;
                 }
             }
+		//	cout<<count<<endl;
             for(int m = 0; m < totals1.size(); m++) {
 				if(count==0)
 					MidPoints[k][m]=0;
@@ -147,23 +175,25 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
                 //      cout<<MidPoints[k][m]<<endl;
             }
         }
-		cout<<"Done"<<endl;
+		//cout<<"Done"<<endl;
+    	finished = true;
     }
-    cout<<"Cluster: "<<trial<<endl;
-	int K = clusternum;
-    int N = allpoints->size();
-    int P = Som1->at(0).size();
+//    cout<<"Cluster: "<<trial<<endl;
         //rebuild clusters to be adjacient
         //Calculating Distance Matrix
-    double DistMatrix[N][K];
+//	cout<<"Dist: "<<trial<<endl;
+	DistMatrix.clear();
+    //double DistMatrix[N][K];
+//	cout<<"Dist: "<<trial<<endl;
     for(int n = 0; n < N; n++) {
+		vector<double> DistMatrixRow;
     	for(int k = 0; k < K; k++) {
-        	DistMatrix[(int)allpoints->at(n)[0]*col1+(int)allpoints->at(n)[1]][k]=0;
+			DistMatrixRow.push_back(0);
            	if(!sparse) {
             	for(int p = 0; p < P; p++) {
-                	DistMatrix[(int)allpoints->at(n)[0]*col1+(int)allpoints->at(n)[1]][k]+=pow(Som1->at((int)(allpoints->at(n)[0])*col1+(int)(allpoints->at(n)[1]))[p]-MidPoints[k][p],2);
+                	DistMatrixRow[k]+=pow(Som1->at((int)(allpoints->at(n)[0])*col1+(int)(allpoints->at(n)[1]))[p]-MidPoints[k][p],2);
             	}
-            	DistMatrix[(int)allpoints->at(n)[0]*col1+(int)allpoints->at(n)[1]][k]=sqrt(DistMatrix[(int)allpoints->at(n)[0]*col1+(int)allpoints->at(n)[1]][k]);
+				DistMatrixRow[k]=sqrt(DistMatrixRow[k]);
             } else {
                 double similarity=0;
                 double mag1 = 0;
@@ -180,21 +210,18 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
                 	similarity /= (sqrt(mag1) * sqrt(mag2));
                 }
                 double dist1 = 1-similarity;
-                DistMatrix[(int)allpoints->at(n)[0]*col1+(int)allpoints->at(n)[1]][k]=dist1;
+                DistMatrixRow.push_back(dist1);
 
             }
         }
+		DistMatrix.push_back(DistMatrixRow);
     }
-	int pointlist[row1][col1];
     for(int k = 0; k < row1; k++) {
     	for(int n = 0; n < col1; n++) {
         	pointlist[k][n]=-1;
         }
     }
-    vector<vector<vector<double> > > points;
-    vector<vector<vector<double> > > points2;
-    vector<vector<double> > points3;
-    int Nc[allpoints->size()];
+	//cout<<"Distance calculated. "<<trial<<endl;
     for(int k = 0; k < K; k++) {
     	vector<vector<double> > temp;
         vector<vector<double> > temp2;
@@ -218,8 +245,28 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
         points3[k]=allpoints->at(lowestindex);
         pointlist[(int)allpoints->at(lowestindex)[0]][(int)allpoints->at(lowestindex)[1]]=k;
     }
+	finished2=true;
+	for(int k = 0; k < clusternum; k++) {
+        int count = 0;
+        for(int m = 0; m < row1; m++) {
+			for(int n = 0; n < col1; n++) {
+				if(pointlist[m][n]==k) {
+                    count++;
+                }
+            }
+		}
+        if(count==0) {
+			int index = rand() % (allpoints->size());
+            for(int n = 0; n < Som1->at(0).size(); n++) {
+				MidPoints[k][n]=Som1->at((int)(allpoints->at(index)[0])*col1+(int)(allpoints->at(index)[1]))[n];
+            }
+            allpoints->at(index)[2]=k;
+            finished2=false;
+        }
+	}
+	}
 	//build adjecency list
-	cout<<"Build Adjecency List: "<<trial<<endl;
+	//cout<<"Build Adjecency List: "<<trial<<endl;
     bool done = false;
     bool recalc=true;
     vector<vector<vector<double> > > adj;
@@ -334,7 +381,7 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
     for(int n = 0; n < N; n++) {
     	clusterIndex->push_back(pointlist[(int)allpoints->at(n)[0]][(int)allpoints->at(n)[1]]);
     }
-	cout<<"Calculate AIC: "<<trial<<endl;
+	//cout<<"Calculate AIC: "<<trial<<endl;
 	// Calculate AIC
     // Nc contains number of objects in each cluster
     for(int k = 0; k < K; k++) {
@@ -390,7 +437,10 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
         for(int n = 0; n < N; n++) {
         	Var += pow(Som1->at(allpoints->at(n)[0]*col1+allpoints->at(n)[1])[p]-Mid[p],2);
         }
-        V[p]=Var/(N-1);
+		if(N>1)
+	        V[p]=Var/(N-1);
+		else
+			V[p]=Var;
     }
     //Compute log-like LL, 1 x K
     double LL[K];
