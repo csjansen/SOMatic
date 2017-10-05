@@ -8,7 +8,7 @@ option_list = list(
   );
 opt_parser = OptionParser(option_list=option_list);
 opt=parse_args(opt_parser);
-sample<-read.delim(opt$TraitFile);
+samples<-read.delim(opt$TraitFile);
 #sample <- read.delim("/bio/csjansen/TraitFiles/sample3.Xeno.list")
 #sample=sample[,-2]#sample <- read.delim("/bio/csjansen/TraitFiles/Trait2.txt")
 
@@ -34,7 +34,11 @@ if (!require("plyr")) {
   install.packages("plyr", dependencies = TRUE)
   library(plyr)
 }
-sample=sample[,-1]
+print(samples)
+sample = samples[,-1]
+#colnames(sample) = samples[1,-1]
+rownames(sample) = samples[,1]
+print(sample)
 #sample=sample[,-1]
 traitnames = colnames(sample)
 
@@ -49,6 +53,7 @@ for(i in 0:clusternum) {
   HeatAtac3 = rbind(HeatAtac3,HeatAtac2)
 }
 cors=cor(t(HeatAtac3),sample)
+print(cors)
 pvals = 2*pt(-abs(cors/(sqrt((1-cors^2)/(clusternum-1)))),df=clusternum+1)
 #for each trait
 #traitpvals=c()
@@ -119,7 +124,7 @@ rownames(pvals)=0:clusternum
 colnames(pvals)=traitnames
 rownames(pvals) <- make.names(rownames(pvals))
 pvals=pvals[rowSums(abs(pvals))>0,]
-
+print(pvals)
 matrix_palette <- colorRampPalette(c("blue", "white", "red"))(n = 299)
 matrix_fill_limits = NULL  
 
@@ -133,7 +138,8 @@ row_limits=row_labels
 row_limits = row_limits[rowHC$order]
 row_labels = row_labels[rowHC$order]
 
-
+col_labels=colnames(pvals)
+col_limits=col_labels
 
 df = melt(as.matrix(pvals))
 p1 = ggplot(df, aes(x=Var2, y=Var1))
@@ -141,6 +147,7 @@ p1 = p1 + geom_tile(aes(fill=value))
 p1 = p1 + scale_fill_gradientn(colours=matrix_palette, limits=c(-1,1))
 p1 = p1 + theme(axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
 p1 = p1 + scale_y_discrete(expand=c(0,0), limits=row_limits, labels=row_labels)
+p1 = p1 + scale_x_discrete(expand=c(0,0), limits=col_limits, labels=col_labels)
 p1 = p1 + theme(plot.margin=unit(c(0.00, 0.00, 0.00, 0.00),"inch"))
 p1 = p1 + labs(x="Trait", y="Cluster #")
 

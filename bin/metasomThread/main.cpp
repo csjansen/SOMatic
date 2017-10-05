@@ -34,6 +34,7 @@ std::vector<std::string> split(const std::string &s, char delim) {
 }
 
 void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >* Som1, int Dimensionality, int clusternum, bool sparse, vector<int>* clusterIndex, double* score, int row1, int col1, int trial) {
+	vector<vector<double> > allpoints2=*allpoints;
 	// Make random shuffle
 	vector<int> index;
 	for(int i = 0; i < allpoints->size(); i++) {
@@ -124,10 +125,10 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
                     lowestdist=dist1;
                 }
             }
-            if(allpoints->at(k)[2] != lowestk1) {
+            if(allpoints2.at(k)[2] != lowestk1) {
             	count++;
-                allpoints->at(k)[2] = lowestk1;
-                allpoints->at(k)[3] = lowestdist1;
+                allpoints2.at(k)[2] = lowestk1;
+                allpoints2.at(k)[3] = lowestdist1;
                 finished = false;
             }
             if(lowestdist > Rads[lowestk1]) Rads[lowestk1]=lowestdist;
@@ -135,7 +136,7 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
 		for(int k = 0; k < clusternum; k++) {
 			int count = 0;
 			for(int m = 0; m < allpoints->size(); m++) {
-                if((int)(allpoints->at(m)[2])==k) {
+                if((int)(allpoints2.at(m)[2])==k) {
                     count++;
                 }
             }
@@ -144,7 +145,7 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
 				for(int n = 0; n < Som1->at(0).size(); n++) {
 					MidPoints[k][n]=Som1->at((int)(allpoints->at(index)[0])*col1+(int)(allpoints->at(index)[1]))[n];
 				}
-				allpoints->at(index)[2]=k;
+				allpoints2.at(index)[2]=k;
 				finished=false;
 			}
 		}
@@ -161,7 +162,7 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
             int count = 0;
             for(int m = 0; m < Som1->at(0).size(); m++) totals1.push_back(0);
             for(int m = 0; m < allpoints->size(); m++) {
-            	if((int)(allpoints->at(m)[2])==k) {
+            	if((int)(allpoints2.at(m)[2])==k) {
                 	for(int n = 0; n < Som1->at(0).size(); n++) totals1[n]+=Som1->at((int)(allpoints->at(m)[0])*col1+(int)(allpoints->at(m)[1]))[n];
                    	count++;
                 }
@@ -241,8 +242,8 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
             }
       	}
         points[k].push_back(Som1->at((int)(allpoints->at(lowestindex)[0])*col1+(int)(allpoints->at(lowestindex)[1])));
-        points2[k].push_back(allpoints->at(lowestindex));
-        points3[k]=allpoints->at(lowestindex);
+        points2[k].push_back(allpoints2.at(lowestindex));
+        points3[k]=allpoints2.at(lowestindex);
         pointlist[(int)allpoints->at(lowestindex)[0]][(int)allpoints->at(lowestindex)[1]]=k;
     }
 	finished2=true;
@@ -260,7 +261,7 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
             for(int n = 0; n < Som1->at(0).size(); n++) {
 				MidPoints[k][n]=Som1->at((int)(allpoints->at(index)[0])*col1+(int)(allpoints->at(index)[1]))[n];
             }
-            allpoints->at(index)[2]=k;
+            allpoints2.at(index)[2]=k;
             finished2=false;
         }
 	}
