@@ -69,15 +69,19 @@ map<string, TSSsite>* parseGtfFile(string gtfFileName, string geneidtype, bool X
 				bool protein_coding_gene=false;
 				for(int i = 0; i < attributes.size(); i++) {
 					vector<string> pairItems = split(attributes[i],' ');
-					if(geneidtype.compare("gene_id")!=0) {
+//					cout<<geneidtype<<endl;
+					if(geneidtype.compare("gene_id")==0) {
+//						cout<<pairItems[0]<<'\t'<<pairItems[1]<<endl;
 						if(pairItems[0].compare("gene_id")==0) {
 							temptext = pairItems[1].substr(1,pairItems[1].size()-2);
+							vector<string> temptextlist = split(temptext,'.');
+							temptext = temptextlist[0];
 						}
 						if(pairItems[1].compare("gene_name")==0) {
-							geneName = temptext+"_"+pairItems[2].substr(1,pairItems[2].size()-2);
-//							cout<<geneName<<endl;
+							//geneName = temptext+"-"+pairItems[2].substr(1,pairItems[2].size()-2);
+							geneName = temptext;
 						}
-					} else if(geneidtype.compare("gene_name")!=0) {
+					} else if(geneidtype.compare("gene_name")==0) {
 					
 						if(pairItems[1].compare("gene_id")==0) {
 							vector<string> splitz2 = split(pairItems[2].substr(1,pairItems[2].size()-2),'.');
@@ -100,8 +104,9 @@ map<string, TSSsite>* parseGtfFile(string gtfFileName, string geneidtype, bool X
 					//cin>>temp;
 					}
 				}
-					//int temp;
-					//cin>>temp;
+//							cout<<geneName<<endl;
+//					int temp;
+//					cin>>temp;
 				TSSsite record = TSSsites->operator[](geneName);
 				if(!protein_coding&&protein_coding_gene) continue;
 				record.strand = splitz[6];
@@ -204,7 +209,8 @@ vector<genomicRegion> GetRegRegions(map<string, TSSsite>* TSSsites, vector<strin
 	vector<genomicRegion> regions;
 	//cout<<genes.size()<<" Passed in."<<endl;
 	for(int i = 0; i < genes.size(); i++) {
-		map<string, TSSsite>::iterator it = TSSsites->find(genes[i]);
+		vector<string> splitz = split(genes[i],'-');
+		map<string, TSSsite>::iterator it = TSSsites->find(splitz[0]);
 		TSSsite TSS;
 		if(it!=TSSsites->end()) {
 			TSS = it->second;
@@ -389,9 +395,12 @@ int main(int argc, char* argv[]) {
 						//cout<<"Opened: "<<(prefix2+"_"+SSTR(RnaRow)+"_"+SSTR(RnaCol)+".unit")<<endl;
 						string line;
 						vector<string> genes;
+						vector<string> genes2;
 						while(getline(RnaUnit, line)) {
 							vector<string> splitz=split(line,'\t');
+							//vector<string> splitz2 = split(splitz[0],'-');
 							genes.push_back(splitz[0]);
+							
 						}
 						RNASizeRow.push_back(genes.size());
 						//cout<<"Genes: "<<genes.size()<<endl;
