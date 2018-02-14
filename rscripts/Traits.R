@@ -45,15 +45,35 @@ traitnames = colnames(sample)
 cols = ncol(sample)
 #i=2
 HeatAtac3=c()
+rowcol = c()
+colcol = c()
+SOMrows = 39
+SOMcols = 59
+for(i in 0:SOMrows) {
+        for(j in 0:SOMcols) {
+                rowcol = c(rowcol, i)
+                colcol = c(colcol, j)
+        }
+}
+Atac=cbind(rowcol,colcol,Atac)
+colnames(Atac)=c('V1','V2','V10000','V100001',colnames(Atac[,5:ncol(Atac)]))
+#print(Atac)
 for(i in 0:clusternum) {
   cluster = clusters2[clusters2$V3==i,]
   HeatAtac = join(cluster,Atac,by=c("V1","V2"))
   HeatAtac = data.matrix(HeatAtac[,4:ncol(HeatAtac)])
+  #print(HeatAtac)
   HeatAtac2 = colSums(HeatAtac)/nrow(HeatAtac)
+  #print(HeatAtac2)
   HeatAtac3 = rbind(HeatAtac3,HeatAtac2)
 }
+#print(ncol(HeatAtac3))
+#print(nrow(HeatAtac3))
+#print(nrow(sample))
+#print(HeatAtac3)
+#print(sample)
 cors=cor(t(HeatAtac3),sample)
-print(cors)
+#print(cors)
 pvals = 2*pt(-abs(cors/(sqrt((1-cors^2)/(clusternum-1)))),df=clusternum+1)
 #for each trait
 #traitpvals=c()
@@ -111,6 +131,7 @@ pvals = 2*pt(-abs(cors/(sqrt((1-cors^2)/(clusternum-1)))),df=clusternum+1)
 #}
 #traitpvals=t(traitpvals)
 #traitnegs=t(traitnegs)
+print(pvals)
 pvals[pvals>.05/((clusternum+1))]=1
 pvals=-1*log10(pvals)
 maxval = min(10,max(pvals))
@@ -124,7 +145,7 @@ rownames(pvals)=0:clusternum
 colnames(pvals)=traitnames
 rownames(pvals) <- make.names(rownames(pvals))
 pvals=pvals[rowSums(abs(pvals))>0,]
-print(pvals)
+#print(pvals)
 matrix_palette <- colorRampPalette(c("blue", "white", "red"))(n = 299)
 matrix_fill_limits = NULL  
 

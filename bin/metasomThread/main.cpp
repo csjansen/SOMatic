@@ -542,29 +542,34 @@ int main(int argc, char* argv[]) {
     vector<vector<double> > Som1;
     string line;
 	vector<vector<double> > allpoints;
-	while(getline(som1file,line)) {
-        if(line[0]=='#') continue;
-        vector<double> Som1Row;
-        vector<string> splitz = split(line, '\t');
-		vector<double> temp;
-		int temprow;
-		int tempcol;
-		istringstream(splitz[0])>>temprow;
-		istringstream(splitz[1])>>tempcol;
-		temp.push_back(temprow);
-		temp.push_back(tempcol);
-		temp.push_back(0);
-		temp.push_back(0);
-		temp.push_back(geneCounts[temprow][tempcol]+1);
-		allpoints.push_back(temp);
-        for(int i = 2; i < splitz.size(); i++) {
-            double temp;
-            istringstream(splitz[i])>>temp;
-            Som1Row.push_back(temp);
-        }
-        Som1.push_back(Som1Row);
+	int tempcol = 0;
+        int temprow = 0;
+        while(getline(som1file,line)) {
+                if(line[0]=='#') continue;
+                cout<<tempcol<<'\t'<<temprow<<endl;
+                vector<double> Som1Row;
+                vector<string> splitz = split(line, '\t');
+                vector<double> temp;
+                temp.push_back(temprow);
+                temp.push_back(tempcol);
+                temp.push_back(0);
+                temp.push_back(0);
+                temp.push_back(geneCounts[temprow][tempcol]+1);
+                allpoints.push_back(temp);
+                for(int i = 0; i < splitz.size(); i++) {
+                        double temp;
+                        istringstream(splitz[i])>>temp;
+                        Som1Row.push_back(temp);
+                }
+                Som1.push_back(Som1Row);
+                tempcol++;
+                if(tempcol == col1) {
+                        tempcol=0;
+                        temprow++;
+                }
     //    if(Som1Row.size()==0) cout<<line<<endl;
-    }
+    	}
+    //
 	
 	vector<vector<vector<int> > > Indexes;
 	vector<vector<double> > Scores;

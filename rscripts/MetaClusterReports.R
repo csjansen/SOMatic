@@ -14,7 +14,7 @@ opt_parser = OptionParser(option_list=option_list);
 opt=parse_args(opt_parser);
 #sample <- read.delim("/bio/csjansen/TraitFiles/sample3.Xeno.list")
 print(1)
-clusters2<- read.delim(opt$MetaClusterFile,header=F)
+clusters2<- read.delim(opt$MetaClusterFile,header=F,stringsAsFactors=F)
 #clusters2<- read.delim("/bio/csjansen/SOM_Meta_Clusters/Xeno.v9.AIC.50.cluster", header=F)
 clusters2<-clusters2[-1,]
 print(1)
@@ -57,7 +57,23 @@ if (!require("plyr")) {
   install.packages("plyr", dependencies = TRUE)
   library(plyr)
 }
+clusters2$V1=as.numeric(clusters2$V1)
+rows = max(clusters2$V1)
+print(rows)
+cols = max(clusters2$V2)
+print(cols)
+rowcol = c()
+colcol = c()
+for(i in 0:rows) {
+	for(j in 0:cols) {
+		rowcol = c(rowcol, i)
+		colcol = c(colcol, j)
+	}
+}
+#print(rowcol)
+Atac = cbind(rowcol,colcol,Atac)
 colnames(Atac)=c("V1","V2",t(samples))
+#print(Atac)
 blueColor=rgb(75,75,200,maxColorValue=255,alpha=255)
 blackColor=rgb(0,0,70,maxColorValue=255,alpha=255)
 yellowColor=rgb(200,200,20,maxColorValue=255,alpha=255)
@@ -66,7 +82,13 @@ HeatAtac3=c()
 Maxsig=0
 for(i in 0:clusternum) {
   cluster = clusters2[clusters2$V3==i,]
+  #print(cluster$V1)
+  #print(cluster$V2)
   HeatAtac = join(cluster,Atac,by=c("V1","V2"))
+  #print(Atac$V1)
+  #print(Atac$V2)
+ # print(HeatAtac)
+  readline(prompt="Press [enter] to continue")
   HeatAtac = data.matrix(HeatAtac[,4:ncol(HeatAtac)])
   Maxsig=max(c(Maxsig,max(HeatAtac)))
   HeatAtac2 = colSums(HeatAtac)/nrow(HeatAtac)

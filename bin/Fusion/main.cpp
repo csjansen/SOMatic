@@ -147,6 +147,7 @@ map<string, TSSsite>* parseGtfFile(string gtfFileName, string geneidtype, bool X
 				vector<string> splitz2 = split(splitz1[0],'=');
 				vector<string> splitz3 = split(splitz1[1],'=');
 				string genename =splitz2[1]+"-"+splitz3[1];
+	//			cout<<genename<<endl;
 				TSSsites->operator[](genename) = temp;
 				
 			}
@@ -205,12 +206,12 @@ string createKey(int row1, int col1, int row2, int col2) {
 	return SSTR(row1)+"_"+SSTR(col1)+"_"+SSTR(row2)+"_"+SSTR(col2);
 }
 
-vector<genomicRegion> GetRegRegions(map<string, TSSsite>* TSSsites, vector<string> genes, string CompareType) {
+vector<genomicRegion> GetRegRegions(map<string, TSSsite>* TSSsites, vector<string> genes, string CompareType, int SearchRange) {
 	vector<genomicRegion> regions;
 	//cout<<genes.size()<<" Passed in."<<endl;
 	for(int i = 0; i < genes.size(); i++) {
 		vector<string> splitz = split(genes[i],'-');
-		map<string, TSSsite>::iterator it = TSSsites->find(splitz[0]);
+		map<string, TSSsite>::iterator it = TSSsites->find(genes[i]);
 		TSSsite TSS;
 		if(it!=TSSsites->end()) {
 			TSS = it->second;
@@ -222,12 +223,12 @@ vector<genomicRegion> GetRegRegions(map<string, TSSsite>* TSSsites, vector<strin
 		int start;
 		int stop;
 		if(CompareType.compare("TwoClosest")==0) {
-			int prevdist = 1000000;
-			if(TSS.pos < 1000000) start = 0;
-			else start = TSS.pos - 1000000;
-			int nextdist = 1000000;
-			if(TSS.pos < 1000000) stop = 0;
-            else stop = TSS.pos + 1000000;
+			int prevdist = SearchRange;
+			if(TSS.pos < SearchRange) start = 0;
+			else start = TSS.pos - SearchRange;
+			int nextdist = SearchRange;
+			if(TSS.pos < SearchRange) stop = 0;
+            else stop = TSS.pos + SearchRange;
 			//cout<<start<<'\t'<<stop;
 			for(map<string, TSSsite>::iterator looper = TSSsites->begin(); looper != TSSsites->end(); looper++) {
 				TSSsite tester = looper->second;
@@ -248,19 +249,19 @@ vector<genomicRegion> GetRegRegions(map<string, TSSsite>* TSSsites, vector<strin
 			temp.stop = stop;
 			regions.push_back(temp);
 		} else if (CompareType.compare("OneClosest")==0) {
-			float distance1=50000;
-			float distance2=50000;
+			float distance1=SearchRange;
+			float distance2=SearchRange;
 			for(map<string, TSSsite>::iterator looper = TSSsites->begin(); looper != TSSsites->end(); looper++) {
 				TSSsite tester = looper->second;
 				if(TSS.chrom.compare(tester.chrom)!=0) continue;
 				if(TSS.pos < tester.pos && tester.pos-TSS.pos < distance1) distance1=tester.pos-TSS.pos;
 				if(TSS.pos > tester.pos && TSS.pos-tester.pos < distance2) distance2=TSS.pos-tester.pos;
 			}
-			if(distance2!=50000)
+			if(distance2!=SearchRange)
 				start = TSS.pos-distance2/2;
 			else
 				start = TSS.pos-distance2;
-			if(distance1!=50000)
+			if(distance1!=SearchRange)
 				stop = TSS.pos+distance1/2;
 			else
 				stop = TSS.pos+distance1;
@@ -300,6 +301,7 @@ int main(int argc, char* argv[]) {
         cout << "ATACxRNA options:\n\t-Algorithm: Which GREAT algorithm is used. <OneClosest>[OneClosest,TwoClosest]"<<endl;
         cout << "\t-GTFFile: GTF File for your organism."<<endl;
         cout << "\t-GeneIDType: Type of gene ID in RNA SOM unit files. <gene_id>[gene_id,gene_name]"<<endl;
+	cout << "\t-SearchRange: The distance from a gene to use for GREAT <1000000>"<<endl;
         return 0;
     }
     string type = "ATACxRNA";
@@ -314,32 +316,35 @@ int main(int argc, char* argv[]) {
 	string outfileName;
 	string gtfFileName;
 	bool Xeno = false;
+	int SearchRange=1000000;
 	for(int i = 0; i < argc; i++) {
-        string temp = argv[i];
-        if(temp.compare("-UnitPrefix1")==0)
+        	string temp = argv[i];
+	        if(temp.compare("-UnitPrefix1")==0)
 			prefix1= argv[i+1];	
-        if(temp.compare("-Row1")==0)
-            istringstream(argv[i+1])>>row1;
-        if(temp.compare("-Row2")==0)
-            istringstream(argv[i+1])>>row2;
-        if(temp.compare("-UnitPrefix2")==0)
+        	if(temp.compare("-Row1")==0)
+	        	istringstream(argv[i+1])>>row1;
+        	if(temp.compare("-Row2")==0)
+            		istringstream(argv[i+1])>>row2;
+	        if(temp.compare("-UnitPrefix2")==0)
 			prefix2= argv[i+1];	
-        if(temp.compare("-Col1")==0)
-            istringstream(argv[i+1])>>col1;
-        if(temp.compare("-Col2")==0)
-            istringstream(argv[i+1])>>col2;
-        if(temp.compare("-Output")==0)
+        	if(temp.compare("-Col1")==0)
+        		istringstream(argv[i+1])>>col1;
+        	if(temp.compare("-Col2")==0)
+        		istringstream(argv[i+1])>>col2;
+        	if(temp.compare("-Output")==0)
 			outfileName = argv[i+1];	
-        if(temp.compare("-Algorithm")==0)
+        	if(temp.compare("-Algorithm")==0)
 			CompareType = argv[i+1];	
-        if(temp.compare("-Type")==0)
+        	if(temp.compare("-Type")==0)
 			type = argv[i+1];	
-        if(temp.compare("-GTFFile")==0)
+        	if(temp.compare("-GTFFile")==0)
 			gtfFileName = argv[i+1];	
-        if(temp.compare("-GeneIDType")==0)
+        	if(temp.compare("-GeneIDType")==0)
 			geneidtype = argv[i+1];	
 		if(temp.compare("-Xeno")==0)
 			Xeno=true;
+		if(temp.compare("-SearchRange")==0) 
+			istringstream(argv[i+1])>>SearchRange;
 	}
 
 	cout<<prefix1<<" rows: "<<row1<<" cols: "<<col1<<endl;
@@ -373,11 +378,14 @@ int main(int argc, char* argv[]) {
 					if(splitz.size() == 1) continue;
 					temp.chrom = splitz[0];
 					vector<string> splitz2 = split(splitz[1],'-');
-					istringstream(splitz2[0])>>temp.start;
-					istringstream(splitz2[1])>>temp.stop;
+					if(splitz2.size() > 1) {
+						istringstream(splitz2[0])>>temp.start;
+						istringstream(splitz2[1])>>temp.stop;
+					} else {
 					//cout<<temp.start<<'\t'<<temp.stop<<'\t'<<line<<endl;
-					//istringstream(splitz[1])>>temp.start;
-					//istringstream(splitz[2])>>temp.stop;
+						istringstream(splitz[1])>>temp.start;
+						istringstream(splitz[2])>>temp.stop;
+					}
 					AtacRegions.push_back(temp);
 				}
 				vector<vector<vector<string> > > AtacOverlaps;
@@ -391,6 +399,7 @@ int main(int argc, char* argv[]) {
 					vector<int> RNASizeRow;
 					for(int RnaCol = 0; RnaCol < col2; RnaCol++) {
 						//cout<<"RNA col: "<<RnaCol<<endl;
+				//		cout<<"Opening "<<prefix2+"_"+SSTR(RnaRow)+"_"+SSTR(RnaCol)+".unit"<<endl;
 						ifstream RnaUnit((prefix2+"_"+SSTR(RnaRow)+"_"+SSTR(RnaCol)+".unit").c_str());
 						//cout<<"Opened: "<<(prefix2+"_"+SSTR(RnaRow)+"_"+SSTR(RnaCol)+".unit")<<endl;
 						string line;
@@ -398,6 +407,7 @@ int main(int argc, char* argv[]) {
 						vector<string> genes2;
 						while(getline(RnaUnit, line)) {
 							vector<string> splitz=split(line,'\t');
+						//	cout<<splitz[0]<<endl;
 							//vector<string> splitz2 = split(splitz[0],'-');
 							genes.push_back(splitz[0]);
 							
@@ -406,7 +416,7 @@ int main(int argc, char* argv[]) {
 						//cout<<"Genes: "<<genes.size()<<endl;
 						if(regions.size() < row2 * col2) {
 							//cout<<"Getting Reg Regions"<<endl;
-							regions.push_back(GetRegRegions(TSSsites, genes, CompareType));
+							regions.push_back(GetRegRegions(TSSsites, genes, CompareType,SearchRange));
 							//cout<<"Gotten"<<endl;
 						}
 						vector<string> overlaps;
@@ -425,8 +435,12 @@ int main(int argc, char* argv[]) {
 										//int temp;
 										//cin>>temp;
 										//if(regions[RnaRow*col2+RnaCol][RNAs].gene.compare("ENSMUSG00000075370")==0) cout<<AtacRegions[Atacs].chrom+":"+SSTR(AtacRegions[Atacs].start)+"-"+SSTR(AtacRegions[Atacs].stop)<<'\t'<<regions[RnaRow*col2+RnaCol][RNAs].start<<'\t'<<regions[RnaRow*col2+RnaCol][RNAs].stop<<endl;
+										int midDist = abs((AtacRegions[Atacs].stop-AtacRegions[Atacs].start)-(regions[RnaRow*col2+RnaCol][RNAs].stop-regions[RnaRow*col2+RnaCol][RNAs].start));
 										overlaps.push_back(regions[RnaRow*col2+RnaCol][RNAs].gene);
+										//cout<<SSTR(midDist)<<endl;
 										genomicOverlaps.push_back(AtacRegions[Atacs].chrom+":"+SSTR(AtacRegions[Atacs].start)+"-"+SSTR(AtacRegions[Atacs].stop));
+										//genomicOverlaps.push_back(AtacRegions[Atacs].chrom+":"+SSTR(AtacRegions[Atacs].start)+"-"+SSTR(AtacRegions[Atacs].stop)+"="+SSTR(midDist));
+										//cout<<midDist<<endl;
 						//				cout<<regions[RnaRow*col2+RnaCol][RNAs].gene<<'\t'<<AtacRegions[Atacs].chrom<<'\t'<<AtacRegions[Atacs].start<<'\t'<<AtacRegions[Atacs].stop<<endl;
 									}
 									/*if(AtacRegions[Atacs].stop>=regions[RnaRow*col2+RnaCol][RNAs].stop && AtacRegions[Atacs].stop <= regions[RnaRow*col2+RnaCol][RNAs].stop) {

@@ -67,12 +67,13 @@ vector <vector<int> > merge(vector <vector<int> > lhs, vector<vector<int> > rhs)
 
 int main(int argc, char *argv[]) {
 	if(argc < 2) {
-        cout << "Usage: ./cluster -SOMFile <SOM File Location> -Clusters1 <Output file with clusters on SOM units> -Clusters2 <Output file with clusters on profiles> -NoNormalize" <<endl;
+        cout << "Usage: ./cluster -SOMFile <SOM File Location> -Clusters1 <Output file with clusters on SOM units> -Clusters2 <Output file with clusters on profiles> -NoNormalize -Col <Number of Cols in SOM" <<endl;
         return 0;
     }
 	string somFileName;
     string outFileName1;
     string outFileName2;
+	int cols=60;
 	bool Normalize = true;
 	for(int i = 0; i < argc; i++) {
         string temp = argv[i];
@@ -84,9 +85,11 @@ int main(int argc, char *argv[]) {
 			outFileName2=argv[i+1];
 		if(temp.compare("-NoNormalize")==0)
 			Normalize = false;
+		if(temp.compare("-Col")==0)
+			istringstream(argv[i+1])>>cols;
 	}
 	int numRows = 0;
-	int numCols = 0;
+	int numCols = cols;
 
 	cout<<"Opening SOM file"<<endl;
 	ifstream somFile(somFileName.c_str());
@@ -94,33 +97,29 @@ int main(int argc, char *argv[]) {
 	vector<vector<vector<double> > > inputMap;
 	int lastcol;
 	vector<vector<double> > temp;
+	int index = 0;
 	while(getline(somFile, line)) {
 		if(line[0] == '#') {
 			continue;
 		}
 		vector<string> splitz = split(line,'\t');
-		int row;
-		int col;
-		istringstream(splitz[0])>>row;
-		numRows = row+1;
-		istringstream(splitz[1])>>col;
-		if(lastcol > col) {
-			numCols = lastcol+1;
+		if(index >= cols) {
 			inputMap.push_back(temp);
 			temp.erase(temp.begin(),temp.end());
-			lastcol = col;
-		} else {
-			lastcol = col;
+			index=0;
+			numRows++;
 		}
 		vector<double> temp2;
-		for(int i = 2; i < splitz.size(); i++) {
+		for(int i = 0; i < splitz.size(); i++) {
 			double entry;
 			istringstream(splitz[i])>>entry;
 			temp2.push_back(entry);
 		}
 		temp.push_back(temp2);
+		index++;
 	}
 	inputMap.push_back(temp);
+	numRows++;
 	if(Normalize) {
 		cout<<"Normalizing"<<endl;
 		for(int i = 0; i < inputMap.size(); i++) {

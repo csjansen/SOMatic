@@ -450,7 +450,11 @@ int main(int argc, char* argv[]) {
 		ColsInEachCluster.push_back(tempCols);
 	}
 	for(int i = 0; i < kmeans1; i++) {
+		vector<string> GenesInEachCluster;
+        	vector<string> RowsInEachCluster;
+        	vector<string> ColsInEachCluster;
 		for(int k = 0; k < MetaClusters[i].size(); k++) {
+			cout<<"top of for"<<endl;
 			stringstream row;
 			row<<MetaClusters[i][k][0];
 			stringstream col;
@@ -459,27 +463,21 @@ int main(int argc, char* argv[]) {
 			ifstream UnitFile((UnitPrefix+"_"+row.str()+"_"+col.str()+".unit").c_str());
 			string line;
 			while(getline(UnitFile,line)) {
+				cout<<line<<endl;
 				vector<string> splitz2=split(line,'\t');
-				GenesInEachCluster[i].push_back(splitz2[0]);
-				RowsInEachCluster[i].push_back(row.str());
-				ColsInEachCluster[i].push_back(col.str());
-				int found = -1;
-				for(int j = 0; j < FullListOfGenes.size(); j++) {
-					if(FullListOfGenes[j].compare(splitz2[0])==0) {
-						found = j;
-						break;
-					}
+				if(splitz2.size() > 0) {
+					cout<<splitz2[0]<<endl;
+					GenesInEachCluster.push_back(splitz2[0]);
 				}
-				if(found == -1) {
-					FullListOfGenes.push_back(splitz2[0]);
-				}
+				RowsInEachCluster.push_back(row.str());
+				ColsInEachCluster.push_back(col.str());
 			}
 			UnitFile.close();
 		}
-		cout<<i<<'\t'<<GenesInEachCluster[i].size()<<endl;
+		cout<<i<<'\t'<<GenesInEachCluster.size()<<endl;
 		ofstream outfile2((outputprefix+"/Genes_"+SSTR(i)).c_str());
-	    for(int k = 0; k < GenesInEachCluster[i].size(); k++) {
-		    outfile2<<GenesInEachCluster[i][k]<<'\t'<<RowsInEachCluster[i][k]<<'\t'<<ColsInEachCluster[i][k]<<endl;
+	    	for(int k = 0; k < GenesInEachCluster.size(); k++) {
+		    outfile2<<GenesInEachCluster[k]<<'\t'<<RowsInEachCluster[k]<<'\t'<<ColsInEachCluster[k]<<endl;
 		}
 		outfile2.close();
 	}

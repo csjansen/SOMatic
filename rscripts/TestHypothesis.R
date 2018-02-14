@@ -31,19 +31,37 @@ samples <- read.delim(opt$SampleList, header=F, comment.char="#")
 #bsamples <- read.delim("/bio/csjansen/SOMatic/XenoRNAFusion.20x30.v10/data/Beta-catenin-Control7", header=F, comment.char="#")
 #OutputName <- "/pub/public-www/csjansen/xenoRNA.40x60.v1-Hypo.pdf"
 #clusternum <- 17-1
+Atac <- read.delim("/share/samdata/csjansen/SOMatic/statATAC.10x15.v1.som", header=F)
+Atac=Atac[-1,]
+MetaClusters <- read.delim("/share/samdata/csjansen/SOMatic/statATAC.10x15.v1/data/MetaClusters", header=F)
+MetaClusters = MetaClusters[-1,]
 OutputName <- opt$OutputName
 clusternum <- opt$ClusterNum-1
-
-LinkedReplicates = opt$LinkedReplicates
+SOMrows = 9
+SOMcols = 14
+rowcol=c()
+colcol=c()
+for(i in 0:SOMrows) {
+  for(j in 0:SOMcols) {
+    rowcol=c(rowcol,i)
+    colcol=c(colcol,j)
+  }
+}
+Atac = cbind(rowcol,colcol,Atac)
+colnames(Atac)=c('V1','V2','V1000','V10001',colnames(Atac[,5:ncol(Atac)]))
+#LinkedReplicates = opt$LinkedReplicates
 #rows <- 40
 #cols <- 60
 #clusters2<-clusters2[-1,]
-asamples=HypoFile[HypoFile[,2*(1)]==1,1]
-bsamples=HypoFile[HypoFile[,2*(1)+1]==1,1]
-for(i in 2:((ncol(HypoFile)-1)/2)) {
-  asamples = cbind.data.frame(asamples,HypoFile[HypoFile[,2*(i)]==1,1])
-  bsamples = cbind.data.frame(bsamples,HypoFile[HypoFile[,2*(i)+1]==1,1])
-}
+#asamples=HypoFile[HypoFile[,2*(1)]==1,1]
+#bsamples=HypoFile[HypoFile[,2*(1)+1]==1,1]
+#for(i in 2:((ncol(HypoFile)-1)/2)) {
+# asamples = cbind.data.frame(asamples,HypoFile[HypoFile[,2*(i)]==1,1])
+#  bsamples = cbind.data.frame(bsamples,HypoFile[HypoFile[,2*(i)+1]==1,1])
+#}
+asamples=names(tail(sort(col0h),30))
+bsamples=names(tail(sort(col24h),30))
+
 #print(ncol(HypoFile))
 if (!require("reshape2")) {
   install.packages("reshape2", dependencies = TRUE)
@@ -74,11 +92,11 @@ if (!require("plyr")) {
 alist=c()
 names=c()
 #print(bsamples)
-for(i in 1:ncol(asamples)) {
+#for(i in 1:10) {
 #i=121
 #print(ncol(asamples))
-  anums=match(asamples[,i],samples$V1)
-  bnums=match(bsamples[,i],samples$V1)
+  anums=match(asamples,samples$V1)
+  bnums=match(bsamples,samples$V1)
 #print(asamples)
   traitpvals=c()
   traitnegs=c()
@@ -86,10 +104,12 @@ for(i in 1:ncol(asamples)) {
     cluster = clusters2[clusters2$V3==j,]
     HeatAtac = join(cluster,Atac,by=c("V1","V2"))
   
-    HeatAtac2 = data.matrix(HeatAtac[,4:ncol(HeatAtac)])
+    HeatAtac2 = HeatAtac[,4:ncol(HeatAtac)]
 
-    as=exp(as.matrix(HeatAtac2[,anums]))-1
-    bs=exp(as.matrix(HeatAtac2[,bnums]))-1
+    #as=exp(as.matrix(HeatAtac2[,anums]))-1
+    as=as.matrix(HeatAtac2[,anums])
+    #bs=exp(as.matrix(HeatAtac2[,bnums]))-1
+    bs=as.matrix(HeatAtac2[,bnums])
     asubs=c()
     bsubs=c()
     csubs=c()
@@ -177,7 +197,7 @@ for(i in 1:ncol(asamples)) {
  #print(m)
 #write.table(traitpvals,file=paste0(),quote=FALSE,sep="\t",row.names=FALSE,col.names=FALSE) 
   alist=cbind(alist,traitpvals)
-}
+#}
 names=c()
 for(i in seq(2,ncol(HypoFile),2)) {
   names=c(names,colnames(HypoFile)[i])

@@ -390,6 +390,7 @@ int main(int argc, char* argv[]) {
 	int kmeans2;
 	string outputprefix;
 	string ConnectionsFileName;
+	bool Fuse=false;
     for(int i = 0; i < argc; i++) {
         string temp = argv[i];
         if(temp.compare("-FusionClusterFile")==0)
@@ -402,6 +403,8 @@ int main(int argc, char* argv[]) {
             istringstream(argv[i+1])>>kmeans2;
         if(temp.compare("-OutputPrefix")==0)
             outputprefix=argv[i+1];
+	if(temp.compare("-Fuse")==0)
+	    Fuse=true;
 	}
 	ifstream ClusterFile(clusterfile.c_str());
 	ifstream ConnectionsFile(ConnectionsFileName.c_str());
@@ -488,6 +491,7 @@ int main(int argc, char* argv[]) {
 	}
 	while(getline(ClusterFile,line)) {
 		vector<string> splitz = split(line,'\t');
+		//cout<<line<<endl;
 		if(splitz.size() < 5) {
 			cout<<splitz.size()<<endl;
 			cout<<line<<endl;
@@ -498,7 +502,8 @@ int main(int argc, char* argv[]) {
 		istringstream(splitz[4])>>ATACCluster;
 		istringstream(splitz[5])>>RNACluster;
 		string unit = splitz[0]+'\t'+splitz[1]+'\t'+splitz[2]+'\t'+splitz[3];
-		UnitsInEachCluster[ATACCluster][RNACluster].push_back(unit);	
+		//cout<<unit<<endl;	
+		UnitsInEachCluster[ATACCluster][RNACluster].push_back(unit);
 	}
 	cout<<"Genes"<<endl;
 	ofstream GeneTotalFile((outputprefix+"/GeneTotal.txt").c_str());
@@ -575,6 +580,31 @@ int main(int argc, char* argv[]) {
 			for(int k = 0; k < RegionsInEachCluster[i][j].size(); k++) {
 				vector<string> splitz = split(RegionsInEachCluster[i][j][k],':');
 				vector<string> splitz2 = split(splitz[1],'-');
+				if(Fuse)
+					for(int m = k+1; m < RegionsInEachCluster[i][j].size(); m++) {
+						vector<string> splitzcomp = split(RegionsInEachCluster[i][j][m],':');
+						vector<string> splitzcomp2 = split(splitzcomp[1],'-');
+						int start;
+						int end;
+						int compstart;
+						int compend;
+						istringstream(splitz2[0])>>start;
+						istringstream(splitz2[1])>>end;
+						istringstream(splitzcomp2[0])>>compstart;
+						istringstream(splitzcomp2[1])>>compend;
+						if(abs(start-compend)<=5 && splitz[0].compare(splitzcomp[0])==0) {
+							splitz2[0]=SSTR(compstart);
+							RegionsInEachCluster[i][j].erase(RegionsInEachCluster[i][j].begin()+m);
+							m=k;
+							continue;
+						}
+						if(abs(end-compstart)<=5 && splitz[0].compare(splitzcomp[0])==0) {
+							splitz2[1]=SSTR(compend);
+                                                        RegionsInEachCluster[i][j].erase(RegionsInEachCluster[i][j].begin()+m);
+                                                        m=k;
+                                                        continue;
+						}
+					}
 				outfile2<<splitz[0]<<'\t'<<splitz2[0]<<'\t'<<splitz2[1]<<endl;
 				for(int n = 0; n < regionToGene[RegionsInEachCluster[i][j][k]].size(); n++)
 				{

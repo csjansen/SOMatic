@@ -43,14 +43,14 @@ std::vector<std::string> split(const std::string &s, char delim) {
 
 int main(int argc, char* argv[]) {
 	if(argc < 2) {
-        cout << "Usage: ./mapsom -SampleList <Sample List File Location> -SOMFile <SOM File Location> -Prefix <Output Map File Prefix>" <<endl;
+        cout << "Usage: ./mapsom -SampleList <Sample List File Location> -SOMFile <SOM File Location> -Prefix <Output Map File Prefix> -col <Number of cols in SOM>" <<endl;
         return 0;
     }
 
 	string somFileName;
 	string labelfile;
 	string prefix;
-
+	int col=60;
 	for(int i = 0; i < argc; i++) {
         string temp = argv[i];
         if(temp.compare("-SampleList")==0)
@@ -59,6 +59,8 @@ int main(int argc, char* argv[]) {
             somFileName = argv[i+1];
 		if(temp.compare("-Prefix")==0)
             prefix = argv[i+1];
+		if(temp.compare("-col")==0)
+			istringstream(argv[i+1])>>col;
 	}
 
 
@@ -66,31 +68,28 @@ int main(int argc, char* argv[]) {
 	ifstream somFile(somFileName.c_str());
     string line;
     vector<vector<vector<double> > > inputMap;
-    int lastcol;
     vector<vector<double> > temp;
+    int index = 0;
     while(getline(somFile, line)) {
         if(line[0] == '#') {
             continue;
         }
         vector<string> splitz = split(line,'\t');
-        int row;
-        int col;
-        istringstream(splitz[0])>>row;
-        istringstream(splitz[1])>>col;
-        if(lastcol > col) {
+        //istringstream(splitz[0])>>row;
+        //istringstream(splitz[1])>>col;
+        if(index >= col) {
             inputMap.push_back(temp);
             temp.erase(temp.begin(),temp.end());
-            lastcol = col;
-        } else {
-            lastcol = col;
-        }
+            index = 0;
+        } 
         vector<double> temp2;
-        for(int i = 2; i < splitz.size(); i++) {
+        for(int i = 0; i < splitz.size(); i++) {
             double entry;
             istringstream(splitz[i])>>entry;
             temp2.push_back(entry);
         }
         temp.push_back(temp2);
+	index++;
     }
     inputMap.push_back(temp);
 	somFile.close();

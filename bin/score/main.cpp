@@ -123,7 +123,7 @@ vector<double> propagate(vector<double>* trainingVector, int numRows, int numCol
 
 int main(int argc, char *argv[]) {
 	if(argc < 2) {
-        cout << "Usage: ./scoresom -TrainingMatrix <Training Matrix File Location> -SOMFile <SOM File Location> -ScoreFile <Output Score File Location" <<endl;
+        cout << "Usage: ./scoresom -TrainingMatrix <Training Matrix File Location> -SOMFile <SOM File Location> -ScoreFile <Output Score File Location> -col <Number of Cols in SOM>" <<endl;
         return 0;
     }
 	string somFileName;
@@ -131,6 +131,7 @@ int main(int argc, char *argv[]) {
     string scoreFileName;
 	bool sparse = false;
 	bool sub1 = false;
+	int cols = 60;
 	for(int i = 0; i < argc; i++) {
         string temp = argv[i];
         if(temp.compare("-TrainingMatrix")==0)
@@ -143,9 +144,9 @@ int main(int argc, char *argv[]) {
 			sub1=true;
 		if(temp.compare("-Sparse")==0) 
 			sparse=true;
+		if(temp.compare("-col")==0)
+			istringstream(argv[i+1])>>cols;
 	}
-	int numRows = 0;
-	int numCols = 0;
 
 	cout<<"Opening SOM file"<<endl;
 	ifstream somFile(somFileName.c_str());
@@ -153,36 +154,42 @@ int main(int argc, char *argv[]) {
 	vector<vector<vector<double> > > inputMap;
 	int lastcol;
 	vector<vector<double> > temp;
+	int index = 0;
+	int numRows = 0;
 	while(getline(somFile, line)) {
+		//cout<<line<<endl;
 		if(line[0] == '#') {
 			continue;
 		}
 		vector<string> splitz = split(line,'\t');
-		int row;
-		int col;
-		istringstream(splitz[0])>>row;
-		numRows = row+1;
-		istringstream(splitz[1])>>col;
-		if(lastcol > col) {
-			numCols = lastcol+1;
+		if(index >= cols) {
+			cout<<temp.size()<<endl;
 			inputMap.push_back(temp);
 			temp.erase(temp.begin(),temp.end());
-			lastcol = col;
-		} else {
-			lastcol = col;
+			index=0;
+			numRows++;
+			cout<<cols<<'\t'<<numRows<<endl;
 		}
 		vector<double> temp2;
-		for(int i = 2; i < splitz.size(); i++) {
+		for(int i = 0; i < splitz.size(); i++) {
 			double entry;
 			istringstream(splitz[i])>>entry;
 			temp2.push_back(entry);
 		}
 		temp.push_back(temp2);
+		index++;
 	}
-	if(numCols==0) {
-		numCols = lastcol+1;
-	}
+	cout<<temp.size()<<endl;
 	inputMap.push_back(temp);
+	numRows++;
+	/*for(int i = 0; i < numRows; i++) {
+		for(int j = 0; j < cols; j++) {
+			for(int k = 0; k < inputMap[i][j].size(); k++) {
+				cout<<inputMap[i][j][k]<<endl;
+			}
+		}
+	}*/
+	cout<<numRows<<'\t'<<cols<<endl;
 	cout<<"Opening data file"<<endl;
 	int dimension = -1;
     map<string, vector<double> > dataMap;
@@ -218,7 +225,7 @@ int main(int argc, char *argv[]) {
     for(int row = 0; row < numRows; row ++) {
     	vector<vector<string > > temp2;
 		vector<vector<double > > temp3;
-        for(int col = 0; col < numCols; col++) {
+        for(int col = 0; col < cols; col++) {
         	vector<string> temp;
 			vector<double> temp4;
             temp2.push_back(temp);
@@ -247,8 +254,11 @@ int main(int argc, char *argv[]) {
         if(dataKeys[i].compare("chr16:16869268:16869375")==0) {
             print = true;
             cout<<"59305"<<endl;
-        }*/	
-    	vector<double> winunit = propagate(&(dataMap[dataKeys[i]]),numRows,numCols, &inputMap,sparse,print);
+        }*/
+	//cout<<dataKeys[i]<<endl;
+	//cout<<dataMap[dataKeys[i]].size()<<endl;	
+    	vector<double> winunit = propagate(&(dataMap[dataKeys[i]]),numRows,cols, &inputMap,sparse,print);
+	//cout<<(int)(winunit)[0]<<'\t'<<(int)(winunit)[1]<<endl;
     	winnerMap[(int)(winunit)[0]][(int)(winunit)[1]].push_back(dataKeys[i]);
 		if(sparse) 
 			winnerDist[(int)(winunit)[0]][(int)(winunit)[1]].push_back((winunit)[2]);
@@ -259,7 +269,7 @@ int main(int argc, char *argv[]) {
     //Count up score
     cout<<"Counting up score"<<endl;
     for(int row = 0; row < numRows; row++) {
-    	for(int col = 0; col < numCols; col++) {
+    	for(int col = 0; col < cols; col++) {
 			scoreFile<<"unit\t"<<row<<','<<col;
 			for(int i = 0; i < inputMap[row][col].size(); i++) {
 				scoreFile<<'\t'<<inputMap[row][col][i];
