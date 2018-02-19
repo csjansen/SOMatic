@@ -1,23 +1,23 @@
-library("optparse")
-option_list = list(
-  make_option(c("--HypoFile"),type="character",default=NULL,help="Hypo File Name",metavar="character"),
-  make_option(c("--MetaClusterFile"),type="character",default=NULL,help="Meta Cluster File from MetaClusters in SOMatic",metavar="character"),
-  make_option(c("--SOMFile"),type="character",default=NULL,help="SOM file from SOMatic",metavar="character"),
-  make_option(c("--ClusterNum"),type="integer",default=1,help="Number of Meta Clusters in Meta CLuster File",metavar="character"),
-  make_option(c("--SampleList"),type="character",default=NULL,help="SOM Sample List"),
-  make_option(c("--LinkedReplicates"),type="logical",default=FALSE,help="If Controls and Experiment reps are linked"),
-  make_option(c("--OutputName"),type="character",default="Hypo.pdf",help="Outfile File Name")
-);
-opt_parser = OptionParser(option_list=option_list);
-opt=parse_args(opt_parser);
-HypoFile = read.delim(opt$HypoFile,header=T,comment.char="#")
+#library("optparse")
+#option_list = list(
+#  make_option(c("--HypoFile"),type="character",default=NULL,help="Hypo File Name",metavar="character"),
+#  make_option(c("--MetaClusterFile"),type="character",default=NULL,help="Meta Cluster File from MetaClusters in SOMatic",metavar="character"),
+#  make_option(c("--SOMFile"),type="character",default=NULL,help="SOM file from SOMatic",metavar="character"),
+#  make_option(c("--ClusterNum"),type="integer",default=1,help="Number of Meta Clusters in Meta CLuster File",metavar="character"),
+#  make_option(c("--SampleList"),type="character",default=NULL,help="SOM Sample List"),
+#  make_option(c("--LinkedReplicates"),type="logical",default=FALSE,help="If Controls and Experiment reps are linked"),
+#  make_option(c("--OutputName"),type="character",default="Hypo.pdf",help="Outfile File Name")
+#);
+#opt_parser = OptionParser(option_list=option_list);
+#opt=parse_args(opt_parser);
+#HypoFile = read.delim(opt$HypoFile,header=T,comment.char="#")
 #clusters2<- read.delim("/bio/csjansen/SOM_Meta_Clusters/Xeno.v10.AIC.75.cluster", header=F)
 #clusters2<- read.delim("/bio/csjansen/SOM_Meta_Clusters/BennyRNAAIC4060.300.cluster", header=F)
 #clusters2<- read.delim("/bio/csjansen/SOMatic/xenoRNA.40x60.v1/data/MetaClusters", header=F)
 #clusters2<- read.delim("/bio/csjansen/SOMatic/FusionATAC.CosDist.40x60.v11/data/MetaClusters", header=F)
-Atac <- read.delim(opt$SOMFile,header=F,comment.char="#")
-clusters2 <- read.delim(opt$MetaClusterFile,header=F,comment.char="#")
-#Atac <- read.delim("/samlab/csjansen/SOMatic/XenoRNAFusion.20x30.v10.som", header=F, comment.char="#")
+#Atac <- read.delim(opt$SOMFile,header=F,comment.char="#")
+#clusters2 <- read.delim(opt$MetaClusterFile,header=F,comment.char="#")
+#Atac <- read.delim("/samlab/csjansen/SOMatic/statATAC.20x30.v3.som", header=F, comment.char="#")
 #Atac <- read.delim("/bio/zengw/SOM/SOMatic/Bcl11b_SOM_combat_Gata3KD_removed_log_scale_40by60.som", header=F, comment.char="#")
 #Atac <- read.delim("/bio/csjansen/SOMatic/FusionATAC.CosDist.40x60.v11.som", header=F, comment.char="#")
 #Atac <- read.delim("/bio/csjansen/SOMatic/xenoRNA.40x60.v1.som", header=F, comment.char="#")
@@ -25,22 +25,26 @@ clusters2 <- read.delim(opt$MetaClusterFile,header=F,comment.char="#")
 
 #samples <- read.delim("/bio/zengw/SOM/SOMatic/Bcl11b_SOM_combat_Gata3KD_removed_log_scale_40by60/data/sample.list", header=F, comment.char="#")
 #samples <- read.delim("/samlab/csjansen/SOMatic/FusionATAC.CosDist.40x60.v11/data/sample.list", header=F, comment.char="#")
-samples <- read.delim(opt$SampleList, header=F, comment.char="#")
-#samples <- read.delim("/bio/csjansen/SOMatic/xenoRNA.40x60.v1/data/sample.list", header=F, comment.char="#")
+#samples <- read.delim(opt$SampleList, header=F, comment.char="#")
+samples <- read.table("/bio/csjansen/SOMatic/statATAC.20x30.v3/data/sample.list", header=F, comment.char="#",stringsAsFactors=F)
 #asamples <- read.delim("/bio/csjansen/SOMatic/XenoRNAFusion.20x30.v10/data/Beta-catenin-Morphs7", header=F, comment.char="#")
 #bsamples <- read.delim("/bio/csjansen/SOMatic/XenoRNAFusion.20x30.v10/data/Beta-catenin-Control7", header=F, comment.char="#")
 #OutputName <- "/pub/public-www/csjansen/xenoRNA.40x60.v1-Hypo.pdf"
 #clusternum <- 17-1
-Atac <- read.delim("/share/samdata/csjansen/SOMatic/statATAC.10x15.v1.som", header=F)
-Atac=Atac[-1,]
-MetaClusters <- read.delim("/share/samdata/csjansen/SOMatic/statATAC.10x15.v1/data/MetaClusters", header=F)
+Atac <- read.table("/share/samdata/csjansen/SOMatic/statATAC.20x30.v3.som", header=F,stringsAsFactors=F)
+#Atac=Atac[-1,]
+MetaClusters <- read.delim("/share/samdata/csjansen/SOMatic/statATAC.20x30.v3/data/MetaClusters", header=F)
 MetaClusters = MetaClusters[-1,]
-OutputName <- opt$OutputName
-clusternum <- opt$ClusterNum-1
-SOMrows = 9
-SOMcols = 14
+clusters2=MetaClusters
+#OutputName <- opt$OutputName
+OutputName <- "/pub/public-www/csjansen/statATAC.20x30.v3-Hypo.pdf"
+#clusternum <- opt$ClusterNum-1
+clusternum =  102
+SOMrows = 19
+SOMcols = 29
 rowcol=c()
 colcol=c()
+Atac=data.matrix(Atac)
 for(i in 0:SOMrows) {
   for(j in 0:SOMcols) {
     rowcol=c(rowcol,i)
@@ -48,8 +52,13 @@ for(i in 0:SOMrows) {
   }
 }
 Atac = cbind(rowcol,colcol,Atac)
-colnames(Atac)=c('V1','V2','V1000','V10001',colnames(Atac[,5:ncol(Atac)]))
+colnames(Atac)=c('V1','V2',samples$V1)
+names0h = rownames(traits)[traits$X0h==1]
+names24h = rownames(traits)[traits$X24h==1]
+top200h=names(head(sort(colSums(Atac)[names0h],decreasing=TRUE), n = 20))
+top2024h=names(head(sort(colSums(Atac)[names24h],decreasing=TRUE), n = 20))
 #LinkedReplicates = opt$LinkedReplicates
+LinkedReplicates = F
 #rows <- 40
 #cols <- 60
 #clusters2<-clusters2[-1,]
@@ -59,8 +68,8 @@ colnames(Atac)=c('V1','V2','V1000','V10001',colnames(Atac[,5:ncol(Atac)]))
 # asamples = cbind.data.frame(asamples,HypoFile[HypoFile[,2*(i)]==1,1])
 #  bsamples = cbind.data.frame(bsamples,HypoFile[HypoFile[,2*(i)+1]==1,1])
 #}
-asamples=names(tail(sort(col0h),30))
-bsamples=names(tail(sort(col24h),30))
+asamples=top200h
+bsamples=top2024h
 
 #print(ncol(HypoFile))
 if (!require("reshape2")) {
@@ -102,7 +111,7 @@ names=c()
   traitnegs=c()
   for(j in 0:clusternum) {
     cluster = clusters2[clusters2$V3==j,]
-    HeatAtac = join(cluster,Atac,by=c("V1","V2"))
+    HeatAtac = join(cluster,as.data.frame(Atac),by=c("V1","V2"))
   
     HeatAtac2 = HeatAtac[,4:ncol(HeatAtac)]
 
@@ -198,10 +207,10 @@ names=c()
 #write.table(traitpvals,file=paste0(),quote=FALSE,sep="\t",row.names=FALSE,col.names=FALSE) 
   alist=cbind(alist,traitpvals)
 #}
-names=c()
-for(i in seq(2,ncol(HypoFile),2)) {
-  names=c(names,colnames(HypoFile)[i])
-}
+names=c("0hr vs 24hr")
+#for(i in seq(2,ncol(HypoFile),2)) {
+#  names=c(names,colnames(HypoFile)[i])
+#}
 colnames(alist)=names
 rownames(alist)=make.names(0:clusternum)
 #rownames(alist)=names
@@ -267,15 +276,15 @@ if(sum(ind)==0) {
   print(p1, matrix_vp, newpage=FALSE)
 
   dev.off()
-  colHC_data = dendro_data(as.dendrogram(colHC))
-  col_ggdendro = ggplot(segment(colHC_data))
-  col_ggdendro = col_ggdendro + geom_segment(aes(x=x, y=y, xend=xend, yend=yend))
-  p1 = p1 + theme(axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
-  col_ggdendro = col_ggdendro + scale_x_continuous(expand=c(0,0), labels=col_labels, limits=col_limits) 
-  col_ggdendro = col_ggdendro + scale_y_continuous(expand=c(0,0), labels=NULL)
-  col_ggdendro = col_ggdendro + theme(plot.margin=unit(c(0.10, 0.00, 0.00, 0.01), "inch"))
-  col_ggdendro = col_ggdendro + theme_dendro()
-  col_ggdendro = col_ggdendro + labs(x=NULL, y=NULL)
-  pdf("ColDendro.pdf",h=5,w=8)
+  #colHC_data = dendro_data(as.dendrogram(colHC))
+  #col_ggdendro = ggplot(segment(colHC_data))
+  #col_ggdendro = col_ggdendro + geom_segment(aes(x=x, y=y, xend=xend, yend=yend))
+  #p1 = p1 + theme(axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
+  #col_ggdendro = col_ggdendro + scale_x_continuous(expand=c(0,0), labels=col_labels, limits=col_limits) 
+  #col_ggdendro = col_ggdendro + scale_y_continuous(expand=c(0,0), labels=NULL)
+  #col_ggdendro = col_ggdendro + theme(plot.margin=unit(c(0.10, 0.00, 0.00, 0.01), "inch"))
+  #col_ggdendro = col_ggdendro + theme_dendro()
+  #col_ggdendro = col_ggdendro + labs(x=NULL, y=NULL)
+  #pdf("ColDendro.pdf",h=5,w=8)
   
 }

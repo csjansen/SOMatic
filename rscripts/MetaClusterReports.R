@@ -58,21 +58,22 @@ if (!require("plyr")) {
   library(plyr)
 }
 clusters2$V1=as.numeric(clusters2$V1)
-rows = max(clusters2$V1)
-print(rows)
-cols = max(clusters2$V2)
-print(cols)
-rowcol = c()
-colcol = c()
-for(i in 0:rows) {
-	for(j in 0:cols) {
-		rowcol = c(rowcol, i)
-		colcol = c(colcol, j)
-	}
-}
+#rows = max(clusters2$V1)
+#print(rows)
+#cols = max(clusters2$V2)
+#print(cols)
+#rowcol = c()
+#colcol = c()
+#for(i in 0:rows) {
+#	for(j in 0:cols) {
+#		rowcol = c(rowcol, i)
+#		colcol = c(colcol, j)
+#	}
+#}
 #print(rowcol)
-Atac = cbind(rowcol,colcol,Atac)
+#Atac = cbind(rowcol,colcol,Atac)
 colnames(Atac)=c("V1","V2",t(samples))
+
 #print(Atac)
 blueColor=rgb(75,75,200,maxColorValue=255,alpha=255)
 blackColor=rgb(0,0,70,maxColorValue=255,alpha=255)
