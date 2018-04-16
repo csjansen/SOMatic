@@ -349,11 +349,73 @@ int main(int argc, char* argv[]) {
 
 	cout<<prefix1<<" rows: "<<row1<<" cols: "<<col1<<endl;
 	cout<<prefix2<<" rows: "<<row2<<" cols: "<<col2<<endl;
+	ofstream outfile(outfileName.c_str());
+	if(type.compare("RNAxRNA")==0) {
+		cout<<"RNAxRNA"<<endl;
+		vector<vector<vector<vector<string> > > > RNAOverlaps;
+		vector<vector<vector<string> > > genes1;
+		for(int RNARow1 = 0; RNARow1 < row1; RNARow1++) {
+			vector<vector<string> > geneRow;
+			for(int RNACol1 = 0; RNACol1 < col1; RNACol1++) {
+				ifstream RNAUnit1((prefix1+"_"+SSTR(RNARow1)+"_"+SSTR(RNACol1)+".unit").c_str());
+				string line;
+				vector<string> geneCol;
+				while(getline(RNAUnit1,line)) {
+					vector<string> splitz = split(line,'\t');
+					geneCol.push_back(splitz[0]);
+				}
+				RNAUnit1.close();
+				geneRow.push_back(geneCol);
+			}
+			genes1.push_back(geneRow);
+		}
+		vector<vector<vector<string> > > genes2;
+                for(int RNARow2 = 0; RNARow2 < row2; RNARow2++) {
+                        vector<vector<string> > geneRow;
+                        for(int RNACol2 = 0; RNACol2 < col2; RNACol2++) {
+                                ifstream RNAUnit2((prefix2+"_"+SSTR(RNARow2)+"_"+SSTR(RNACol2)+".unit").c_str());
+                                string line;
+                                vector<string> geneCol;
+                                while(getline(RNAUnit2,line)) {
+                                        vector<string> splitz = split(line,'\t');
+                                        geneCol.push_back(splitz[0]);
+                                }
+                                RNAUnit2.close();
+                                geneRow.push_back(geneCol);
+                        }
+                        genes2.push_back(geneRow);
+                }
+
+		for(int RNARow1 = 0; RNARow1 < row1; RNARow1++) {
+			for(int RNACol1 = 0; RNACol1 < col1; RNACol1++) {
+				outfile<<RNARow1<<'\t'<<RNACol1;
+				for(int RNARow2 = 0; RNARow2 < row2; RNARow2++) {
+					for(int RNACol2 = 0; RNACol2 < col2; RNACol2++) {
+						vector<string> matches;
+						for(int i = 0; i < genes1[RNARow1][RNACol1].size(); i++) {
+							for(int j = 0; j < genes2[RNARow2][RNACol2].size(); j++) {
+								if(genes1[RNARow1][RNACol1][i].compare(genes2[RNARow2][RNACol2][j])==0) {
+									matches.push_back(genes1[RNARow1][RNACol1][i]);
+								}
+							}
+						}	
+						if(matches.size() >0) {
+							outfile<<'\t'<<RNARow2<<'\t'<<RNACol2<<'\t'<<matches.size();
+							for(int i = 0; i < matches.size(); i++) {
+								outfile<<'\t'<<matches[i]<<'\t'<<matches[i];
+							}
+						}
+					}
+				}
+				outfile<<endl;
+			}
+		}
+		outfile.close();
+	}
 	if(type.compare("ATACxRNA")==0) {
 		cout<<"ATACxRNA"<<endl;
 		cout<<gtfFileName<<endl;
 		map<string, TSSsite>* TSSsites = parseGtfFile(gtfFileName, geneidtype,Xeno);
-		ofstream outfile(outfileName.c_str());
 		vector<vector<int> > AtacSizes;
 		vector<vector<int> > RNASizes;
 		vector<vector<genomicRegion> > regions;
@@ -431,22 +493,10 @@ int main(int argc, char* argv[]) {
 								//cin>>temp;
 								if(AtacRegions[Atacs].chrom.compare(regions[RnaRow*col2+RnaCol][RNAs].chrom)==0) {
 									if((AtacRegions[Atacs].start>=regions[RnaRow*col2+RnaCol][RNAs].start && AtacRegions[Atacs].start<=regions[RnaRow*col2+RnaCol][RNAs].stop)||(AtacRegions[Atacs].start>=regions[RnaRow*col2+RnaCol][RNAs].stop && AtacRegions[Atacs].stop <= regions[RnaRow*col2+RnaCol][RNAs].stop)||(AtacRegions[Atacs].start<=regions[RnaRow*col2+RnaCol][RNAs].start && AtacRegions[Atacs].stop >= regions[RnaRow*col2+RnaCol][RNAs].stop)) {
-										//cout<<regions[RnaRow*col2+RnaCol][RNAs].gene<<endl;
-										//int temp;
-										//cin>>temp;
-										//if(regions[RnaRow*col2+RnaCol][RNAs].gene.compare("ENSMUSG00000075370")==0) cout<<AtacRegions[Atacs].chrom+":"+SSTR(AtacRegions[Atacs].start)+"-"+SSTR(AtacRegions[Atacs].stop)<<'\t'<<regions[RnaRow*col2+RnaCol][RNAs].start<<'\t'<<regions[RnaRow*col2+RnaCol][RNAs].stop<<endl;
 										int midDist = abs((AtacRegions[Atacs].stop-AtacRegions[Atacs].start)-(regions[RnaRow*col2+RnaCol][RNAs].stop-regions[RnaRow*col2+RnaCol][RNAs].start));
 										overlaps.push_back(regions[RnaRow*col2+RnaCol][RNAs].gene);
-										//cout<<SSTR(midDist)<<endl;
 										genomicOverlaps.push_back(AtacRegions[Atacs].chrom+":"+SSTR(AtacRegions[Atacs].start)+"-"+SSTR(AtacRegions[Atacs].stop));
-										//genomicOverlaps.push_back(AtacRegions[Atacs].chrom+":"+SSTR(AtacRegions[Atacs].start)+"-"+SSTR(AtacRegions[Atacs].stop)+"="+SSTR(midDist));
-										//cout<<midDist<<endl;
-						//				cout<<regions[RnaRow*col2+RnaCol][RNAs].gene<<'\t'<<AtacRegions[Atacs].chrom<<'\t'<<AtacRegions[Atacs].start<<'\t'<<AtacRegions[Atacs].stop<<endl;
 									}
-									/*if(AtacRegions[Atacs].stop>=regions[RnaRow*col2+RnaCol][RNAs].stop && AtacRegions[Atacs].stop <= regions[RnaRow*col2+RnaCol][RNAs].stop) {
-										overlaps.push_back(regions[RnaRow*col2+RnaCol][RNAs].gene);
-										continue;
-									}*/
 								}
 							}
 						}
@@ -484,13 +534,6 @@ int main(int argc, char* argv[]) {
 				TotalAtacRegions.push_back(AtacRegions);
 			}
 		}
-/*		for(int num = 0; num < TotalAtacOverlaps[6*col1+24].size(); num++) {
-			for(int num2=0; num2<TotalAtacOverlaps[6*col1+24][num].size(); num2++) {
-				for(int num3=0; num3<TotalAtacOverlaps[6*col1+24][num][num2].size(); num3++) {
-					cout<<num<<'\t'<<num2<<'\t'<<num3<<'\t'<<TotalAtacOverlaps[6*col1+24][num][num2][num3]<<'\t'<<TotalRnaOverlaps[6*col1+24][num][num2][num3]<<endl;//<<'\t'<<TotalAtacRegions[6*col1+24][num][num2][num3]<<endl;
-				}
-			}
-		}*/
 		for(int AtacRow = 0; AtacRow < row1; AtacRow++) {
             for(int AtacCol = 0; AtacCol < col1; AtacCol++) {
 				outfile<<AtacRow<<'\t'<<AtacCol;
@@ -498,13 +541,7 @@ int main(int argc, char* argv[]) {
 				int totalamount=0;
                 for(int AtacOverRows = 0; AtacOverRows<TotalAtacOverlaps[AtacRow*col1+AtacCol].size(); AtacOverRows++)
                     for(int AtacOverCols = 0; AtacOverCols<TotalAtacOverlaps[AtacRow*col1+AtacCol][AtacOverRows].size(); AtacOverCols++) {
-                        //if(TotalAtacOverlaps[AtacRow*row1+AtacCol][AtacOverRows][AtacOverCols].size()>1) {
-                        //    outfile<<'\t'<<AtacOverRows<<'\t'<<AtacOverCols<<'\t'<<TotalAtacOverlaps[AtacRow*row1+AtacCol][AtacOverRows][AtacOverCols].size();
-                        //    for(int genes = 0; genes < TotalAtacOverlaps[AtacRow*row1+AtacCol][AtacOverRows][AtacOverCols].size(); genes++) {
-                        //        outfile<<'\t'<<TotalRnaOverlaps[AtacRow*row1+AtacCol][AtacOverRows][AtacOverCols][genes]<<'\t'<<TotalAtacOverlaps[AtacRow*row1+AtacCol][AtacOverRows][AtacOverCols][genes];
-                        //    }
-                        //} else 
-							if (TotalAtacOverlaps[AtacRow*col1+AtacCol][AtacOverRows][AtacOverCols].size()>0) {
+			if (TotalAtacOverlaps[AtacRow*col1+AtacCol][AtacOverRows][AtacOverCols].size()>0) {
 							vector<double> input;
 							input.push_back(AtacRow);
 							input.push_back(AtacCol);

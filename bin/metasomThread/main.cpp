@@ -571,8 +571,9 @@ int main(int argc, char* argv[]) {
     	}
     //
 	
-	vector<vector<vector<int> > > Indexes;
-	vector<vector<double> > Scores;
+	vector<vector<int> > Indexes;
+	vector<int> bestClusters;
+	vector<double> bestScores;
 	for(int i = kmeans1; i <= kmeans2; i++) {
 		vector<thread> threads;
 		cout<<"Cluster Num: "<<i<<endl;
@@ -584,19 +585,25 @@ int main(int argc, char* argv[]) {
 			vector<int> temp;
 			IndexRow.push_back(temp);
 		}
-		Scores.push_back(ScoreRow);
-		Indexes.push_back(IndexRow);
 		int count = 0;
 		cout<<"Pushing threads"<<endl;
 		for(int j = 0; j < numberOfTrials; j++) {
-			threads.push_back(thread(ClusterAndScore,&allpoints, &Som1, dimensionality, i, Sparse, &(Indexes[i-kmeans1][j]), &(Scores[i-kmeans1][j]), row1, col1,j));
+			threads.push_back(thread(ClusterAndScore,&allpoints, &Som1, dimensionality, i, Sparse, &(IndexRow[j]), &(ScoreRow[j]), row1, col1,j));
 		}
 		for (auto& th : threads) th.join();
+		double minScore = -999;
+                int bestTrial = -1;
+                for(int j = 0; j < ScoreRow.size(); j++) {
+                        if(ScoreRow[j]<minScore || bestTrial == -1) {
+                                minScore = ScoreRow[j];
+                                bestTrial = j;
+                        }
+                }
+                bestScores.push_back(minScore);
+		Indexes.push_back(IndexRow[bestTrial]);
 	}
 
-	vector<int> bestClusters;
-	vector<double> bestScores;
-	for(int i = 0; i < Scores.size(); i++) {
+	/*for(int i = 0; i < Scores.size(); i++) {
 		double minScore = -999;
 		int bestTrial = -1;
 		for(int j = 0; j < Scores[i].size(); j++) {
@@ -607,19 +614,19 @@ int main(int argc, char* argv[]) {
 		}
 		bestClusters.push_back(bestTrial);
 		bestScores.push_back(minScore);
-	}
+	}*/
 	double minScore = -999;
 	int bestClusterNum = -1;
-	for(int i = 0; i < Scores.size(); i++) {
-		if(Scores[i][bestClusters[i]] < minScore || bestClusterNum==-1) {
-			minScore = Scores[i][bestClusters[i]];
+	for(int i = 0; i < bestScores.size(); i++) {
+		if(bestScores[i] < minScore || bestClusterNum==-1) {
+			minScore = bestScores[i];
 			bestClusterNum = i;
 		}
 	}
 	
 	ofstream outfile2(BestClusterName.c_str());
 	outfile2<<"# Cluster Number: "<<bestClusterNum+kmeans1<<endl;
-	vector<int> BestIndex = Indexes[bestClusterNum][bestClusters[bestClusterNum]];
+	vector<int> BestIndex = Indexes[bestClusterNum];
 	for(int j = 0; j < BestIndex.size(); j++) {
 		outfile2<<(int)j/col1<<'\t'<<j%col1<<'\t'<<BestIndex[j]<<endl;
 	}		

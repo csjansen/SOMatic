@@ -579,6 +579,7 @@ int main(int argc, char* argv[]) {
 				GeneTotalFile<<'\t'<<GenesInEachCluster[i][j].size();
 			for(int k = 0; k < RegionsInEachCluster[i][j].size(); k++) {
 				vector<string> splitz = split(RegionsInEachCluster[i][j][k],':');
+				if(splitz.size() < 2) continue;
 				vector<string> splitz2 = split(splitz[1],'-');
 				if(Fuse)
 					for(int m = k+1; m < RegionsInEachCluster[i][j].size(); m++) {

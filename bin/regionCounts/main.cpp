@@ -259,7 +259,7 @@ int main(int argc, char *argv[]) {
 		totalRegions.push_back(0);
 		threads.push_back(thread(regionCount, &allPartData, line1, &regionCounts, count, &chrList,&totalRegions));
 		count++;
-		if(count%50==0) {
+		if(count%10==0) {
 			for (auto& th : threads) th.join();
 			threads.clear();
 		}

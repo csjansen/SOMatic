@@ -95,10 +95,13 @@ int main(int argc, char* argv[]) {
 	
 	for(int i = 0; i < AverageMap1.size(); i++) {
         for(int j = 0; j < AverageMap1[i].size(); j++) {
+			//double outputNum = (AverageMap1[i][j]-AverageMap2[i][j]);
+			double outputNum;
+			outputNum = log((AverageMap1[i][j]+.01)/(AverageMap2[i][j]+.01))/log(2);
 			if(j==0) {
-				output<<(AverageMap1[i][j]-AverageMap2[i][j]);
+				output<<outputNum;
 			} else {
-				output<<'\t'<<(AverageMap1[i][j]-AverageMap2[i][j]);
+				output<<'\t'<<outputNum;
 			}
 		}
 		output<<endl;

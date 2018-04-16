@@ -58,20 +58,20 @@ if (!require("plyr")) {
   library(plyr)
 }
 clusters2$V1=as.numeric(clusters2$V1)
-#rows = max(clusters2$V1)
-#print(rows)
-#cols = max(clusters2$V2)
-#print(cols)
-#rowcol = c()
-#colcol = c()
-#for(i in 0:rows) {
-#	for(j in 0:cols) {
-#		rowcol = c(rowcol, i)
-#		colcol = c(colcol, j)
-#	}
-#}
+rows = max(clusters2$V1)
+print(rows)
+cols = max(clusters2$V2)
+print(cols)
+rowcol = c()
+colcol = c()
+for(i in 0:rows) {
+	for(j in 0:cols) {
+		rowcol = c(rowcol, i)
+		colcol = c(colcol, j)
+	}
+}
 #print(rowcol)
-#Atac = cbind(rowcol,colcol,Atac)
+Atac = cbind(rowcol,colcol,Atac)
 colnames(Atac)=c("V1","V2",t(samples))
 
 #print(Atac)
@@ -89,7 +89,6 @@ for(i in 0:clusternum) {
   #print(Atac$V1)
   #print(Atac$V2)
  # print(HeatAtac)
-  readline(prompt="Press [enter] to continue")
   HeatAtac = data.matrix(HeatAtac[,4:ncol(HeatAtac)])
   Maxsig=max(c(Maxsig,max(HeatAtac)))
   HeatAtac2 = colSums(HeatAtac)/nrow(HeatAtac)
@@ -98,12 +97,16 @@ for(i in 0:clusternum) {
 write.table(HeatAtac3, file=opt$OutputHeatmap,sep="\t",col.names=FALSE,quote=FALSE,row.names=FALSE)
 dist = "euclidean"
 hclust = "complete"
+print(HeatAtac3)
 df2 = melt(as.matrix(HeatAtac3))
 
 colDist = dist(t(HeatAtac3))
 
 colHC = hclust(colDist, method=hclust)
 write.table(colHC$order, file=paste0(opt$OutputHeatmap,"Order"),sep="\t",col.names=FALSE,quote=FALSE,row.names=FALSE)
+rowDist = dist(HeatAtac3)
+rowHC = hclust(rowDist, method=hclust)
+write.table(rowHC$order, file=paste0(opt$OutputHeatmap,"RowOrder"),sep="\t",col.names=FALSE,quote=FALSE,row.names=FALSE)
 base_size = 8
 Minsig = 0
 for(i in 0:clusternum) {
