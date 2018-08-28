@@ -95,6 +95,7 @@ blueColor=rgb(75,75,200,maxColorValue=255,alpha=255)
 blackColor=rgb(0,0,70,maxColorValue=255,alpha=255)
 yellowColor=rgb(200,200,20,maxColorValue=255,alpha=255)
 matrix_palette <- colorRampPalette(c("blue3", "cyan", "yellow2","red3"))(n = 299)
+matrix_palette3 <- colorRampPalette(c("lightblue","cyan", "yellow2","orange3"))(n = 299)
 matrix_palette2 <- colorRampPalette(c("white","green"))(n = 299)
 
 HeatAtac3=c()
@@ -221,6 +222,7 @@ if(dorows) {
 #colCut = cutreeDynamicTree(colHC, minModuleSize=2)#,maxTreeHeight=1)
 n=length(colHC$height)
 colCut = cutree(colHC,h=max(colHC$height)*.4)
+typeBar$V1=max(typeBar$V1)-typeBar$V1
 colMat = t(rbind(seq(from=1,to=length(colCut)),t(typeBar$V1[colHC$order]),colCut[colHC$order],rep(1.5,length(colCut)),colSignal[colHC$order]))
 colnames(colMat)=c("Number","Type","Cut","Y","Signal")
 p2 = ggplot(data.frame(colMat), aes(x=Number,y=Y))
@@ -228,7 +230,7 @@ p2 = p2 + geom_tile(aes(fill=Cut))
 p2 = p2 + theme(axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
 p2 = p2 + scale_x_discrete(expand=c(0,0), limits=col_limits, labels=NULL)
 p2 = p2 + scale_y_discrete(expand=c(0,0), limits=c(1,1), labels=NULL)
-p2 = p2 + scale_fill_gradientn(colours=matrix_palette)
+p2 = p2 + scale_fill_gradientn(colours=matrix_palette3)
 #p1 = p1 + scale_fill_gradientn(colours=matrix_palette)
 p2 = p2 + theme(plot.margin=unit(c(0.00, 0.00, 0.00, 0.00),"inch"),axis.ticks=element_blank())
 p2 = p2 + labs(x=NULL, y=NULL)
@@ -335,10 +337,13 @@ grow_labels_inches = 1.5#1.5*max(strwidth(grow_labels, units="in", cex=base_size
 #genebox_legend = g_legend(p1)
 #genebox = genebox + theme(legend.position = "none")
 #genebox = genebox + theme()
+library(scales)
+dfbox$value=dfbox$value-mean(dfbox$value)
 box=ggplot(dfbox, aes(x=Var1, y=value))
 box = box + geom_bar(stat="identity")
 box=box+theme(axis.text.x = element_blank())
 box = box + scale_x_discrete(expand=c(0,0), limits=col_limits, labels=col_labels)
+box = box + scale_y_continuous(limits=c(-.75,.75),oob=rescale_none)
 #box = box + scale_fill_gradientn(colours=matrix_palette, limits=matrix_fill_limits)
 box = box + theme(plot.margin=unit(c(0.00, 0.00, 0.00, 0.00),"inch"))
 box = box + labs(x=NULL, y=NULL)
@@ -376,7 +381,7 @@ matrix_box = viewport(
 )
 ColSides = list(); ColSide_legends = list()
 RowSides = list(); RowSide_legends = list()
-matrix_vp_y = max(0, as.numeric(strwidth(rowSide_by, "in")) - col_labels_inches)+matrix_box_h+matrix_box_y
+matrix_vp_y = max(0, as.numeric(strwidth(rowSide_by, "in")) - col_labels_inches)+matrix_box_h+matrix_box_y+2
 #matrix_vp_x = max(0, as.numeric(strwidth(colSide_by, "in")) - row_labels_inches)
 matrix_vp_x = matrix_genes_x+grow_labels_inches-row_labels_inches
 #matrix_vp_h =0

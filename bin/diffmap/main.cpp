@@ -28,6 +28,8 @@ int main(int argc, char* argv[]) {
 	cout<<argv[2]<<endl;
 	ifstream secondmaps(argv[2]);
 	ofstream output(argv[3]);
+	int Log;
+	istringstream(argv[4])>>Log;
 	string line;
 	vector<string> firstMapFileNames;
 	vector<string> secondMapFileNames;
@@ -95,8 +97,10 @@ int main(int argc, char* argv[]) {
 	
 	for(int i = 0; i < AverageMap1.size(); i++) {
         for(int j = 0; j < AverageMap1[i].size(); j++) {
-			//double outputNum = (AverageMap1[i][j]-AverageMap2[i][j]);
-			double outputNum;
+		double outputNum;
+		if (Log == 0) 
+			outputNum = (AverageMap1[i][j]-AverageMap2[i][j]);
+		else
 			outputNum = log((AverageMap1[i][j]+.01)/(AverageMap2[i][j]+.01))/log(2);
 			if(j==0) {
 				output<<outputNum;
