@@ -1,7 +1,12 @@
 
-FILES = convertEnsemblIDs genes GO map score train units cluster estimateSize metasom metasomgene Fusion FusionCluster FusionBreakup cutree trainQuick metasomThread
+FILES = cluster cutree diffmap genes GO map partition regionCounts score train trainQuick trainThread units 
 
 build:
 	for dir in $(FILES); do \
 		$(MAKE) -C $$dir; \
 	done
+clean:
+	for dir in $(FILES); do \
+                $(MAKE) -C $$dir clean; \
+        done
+

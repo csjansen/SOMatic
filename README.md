@@ -17,6 +17,22 @@ If this doesn't work, be sure your g++ version is >2.8.2
 
 `gcc -version`
 
+## Tutorial: Using example data
+
+### unzip example data
+
+From base SOMatic folder:
+
+`cd examples`
+
+`tar -zxf *.tgz`
+
+`cd ../scripts`
+
+`./buildSite.sh -SOMName Example -Matrix ../examples/example.matrix -Rows 20 -Cols 30 -SampleList ../examples/sample.list -Timesteps 1000000 -Trials 5`
+
+`cp ../Example (webserver location)`
+
 ## Tutorial: RNA-seq data after RSEM quantification
 
 ### Prior Requirements
