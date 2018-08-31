@@ -1,5 +1,5 @@
 
-FILES = cluster cutree diffmap genes GO map partition regionCounts score train trainQuick trainThread units 
+FILES = cluster cutree diffmap genes GO map partition regionCounts score trainQuick trainThread units 
 
 build:
 	for dir in $(FILES); do \

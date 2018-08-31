@@ -202,10 +202,11 @@ int main(int argc, char *argv[]) {
 		cout << "-Rows: Number of rows for your SOM. <20>"<<endl;
 		cout << "-Cols: Number of columns for your SOM. <30>"<<endl;
 		cout << "-Trials: Number of trials run for your SOM. The package will choose the best SOM after all trials.  <3>"<<endl;
-		cout << "-Timesteps: Number of timesteps for each trial. <3000000>"<<endl;
+		cout << "-Timesteps: Number of timesteps for each trial. <100>"<<endl;
 		cout << "-Topology: Topology for your SOM. (Only toroid currently supported) <toroid>"<<endl;
 		cout << "-Seed: Set seed for random initialization."<<endl;
 		cout << "-LearningRate: Set Learning Rate <.2>"<<endl; 
+		cout << "-Log2: Log2(x+1) correct training data"<<endl; 
 		return 0;
 	}
 	double bestScore = -1;
@@ -214,12 +215,13 @@ int main(int argc, char *argv[]) {
 	string trainingFileName;
 	string somFile="out.som";
 	int trials=3;
-	int timesteps=3000000;
+	int epochs = 100;
 	string topology="toroid";
 	int seed=-1;
 	bool sparse=false;
 	bool sub1=false;
 	float learningRate = 0.2;
+	bool Log2=false;
 	for(int i = 0; i < argc; i++) {
 		string temp = argv[i];
 		if(temp.compare("-Rows")==0) 
@@ -233,7 +235,7 @@ int main(int argc, char *argv[]) {
 		if(temp.compare("-Trials")==0)
 			istringstream(argv[i+1])>>trials;
 		if(temp.compare("-Timesteps")==0)
-			istringstream(argv[i+1])>>timesteps;
+			istringstream(argv[i+1])>>epochs;
 		if(temp.compare("-Topology")==0)
 			topology=argv[i+1];
 		if(temp.compare("-Seed")==0)
@@ -242,6 +244,8 @@ int main(int argc, char *argv[]) {
 			sparse=true;
 		if(temp.compare("-LearningRate")==0)
 			istringstream(argv[i+1])>>learningRate;
+		if(temp.compare("-Log2")==0)
+			Log2=true;
 	}
 	int dimension = -1;
 	string line;
@@ -260,6 +264,7 @@ int main(int argc, char *argv[]) {
 		linesTraining++;
 	}
 	trainingFile.close();
+	int timesteps = epochs*(linesTraining/2);
 	cout<<"Training Matrix lines: "<<linesTraining<<endl;
 	cout<<"Building data structures"<<endl;
 	double** dataMap=0;
@@ -279,6 +284,8 @@ int main(int argc, char *argv[]) {
 		vector<string> fields = split(line, '\t');
 		for(int i = 1; i < fields.size(); i++) {
 			istringstream(fields[i])>>dataMap[lineCount][i-1];
+			if(Log2)
+				dataMap[lineCount][i-1]=log2(dataMap[lineCount][i-1]+1);
 		}
 		dataKeys[lineCount]=fields[0];
 		dataOrder[lineCount]=lineCount;
@@ -324,7 +331,7 @@ int main(int argc, char *argv[]) {
 			 std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 		for(int j = 0; j < timesteps; j++) {
 //			cout<<j<<endl;
-			int trainingNum = dataOrder[j%linesTraining];
+			int trainingNum = dataOrder[j%((int)(linesTraining/2))];
 			string trainingID = dataKeys[trainingNum];
 			double trainingVector[colsTraining];
 			for(int k = 0; k < colsTraining; k++) {
@@ -484,7 +491,7 @@ int main(int argc, char *argv[]) {
                 outfile<<"# "<<numRows<<" rows\t"<<numCols<<" cols\t"<<colsTraining<<" dimensions\ttoroid topology"<<endl;
                 for(int row = 0; row < numRows; row++) {
                 	for(int col = 0; col <numCols; col++) {
-                    	outfile<<row<<'\t'<<col<<'\t';
+//                    	outfile<<row<<'\t'<<col<<'\t';
                         for(int k = 0; k < colsTraining; k++) {
                         	outfile.precision(5);
                             outfile<<fixed<<trainingMap[row][col][k];

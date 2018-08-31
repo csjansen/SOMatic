@@ -41,15 +41,12 @@ int main(int argc, char *argv[]) {
     if(argc < 2) {
         cout << "Usage: ./partition [options] -PeakDataFile <peak file list location> -Output <output file location>" <<endl;
         cout << "Options: <default>" <<endl;
-        cout << "-MergeRegion: Regions this close together will be merged <0>"<<endl;
-        cout << "-MinFeature: Size of smallest partition. <25>"<<endl;
-        cout << "-IgnoreRandom: Ignores random chromosomes.  <Off> [Off, On]"<<endl;
-        cout << "-PadRegion: Pads regions to this minimum size. <0>"<<endl;
+        cout << "-MinFeature: Size of smallest partition. <200>"<<endl;
 
 		return 0;
     }
     int mergeRegion=0;
-    int minFeature=25;
+    int minFeature=200;
 	int ignoreRandom = 0;
 	int padRegion = 0;
 	string rawDataFileName;
@@ -57,22 +54,12 @@ int main(int argc, char *argv[]) {
     string trainingFileName;
     for(int i = 0; i < argc; i++) {
         string temp = argv[i];
-        if(temp.compare("-MergeRegion")==0)
-            istringstream(argv[i+1])>>mergeRegion;
         if(temp.compare("-MinFeature")==0)
             istringstream(argv[i+1])>>minFeature;
         if(temp.compare("-Output")==0)
             trainingFileName=argv[i+1];
         if(temp.compare("-PeakDataFile")==0)
             peakDataFileName=argv[i+1];
-        if(temp.compare("-IgnoreRandom")==0) {
-			string option = argv[i+1];
-			if(option.compare("On") == 0) {
-				ignoreRandom=1;
-			}
-		}   
-        if(temp.compare("-PadRegion")==0)
-            istringstream(argv[i+1])>>padRegion;
     }
 	
 	cout<<"Reading Peak Data"<<endl;

@@ -174,11 +174,7 @@ int main(int argc, char *argv[]) {
     if(argc < 2) {
         cout << "Usage: ./regionCounts [options] -RawDataFile <raw sam file list location> -Partitions <partition file> -Output <output file location>" <<endl;
         cout << "Options: <default>" <<endl;
-        cout << "-MergeRegion: Regions this close together will be merged <0>"<<endl;
-        cout << "-MinFeature: Size of smallest partition. <25>"<<endl;
-        cout << "-IgnoreRandom: Ignores random chromosomes.  <Off> [Off, On]"<<endl;
-        cout << "-PadRegion: Pads regions to this minimum size. <0>"<<endl;
-		cout << "-LogScale: Log scale RPKM"<<endl;
+	cout << "-Log2: Log scale RPKM"<<endl;
 		return 0;
     }
     int mergeRegion=0;
@@ -191,25 +187,13 @@ int main(int argc, char *argv[]) {
 	bool logScale = false;
     for(int i = 0; i < argc; i++) {
         string temp = argv[i];
-        if(temp.compare("-MergeRegion")==0)
-            istringstream(argv[i+1])>>mergeRegion;
-        if(temp.compare("-MinFeature")==0)
-            istringstream(argv[i+1])>>minFeature;
         if(temp.compare("-Output")==0)
             trainingFileName=argv[i+1];
         if(temp.compare("-RawDataFile")==0)
             rawDataFileName=argv[i+1];
-		if(temp.compare("-Partitions")==0)
-			peakDataFileName=argv[i+1];
-        if(temp.compare("-IgnoreRandom")==0) {
-			string option = argv[i+1];
-			if(option.compare("On") == 0) {
-				ignoreRandom=1;
-			}
-		}   
-        if(temp.compare("-PadRegion")==0)
-            istringstream(argv[i+1])>>padRegion;
-		 if(temp.compare("-LogScale")==0)
+	if(temp.compare("-Partitions")==0)
+	    peakDataFileName=argv[i+1];
+	if(temp.compare("-Log2")==0)
             logScale=true;
     }
 	
@@ -285,7 +269,7 @@ int main(int argc, char *argv[]) {
 				} else {
 					double RPKM = ((double)regionCounts[j][i][k])/((double)(part.stop-part.start)/(1000.0)*(totalRegions[j]/1000000.0));
 		//			cout<<'\t'<<RPKM;
-					if(logScale) RPKM = log(RPKM+1)/log(2);
+					if(logScale) RPKM = log2(RPKM+1);
 					outfile<<'\t'<<RPKM;
 				}
 				//}
