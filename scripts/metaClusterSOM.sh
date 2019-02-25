@@ -47,3 +47,8 @@ then
 fi
 
 #../bin/metasomgene/metasomgene -UnitPrefix ../$SOMName/data/som/units/unit -MetaclusterFile ../$SOMName/data/MetaClusters -OutPrefix ../$SOMName/data/ -Rows $Rows -Cols $Cols -Metaclusters $Metaclusters
+Meta=`head -n 1 ../$SOMName/data/MetaClusters | sed "s/.*: \(.*\)/\1/g"`
+sed -i -e "s/var MetaOn = 0/var MetaOn = 1/g" ../$SOMName/options.js
+sed -i -e "s/var MetaClusterNumber = 75/var MetaClusterNumber = $Meta/g" ../$SOMName/options.js
+
+../bin/metasomgene/metasomgene -UnitPrefix ../$SOMName/data/som/units/unit -MetaclusterFile ../$SOMName/data/MetaClusters -OutPrefix ../$SOMName/data/ -Rows $Rows -Cols $Cols -Metaclusters $Meta

@@ -34,6 +34,9 @@ do
   shift
 done
 
+Dimensionality=`head -n 1 ../$SOMName/data/cutree.txt | cut -f 2`
+echo $Dimensionality
+
 if [ "$Sparse" = 0 ]
 then
 #../bin/metasom/metasom -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -MetaclustersEnd $MetaclustersEnd -Trials $Trials -Outfile ../$SOMName/data/MetaClusters -genePrefix ../$SOMName/data/som/units/unit -Dimensionality $Dimensionality

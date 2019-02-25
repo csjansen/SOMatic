@@ -45,7 +45,7 @@ This tutoral assumes you have a number of RSEM outputs that are locatable by a r
 
 `cd scripts`
 
-`./rsemToTrainingMatrixi_TPM.sh (regular expression for output files in quotes) (Sample List output location) (Training Matrix output location)`
+`./rsemToTrainingMatrix_TPM.sh (regular expression for output files in quotes) (Sample List output location) (Training Matrix output location)`
 
 `./rsemToTrainingMatrix_TPM.sh *.rsem.genes.results sample.list trainingMatrix`
 
@@ -325,7 +325,7 @@ From the base SOMatic folder:
 
 ### Requirements
 
-The base buildSite.sh has to have been run.  It is assumed for this tutorial that the SOM name is RNAdata and that it was a 20x30 SOM.
+The base buildSite.sh has to have been run.  It is assumed for this tutorial that the SOM name is RNAdata and that it was a 20x30 SOM.  This tutorial can be done right after the RNA-seq SOM tutorial above.  If you would like to do the tutorial on the example data, use DNAdata for the SOM name instead of RNAdata and ../examples/example.matrix instead of trainingMatrix.
 
 ### Heirarical cluster on SOM Units
 
@@ -341,27 +341,72 @@ From base SOMatic folder
 
 ### Metacluster
 
-`./metaClusterSOM.sh -SOMName RNAdata
+`./metaClusterSOM.sh -SOMName RNAdata -Rows 20 -Cols 30 -MetaclusterStart 5 -MetaclusterEnd 50 -Trials 10`
+This step is multithreaded, so if you have the option to provide multiple cores to this program, it can use up to the number of Trials you specified.
 
-### Generate Metacluster reports and cluster
+### Generate Metacluster reports and build cluster heatmaps for website
+
+### Requirements
+
+R with the following packages installed are required:
+reshape2
+ggplot2
+ggdendro
+grid
+RColorBrewer
+plyr
+
+Also, Rscript must be a runable application.
+
+### Process
+
+`./generateMetaclusterReports.sh -SOMName RNAdata -Rows 40 -Cols 60 -Matrix trainingMatrix -ShowSegments 0 -OutputPrefix ../RNAdata-`
+
+Creates a number of pdf files with the following output names "RNAdata-#.pdf", where # is the metacluster.  It also sets up files in the website to draw metacluster clustering heatmaps.  You need to re-copy your website to the webserver to access them.
 
 ### Check Metaclusters on SOMatic viewer
 
-## Tutorial: RNA-seq metacluster downstream analysis
+It is important at this stage to make sure that your metaclustering was done properly.  
+
+#### Things to inspect
+Did you get a number of metaclusters on the edge of your search space?  Aka did you get 5 or 50 metaclusters in this case?
+Solution: Run the Metacluster step above with a different range.
+
+Did you get a lot of single unit metaclusters?
+Solution: Your SOM is too small, and one unit is trying to cover a big cluster on its own.  Re-run the SOM at a larger size.
+
+Did one of your metaclusters go all of the way across the rows or columns of your SOM?
+Solution: Your SOM is too large, and you are overclustering the differences between your observations.  Re-run the SOM at a smaller size.
+
+## Tutorial: Metacluster downstream analysis
 
 ### Requirements
+A SOM needs to have been trained with the metaclustering step done.  In this tutorial, we will assume it is RNAdata from above.
 
-### Generate GO terms for each metacluster
+Also, R with the following packages installed are required:
+reshape2
+ggplot2
+ggdendro
+grid
+RColorBrewer
+plyr
 
-## Tutorial: DNA experiments (such as ChIP or ATAC) metacluster downstream analysis
+Also, Rscript must be a runable application.
 
-### Requirements
+### Trait analysis
+A trait descriptor file needs to be made with the following tab-delimited format:
+(tab)	Trait#1	Trait#2
+sample1	1	0
+sample2	0	1
 
-### Generate nearby genes
+With this file made, the following can be run:
+`./SOMMeta.sh -SOMName RNAData -TraitFile traits -Output ../RNAdata-Traits.pdf
 
-### Generate GO terms
+This creates a PDF graph with significantly enriched or de-enriched metaclusters for the traits you specified.  These metaclusters could be analyzed further.
 
-### Generate motifs
+### Convert Metacluster output into a geneID format to calculate GO terms
+
+The contents of the metaclusters are stored in files in the data folder of your website with the format: Genes_(Metacluster #).  For RNA, using cut in the proper way, you can remove everything from each row except for the geneID or gene name.  This file can be uploaded to PantherDB or David for GO analysis.For DNA, these files can be transformed into Bed files to input into GREAT to find GO terms for nearby genes or .  
 
 ## Tutorial: Linking RNA and DNA SOMs (and downstream GO/motif analysis)
 
@@ -369,9 +414,7 @@ From base SOMatic folder
 
 ### Perform link
 
-### Generate GO terms
-
-### Generate motifs
+### Generate motifs for linked metaclusters
 
 ## Tutorial: Network generation
 
