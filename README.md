@@ -19,7 +19,11 @@ If this doesn't work, be sure your g++ version is >2.8.2
 
 ## Tutorial: Using example data
 
-### unzip example data
+### Requirements
+
+A websever needs to be available for you to use.  Install and setup Apache if a webserver isn't available.  Know where you need to copy your website folder.  By default, it is /var/www/html.
+
+### Unzip example data
 
 From base SOMatic folder:
 
@@ -31,7 +35,7 @@ From base SOMatic folder:
 
 `cd ../scripts`
 
-`./buildSite.sh -SOMName Example -Matrix ../examples/example.matrix -Rows 20 -Cols 30 -SampleList ../examples/sample.list -Timesteps 10 -Trials 1`
+`./buildSite.sh -SOMName Example -Matrix ../examples/example.matrix -Rows 20 -Cols 30 -SampleList ../examples/sample.list -Timesteps 4000000 -Trials 1`
 
 `cp ../Example (webserver location)`
 
@@ -406,20 +410,14 @@ This creates a PDF graph with significantly enriched or de-enriched metaclusters
 
 ### Convert Metacluster output into a geneID format to calculate GO terms
 
-The contents of the metaclusters are stored in files in the data folder of your website with the format: Genes_(Metacluster #).  For RNA, using cut in the proper way, you can remove everything from each row except for the geneID or gene name.  This file can be uploaded to PantherDB or David for GO analysis.For DNA, these files can be transformed into Bed files to input into GREAT to find GO terms for nearby genes or .  
+The contents of the metaclusters are stored in files in the data folder of your website with the format: Genes_(Metacluster #).  For RNA, using cut in the proper way, you can remove everything from each row except for the geneID or gene name.  This file can be uploaded to PantherDB or David for GO analysis.For DNA, these files can be transformed into Bed files to input into GREAT to find GO terms for nearby genes or be further transformed to fasta files for motif analysis.  
 
 ## Tutorial: Linking RNA and DNA SOMs (and downstream GO/motif analysis)
 
 ### Requirements
 
+Two SOMs need to have been trained: 1 from RNA data (RNAdata) and 1 from DNA data (DNAdata).  Both need to have been metaclustered as well.  A GTF file for your organism needs to be downloaded as well.
+
 ### Perform link
 
-### Generate motifs for linked metaclusters
-
-## Tutorial: Network generation
-
-### Requirements
-
-### Do motif enrichment
-
-### Make network
+./Link -SOMName1 DNAdata -Row1 40 -Col1 60 -SOMName2 RNAData -Rows2 40 -Col2 60 -OutputFolder SOMLinkage -GTFFile: mm10.gtf 
