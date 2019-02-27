@@ -420,4 +420,4 @@ Two SOMs need to have been trained: 1 from RNA data (RNAdata) and 1 from DNA dat
 
 ### Perform link
 
-./Link -SOMName1 DNAdata -Row1 40 -Col1 60 -SOMName2 RNAData -Rows2 40 -Col2 60 -OutputFolder SOMLinkage -GTFFile: mm10.gtf 
+./Link.sh -SOMName1 DNAdata -Row1 40 -Col1 60 -SOMName2 RNAData -Rows2 40 -Col2 60 -OutputFolder SOMLinkage -GTFFile: mm10.gtf 
