@@ -27,7 +27,7 @@ do
     -Rows) Rows=$2;;
     -Cols) Cols=$2;;
 	-SampleList) SampleList=$2;;
-	-Timesteps) Timesteps=$2;;
+	-Epochs) Epochs=$2;;
 	-Trials) Trials=$2;;
 	-Sparse) Sparse=1;;
 	-LearningRate) LearningRate=$2;;
@@ -63,14 +63,14 @@ sed -i -e "s/= 20/= $Rows/g" ../$SOMName/options.js
 sed -i -e "s/= 50/= $Cols/g" ../$SOMName/options.js
 if [ "$Sparse" = 0 ]
 then
-echo ../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Timesteps $Timesteps -Topology toroid
-	../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Timesteps $Timesteps -Topology toroid -LearningRate $LearningRate
+echo ../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Epochs $Epochs -Topology toroid
+	../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Epochs $Epochs -Topology toroid -LearningRate $LearningRate
 ../bin/score/scoresom -SOMFile ../$SOMName.som -TrainingMatrix $Matrix -ScoreFile ../$SOMName.score -col $Cols
 fi
 if [ "$Sparse" = 1 ]
 then
-echo ../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Timesteps $Timesteps -Topology toroid -Sparse 
-	../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Timesteps $Timesteps -Topology toroid -Sparse -LearningRate $LearningRate
+echo ../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Epochs $Epochs -Topology toroid -Sparse 
+	../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Epochs $Epochs -Topology toroid -Sparse -LearningRate $LearningRate
 ../bin/score/scoresom -SOMFile ../$SOMName.som -TrainingMatrix $Matrix -ScoreFile ../$SOMName.score -Sparse -col $Cols
 fi
 ../bin/map/mapsom -SOMFile ../$SOMName.som -SampleList $SampleList -Prefix ../$SOMName/data/som/ -col $Cols

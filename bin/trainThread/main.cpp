@@ -256,7 +256,7 @@ void runTrial(int seed, int* dataOrder, int linesTraining, int colsTraining, int
                 }
                 delete [] winUnitNeighbors;
                 delete [] winUnit;
-		if(j % 100000 == 0 && j!=0) {
+		if(j % 10000 == 0 && j!=0) {
 			std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
 			cout<<"Trial "<<index<<"\t time:"<<j<<endl;
 			std::cout << "Average timestep: (sec) = " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /(1000000.0*100000) <<std::endl;
@@ -351,6 +351,7 @@ int main(int argc, char *argv[]) {
 	}
 	trainingFile.close();
 	int timesteps = epochs*linesTraining/2;
+	cout<<"Timesteps: "<<timesteps<<endl;
 	cout<<"Training Matrix lines: "<<linesTraining<<endl;
 	cout<<"Building data structures"<<endl;
 	double** dataMap=0;
