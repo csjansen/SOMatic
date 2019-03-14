@@ -285,7 +285,7 @@ int main(int argc, char *argv[]) {
 		cout << "-Rows: Number of rows for your SOM. <20>"<<endl;
 		cout << "-Cols: Number of columns for your SOM. <30>"<<endl;
 		cout << "-Trials: Number of trials run for your SOM. The package will choose the best SOM after all trials.  <3>"<<endl;
-		cout << "-Timesteps: Number of timesteps for each trial. <100>"<<endl;
+		cout << "-Epochs: Number of timesteps for each trial. <100>"<<endl;
 		cout << "-Topology: Topology for your SOM. (Only toroid currently supported) <toroid>"<<endl;
 		cout << "-Seed: Set seed for random initialization."<<endl;
 		cout << "-LearningRate: Set Learning Rate <.2>"<<endl; 
@@ -320,7 +320,7 @@ int main(int argc, char *argv[]) {
 			somFile=argv[i+1];
 		if(temp.compare("-Trials")==0)
 			istringstream(argv[i+1])>>trials;
-		if(temp.compare("-Timesteps")==0)
+		if(temp.compare("-Epochs")==0)
 			istringstream(argv[i+1])>>epochs;
 		if(temp.compare("-Topology")==0)
 			topology=argv[i+1];
