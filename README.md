@@ -3,7 +3,7 @@
 
 Clone github folder
 
-`github commit http://github.com/csjansen/SOMatic`
+`git clone http://github.com/csjansen/SOMatic`
 
 Enter SOMatic bin folder
 
