@@ -36,7 +36,7 @@ done
 
 if [ "$Sparse" = 0 ]
 then
-#../bin/metaSOMTree/metaSOMTree -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -MetaclustersEnd $MetaclustersEnd -Trials $Trials -Outfile ../$SOMName/data/MetaClusters -genePrefix ../$SOMName/data/som/units/unit -Dimensionality $Dimensionality
+echo "../bin/metasomThread/metasom -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -MetaclustersEnd $MetaclustersEnd -Trials $Trials -Outfile ../$SOMName/data/MetaClusters -genePrefix ../$SOMName/data/som/units/unit -Dimensionality $Dimensionality"
 ../bin/metasomThread/metasom -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -MetaclustersEnd $MetaclustersEnd -Trials $Trials -Outfile ../$SOMName/data/MetaClusters -genePrefix ../$SOMName/data/som/units/unit -Dimensionality $Dimensionality
 fi
 
@@ -49,6 +49,6 @@ fi
 #../bin/metasomgene/metasomgene -UnitPrefix ../$SOMName/data/som/units/unit -MetaclusterFile ../$SOMName/data/MetaClusters -OutPrefix ../$SOMName/data/ -Rows $Rows -Cols $Cols -Metaclusters $Metaclusters
 Meta=`head -n 1 ../$SOMName/data/MetaClusters | sed "s/.*: \(.*\)/\1/g"`
 sed -i -e "s/var MetaOn = 0/var MetaOn = 1/g" ../$SOMName/options.js
-sed -i -e "s/var MetaClusterNumber = 75/var MetaClusterNumber = $Meta/g" ../$SOMName/options.js
+sed -i -e "s/var MetaClusterNumber = .*/var MetaClusterNumber = $Meta/g" ../$SOMName/options.js
 
 ../bin/metasomgene/metasomgene -UnitPrefix ../$SOMName/data/som/units/unit -MetaclusterFile ../$SOMName/data/MetaClusters -OutPrefix ../$SOMName/data/ -Rows $Rows -Cols $Cols -Metaclusters $Meta

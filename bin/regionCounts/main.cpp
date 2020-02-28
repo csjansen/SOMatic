@@ -88,6 +88,10 @@ void regionCount(map<string, vector<BedNode> >* allPartData, string filename, ve
 	        return;
 	} 
 	ifstream rawDataFile(filename.c_str());
+	cout<<filename<<endl;
+	if(rawDataFile.fail()) {
+		cout<<"Failed?"<<endl;
+	}
     vector<BedNode> raw;
 	vector<int> chrpos;
 	totalRegions->at(i)=0;
@@ -198,7 +202,7 @@ int main(int argc, char *argv[]) {
     }
 	
 	cout<<"Reading Partition Data"<<endl;
-	
+	cout<<peakDataFileName<<endl;	
 	ifstream partDataFiles(peakDataFileName.c_str());
 	string line1;
 	map<string, vector<BedNode> > allPartData;
@@ -231,6 +235,7 @@ int main(int argc, char *argv[]) {
 		//allPeakData.push_back(peakData);
 	cout<<parts<<" partitions loaded."<<endl;
 	cout<<"Reading Raw Data"<<endl;
+	cout<<rawDataFileName<<endl;
 	vector<string> fileNames;
 	vector<vector<BedNode> > rawData;
 	ifstream rawDataFiles(rawDataFileName.c_str());

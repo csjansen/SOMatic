@@ -534,6 +534,7 @@ int main(int argc, char* argv[]) {
 				count++;
 			}
 			temp.push_back(count);
+			cout<<count<<endl;
 		}
 		geneCounts.push_back(temp);
 	}
@@ -599,6 +600,7 @@ int main(int argc, char* argv[]) {
                                 bestTrial = j;
                         }
                 }
+		cout<<minScore<<endl;
                 bestScores.push_back(minScore);
 		Indexes.push_back(IndexRow[bestTrial]);
 	}
