@@ -34,9 +34,9 @@ done
 
 
 mkdir $Output
-./LinkUnits -UnitPrefix1 ../$SOMName1/data/som/units/unit -Row1 $Row1 -Col1 $Col1 -UnitPrefix2 ../$SOMName2/data/som/units/unit -Rows2 $Row2 -Col2 $Col2 -Output $Output/LinkUnitsFile -GTFFile $GTFFile
-./LinkMeta -FusionFile $Output/LinkUnitsFile -ClusterFile1 ../$SOMName1/data/MetaClusters -ClusterFile2 ../$SOMName2/data/MetaClusters -Output $Output/LinkMetaFile
+../bin/LinkUnits/LinkUnits -UnitPrefix1 ../$SOMName1/data/som/units/unit -Row1 $Row1 -Col1 $Col1 -UnitPrefix2 ../$SOMName2/data/som/units/unit -Row2 $Row2 -Col2 $Col2 -Output $Output/LinkUnitsFile -GTFFile $GTFFile -GeneIDType gene_name
+../bin/LinkMeta/LinkMeta -FusionFile $Output/LinkUnitsFile -ClusterFile1 ../$SOMName1/data/MetaClusters -ClusterFile2 ../$SOMName2/data/MetaClusters -Output $Output/LinkMetaFile
 Meta1=`head -n 1 ../$SOMName1/data/MetaClusters | sed "s/.*: \(.*\)/\1/g"`
 Meta2=`head -n 1 ../$SOMName2/data/MetaClusters | sed "s/.*: \(.*\)/\1/g"`
-./LinkAnalyze -FusionFile $Output/LinkUnitsFile -FusionClusterFile $Output/LinkMetaFile -ClusterNum1 $Meta1 -ClusterNum2 $Meta2 -OutputPrefix $Output -Row1 $Row1 -Col1 $Col1 -Row2 $Row2 -Col2 $Col2
+../bin/LinkAnalyze/LinkAnalyze -FusionFile $Output/LinkUnitsFile -FusionClusterFile $Output/LinkMetaFile -ClusterNum1 $Meta1 -ClusterNum2 $Meta2 -OutputPrefix $Output -Row1 $Row1 -Col1 $Col1 -Row2 $Row2 -Col2 $Col2
 

@@ -83,7 +83,7 @@ map<string, TSSsite>* parseGtfFile(string gtfFileName, string geneidtype, bool X
 						}
 					} else if(geneidtype.compare("gene_name")==0) {
 					
-						if(pairItems[1].compare("gene_id")==0) {
+						if(pairItems[1].compare("gene_name")==0) {
 							vector<string> splitz2 = split(pairItems[2].substr(1,pairItems[2].size()-2),'.');
 							geneName = pairItems[2].substr(1,pairItems[2].size()-2);
 //						cout<<geneName<<endl;
@@ -353,7 +353,7 @@ int main(int argc, char* argv[]) {
 		if(temp.compare("-AddChr")==0)
 			addChr = true;
 	}
-
+	cout<<geneidtype<<endl;
 	cout<<prefix1<<" rows: "<<row1<<" cols: "<<col1<<endl;
 	cout<<prefix2<<" rows: "<<row2<<" cols: "<<col2<<endl;
 	ofstream outfile(outfileName.c_str());

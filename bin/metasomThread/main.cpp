@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <math.h>
 #include <vector>
+#include <array>
 #include <queue>
 #include <map>
 #include <stdio.h>
@@ -33,8 +34,8 @@ std::vector<std::string> split(const std::string &s, char delim) {
         return elems;
 }
 
-void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >* Som1, int Dimensionality, int clusternum, bool sparse, vector<int>* clusterIndex, double* score, int row1, int col1, int trial) {
-	vector<vector<double> > allpoints2=*allpoints;
+void ClusterAndScore(vector<vector<float> >* allpoints, vector<vector<float> >* Som1, int Dimensionality, int clusternum, bool sparse, vector<int>* clusterIndex, float* score, int row1, int col1, int trial) {
+	vector<vector<float> > allpoints2=*allpoints;
 	// Make random shuffle
 	vector<int> index;
 	for(int i = 0; i < allpoints->size(); i++) {
@@ -42,13 +43,13 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
 		index.push_back(i);
 	}
 	random_shuffle(index.begin(),index.end());
-	vector<vector<double> > MidPoints;
-	vector<double> Rads;
+	vector<vector<float> > MidPoints;
+	vector<float> Rads;
         //cout<<"Assignment: "<<trial<<endl;
     // Initial Mid Points
     int uniqs = 0;
     for(int k = 0; k < clusternum+uniqs; k++) {
-    	vector<double> temp;
+    	vector<float> temp;
         for(int m = 0; m < Som1->at(0).size(); m++) {
         	temp.push_back(Som1->at((int)(allpoints->at(index[k])[0])*col1+(int)(allpoints->at(index[k])[1]))[m]);
         }
@@ -77,30 +78,30 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
 	bool finished2 = false;
     int iter = 0;
     bool cont = false;
-	vector<vector<vector<double> > > points;
-    vector<vector<vector<double> > > points2;
-    vector<vector<double> > points3;
+	vector<vector<vector<float> > > points;
+    vector<vector<vector<float> > > points2;
+    vector<vector<float> > points3;
 	int pointlist[row1][col1];
     int Nc[allpoints->size()];
 	int K = clusternum;
     int N = allpoints->size();
     int P = Som1->at(0).size();
-	vector<vector<double> > DistMatrix;
+	vector<vector<float> > DistMatrix;
 	while(!finished2) {
     while(!finished) {
         int count=0;
         //Assignment
         for(int k = 0; k < allpoints->size(); k++) {
-        	double lowestdist1=999999999;
-            double lowestdist=99999999;
-            double lowestdist2=999999999;
+        	float lowestdist1=999999999;
+            float lowestdist=99999999;
+            float lowestdist2=999999999;
             int lowestk1=-1;
             int lowestk2=-1;
             for(int m = 0; m < clusternum; m++) {
-            	double similarity=0;
-                double mag1 = 0;
-                double mag2 = 0;
-                double dist = 0;
+            	float similarity=0;
+                float mag1 = 0;
+                float mag2 = 0;
+                float dist = 0;
                 for(int num = 0; num < Som1->at(0).size(); num++) {
                 	dist += pow(MidPoints[m][num]-Som1->at((int)(allpoints->at(k)[0])*col1+(int)(allpoints->at(k)[1]))[num],2);
                     similarity += MidPoints[m][num]*Som1->at((int)(allpoints->at(k)[0])*col1+(int)(allpoints->at(k)[1]))[num];
@@ -114,7 +115,7 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
                 } else {
                     similarity /= (sqrt(mag1) * sqrt(mag2));
                 }
-                double dist1;
+                float dist1;
                 if(sparse)
                 	dist1 = 1-similarity;
                 else
@@ -158,7 +159,7 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
         cont=true;
 		for(int k = 0; k < clusternum; k++) {
 		//	cout<<k<<endl;
-        	vector<double> totals1;
+        	vector<float> totals1;
             int count = 0;
             for(int m = 0; m < Som1->at(0).size(); m++) totals1.push_back(0);
             for(int m = 0; m < allpoints->size(); m++) {
@@ -172,7 +173,7 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
 				if(count==0)
 					MidPoints[k][m]=0;
 				else
-	                MidPoints[k][m] = totals1[m]/(double)count;
+	                MidPoints[k][m] = totals1[m]/(float)count;
                 //      cout<<MidPoints[k][m]<<endl;
             }
         }
@@ -184,10 +185,10 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
         //Calculating Distance Matrix
 //	cout<<"Dist: "<<trial<<endl;
 	DistMatrix.clear();
-    //double DistMatrix[N][K];
+    //float DistMatrix[N][K];
 //	cout<<"Dist: "<<trial<<endl;
     for(int n = 0; n < N; n++) {
-		vector<double> DistMatrixRow;
+		vector<float> DistMatrixRow;
     	for(int k = 0; k < K; k++) {
 			DistMatrixRow.push_back(0);
            	if(!sparse) {
@@ -196,9 +197,9 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
             	}
 				DistMatrixRow[k]=sqrt(DistMatrixRow[k]);
             } else {
-                double similarity=0;
-                double mag1 = 0;
-                double mag2 = 0;
+                float similarity=0;
+                float mag1 = 0;
+                float mag2 = 0;
                 for(int p = 0; p < P; p++) {
                 	similarity += MidPoints[k][p]*Som1->at((int)(allpoints->at(n)[0])*col1+(int)(allpoints->at(n)[1]))[p];
                     mag1 += pow(MidPoints[k][p],2);
@@ -210,7 +211,7 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
                 } else {
                 	similarity /= (sqrt(mag1) * sqrt(mag2));
                 }
-                double dist1 = 1-similarity;
+                float dist1 = 1-similarity;
                 DistMatrixRow.push_back(dist1);
 
             }
@@ -224,17 +225,17 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
     }
 	//cout<<"Distance calculated. "<<trial<<endl;
     for(int k = 0; k < K; k++) {
-    	vector<vector<double> > temp;
-        vector<vector<double> > temp2;
-        vector<double> temp3;
+    	vector<vector<float> > temp;
+        vector<vector<float> > temp2;
+        vector<float> temp3;
         points.push_back(temp);
         points2.push_back(temp2);
         points3.push_back(temp3);
         Nc[k]=0;
     }
     for(int k = 0; k < K; k++) {
-    	double lowest = 99999999;
-        double lowestindex = -1;
+    	float lowest = 99999999;
+        float lowestindex = -1;
         for(int n = 0; n < N; n++) {
         	if(DistMatrix[(int)allpoints->at(n)[0]*col1+(int)allpoints->at(n)[1]][k]<lowest || lowestindex==-1) {
             	lowest = DistMatrix[(int)allpoints->at(n)[0]*col1+(int)allpoints->at(n)[1]][k];
@@ -270,65 +271,65 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
 	//cout<<"Build Adjecency List: "<<trial<<endl;
     bool done = false;
     bool recalc=true;
-    vector<vector<vector<double> > > adj;
-    for(double r = .01; !done; r+=.01) {
+    vector<vector<vector<float> > > adj;
+    for(float r = .01; !done; r+=.01) {
     	if(recalc) {
         	recalc=false;
             adj.clear();
             for(int k = 0; k < K; k++) {
-            	vector<vector<double> > temp;
+            	vector<vector<float> > temp;
                 adj.push_back(temp);
             }
             for(int k = 0; k < K; k++) {
             	for(int n = 0; n < points[k].size(); n++) {
-                	vector<vector<double> > possadj;
+                	vector<vector<float> > possadj;
                     if((int)points2[k][n][0]%2==0) {
-                    	vector<double> point1;
+                    	vector<float> point1;
                         point1.push_back(points2[k][n][0]-1);
                         point1.push_back(points2[k][n][1]-1);
                         possadj.push_back(point1);
-                        vector<double> point2;
+                        vector<float> point2;
                         point2.push_back(points2[k][n][0]-1);
                         point2.push_back(points2[k][n][1]);
                         possadj.push_back(point2);
-                        vector<double> point3;
+                        vector<float> point3;
                         point3.push_back(points2[k][n][0]);
                         point3.push_back(points2[k][n][1]-1);
                         possadj.push_back(point3);
-                        vector<double> point4;
+                        vector<float> point4;
                         point4.push_back(points2[k][n][0]);
                         point4.push_back(points2[k][n][1]+1);
                         possadj.push_back(point4);
-                        vector<double> point5;
+                        vector<float> point5;
                         point5.push_back(points2[k][n][0]+1);
                         point5.push_back(points2[k][n][1]-1);
                         possadj.push_back(point5);
-                        vector<double> point6;
+                        vector<float> point6;
                         point6.push_back(points2[k][n][0]+1);
                         point6.push_back(points2[k][n][1]);
                         possadj.push_back(point6);
                     } else {
-						vector<double> point1;
+						vector<float> point1;
                         point1.push_back(points2[k][n][0]-1);
                         point1.push_back(points2[k][n][1]);
                         possadj.push_back(point1);
-                        vector<double> point2;
+                        vector<float> point2;
                         point2.push_back(points2[k][n][0]-1);
                         point2.push_back(points2[k][n][1]+1);
                         possadj.push_back(point2);
-                        vector<double> point3;
+                        vector<float> point3;
                         point3.push_back(points2[k][n][0]);
                         point3.push_back(points2[k][n][1]-1);
                         possadj.push_back(point3);
-                        vector<double> point4;
+                        vector<float> point4;
                         point4.push_back(points2[k][n][0]);
                         point4.push_back(points2[k][n][1]+1);
                         possadj.push_back(point4);
-                        vector<double> point5;
+                        vector<float> point5;
                         point5.push_back(points2[k][n][0]+1);
                         point5.push_back(points2[k][n][1]);
                         possadj.push_back(point5);
-                        vector<double> point6;
+                        vector<float> point6;
                         point6.push_back(points2[k][n][0]+1);
                         point6.push_back(points2[k][n][1]+1);
                         possadj.push_back(point6);
@@ -382,6 +383,26 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
     for(int n = 0; n < N; n++) {
     	clusterIndex->push_back(pointlist[(int)allpoints->at(n)[0]][(int)allpoints->at(n)[1]]);
     }
+	for(int i = 0; i < points2.size(); i++) {
+                for(int j = 0; j < points2[i].size(); j++) {
+                        points2[i][j].clear();
+                }
+                points2[i].clear();
+        }
+        points2.clear();
+        for(int i = 0; i < points3.size(); i++) {
+                points3[i].clear();
+        }
+        points3.clear();
+        for(int i = 0; i < DistMatrix.size(); i++) {
+                DistMatrix[i].clear();
+        }
+        DistMatrix.clear();
+	for(int i = 0; i < MidPoints.size();i++) {
+		MidPoints[i].clear();
+	}
+	MidPoints.clear();
+	Rads.clear();
 	//cout<<"Calculate AIC: "<<trial<<endl;
 	// Calculate AIC
     // Nc contains number of objects in each cluster
@@ -389,75 +410,80 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
     	Nc[k]=points[k].size();
     }
     //Calculate Midpoint of points
-    vector<vector<double> > Mids;
-    for(int k = 0; k < K; k++) {
-      	vector<double> temp;
-        for(int p = 0; p < P; p++) {
-        	temp.push_back(0);
-        }
-        for(int p = 0; p < P; p++) {
-        	for(int n = 0; n < points[k].size(); n++) {
-            	temp[p]+=points[k][n][p];
-            }
-            if(points[k].size()>0)
-            	temp[p]/=points[k].size();
-        }
-        Mids.push_back(temp);
-    }
     //Vc is a P x K matrix that contains variances by cluster
-    double Vc[P][K];
-    for(int p = 0; p < P; p++) {
+	float** Vc = new float*[P];
+	for(int i = 0; i < P; i++)
+		Vc[i] = new float[K];
+    	if(!Vc) {
+		cout<<"Vc failed to allocate."<<endl;
+    	}
     	for(int k = 0; k < K; k++) {
-        	double Var=0;
-            for(int n = 0; n < points[k].size(); n++) {
-            	Var+=pow(points[k][n][p]-Mids[k][p],2);
-            }
-            if(points[k].size() >0)
-            	Var = Var/(points[k].size());
-            Vc[p][k]=Var;
-        }
-    }
-    // Mid is the mid point of the whole SOM
-    double Mid[P];
-    for(int p = 0; p < P; p++) {
-    	Mid[p]=0;
-    }
-    for(int n = 0; n < N; n++) {
+		float* Mids = new float[P];
+		if(!Mids)
+			cout<<"Mids failed to allocate: "<<k<<endl;
+        	for(int p = 0; p < P; p++) {
+        		Mids[p]=0;
+			Vc[p][k] = 0;
+        	}
+        	for(int p = 0; p < P; p++) {
+        		for(int n = 0; n < points[k].size(); n++) {
+            			Mids[p]+=points[k][n][p];
+            		}
+            		if(points[k].size()>0)
+            			Mids[p]/=points[k].size();
+			for(int n = 0; n < points[k].size(); n++) {
+                		Vc[p][k]+=pow(points[k][n][p]-Mids[p],2);
+            		}
+        	}
+		delete [] Mids;
+    	}
+    	// Mid is the mid point of the whole SOM
+    	float* Mid = new float[P];
+    	if(!Mid)
+		cout<<"Mid failed to allocate."<<endl;
+
     	for(int p = 0; p < P; p++) {
-        	Mid[p]+=Som1->at(allpoints->at(n)[0]*col1+allpoints->at(n)[1])[p];
-        }
-    }
+    		Mid[p]=0;
+    	}
+    	for(int n = 0; n < N; n++) {
+    		for(int p = 0; p < P; p++) {
+        		Mid[p]+=Som1->at(allpoints->at(n)[0]*col1+allpoints->at(n)[1])[p];
+        	}
+    	}
 	if(N>0)
+    		for(int p = 0; p < P; p++) {
+        		Mid[p]=Mid[p]/N;
+        	}
+
+    	// V is a P x 1 matrix that contains variances for whole sample
+    	float* V = new float[P];
+	if(!V)
+		cout<<"V failed to allocate."<<endl;
     	for(int p = 0; p < P; p++) {
-        	Mid[p]=Mid[p]/N;
-        }
-    // V is a P x 1 matrix that contains variances for whole sample
-    double V[P];
-    for(int p = 0; p < P; p++) {
-        double Var = 0;
-        for(int n = 0; n < N; n++) {
-        	Var += pow(Som1->at(allpoints->at(n)[0]*col1+allpoints->at(n)[1])[p]-Mid[p],2);
-        }
+        	float Var = 0;
+        	for(int n = 0; n < N; n++) {
+        		Var += pow(Som1->at(allpoints->at(n)[0]*col1+allpoints->at(n)[1])[p]-Mid[p],2);
+        	}
 		if(N>1)
-	        V[p]=Var/(N-1);
+	        	V[p]=Var/(N-1);
 		else
 			V[p]=Var;
     }
     //Compute log-like LL, 1 x K
-    double LL[K];
+    float* LL = new float[K];
     for(int k = 0; k < K; k++) {
-    	double csum = 0;
+    	float csum = 0;
         for(int p = 0; p < P; p++) {
         	csum+=log(Vc[p][k]+V[p])/2.0;
         }
         LL[k]=-1*Nc[k] * csum;
     }
     //Compute AIC and BIC
-    double rsum = 0;
+    float rsum = 0;
     for(int k = 0; k < K; k++) {
     	rsum+=LL[k];
     }
-    double AIC;
+    float AIC;
     if(Dimensionality==-1)
     	AIC = -2*rsum+4*K*P;
     else {
@@ -467,7 +493,7 @@ void ClusterAndScore(vector<vector<double> >* allpoints, vector<vector<double> >
 }
 /*class distorder {
 	int pos;
-	double dist;
+	float dist;
 	bool operator<(distorder d1, distorder d2) {
 		return d1.dist<d2.dist;
 	}
@@ -540,17 +566,17 @@ int main(int argc, char* argv[]) {
 	}
 	cout<<"Opening SOM file"<<endl;	
     ifstream som1file(ATACSom.c_str());
-    vector<vector<double> > Som1;
+    vector<vector<float> > Som1;
     string line;
-	vector<vector<double> > allpoints;
+	vector<vector<float> > allpoints;
 	int tempcol = 0;
         int temprow = 0;
         while(getline(som1file,line)) {
                 if(line[0]=='#') continue;
                 cout<<tempcol<<'\t'<<temprow<<endl;
-                vector<double> Som1Row;
+                vector<float> Som1Row;
                 vector<string> splitz = split(line, '\t');
-                vector<double> temp;
+                vector<float> temp;
                 temp.push_back(temprow);
                 temp.push_back(tempcol);
                 temp.push_back(0);
@@ -558,7 +584,7 @@ int main(int argc, char* argv[]) {
                 temp.push_back(geneCounts[temprow][tempcol]+1);
                 allpoints.push_back(temp);
                 for(int i = 0; i < splitz.size(); i++) {
-                        double temp;
+                        float temp;
                         istringstream(splitz[i])>>temp;
                         Som1Row.push_back(temp);
                 }
@@ -574,12 +600,12 @@ int main(int argc, char* argv[]) {
 	
 	vector<vector<int> > Indexes;
 	vector<int> bestClusters;
-	vector<double> bestScores;
+	vector<float> bestScores;
 	for(int i = kmeans1; i <= kmeans2; i++) {
 		vector<thread> threads;
 		cout<<"Cluster Num: "<<i<<endl;
 		vector<vector<int> > IndexRow;
-		vector<double> ScoreRow;
+		vector<float> ScoreRow;
 		// Run numberOfTrials
 		for(int j = 0; j < numberOfTrials; j++) {
 			ScoreRow.push_back(0.0);
@@ -592,7 +618,7 @@ int main(int argc, char* argv[]) {
 			threads.push_back(thread(ClusterAndScore,&allpoints, &Som1, dimensionality, i, Sparse, &(IndexRow[j]), &(ScoreRow[j]), row1, col1,j));
 		}
 		for (auto& th : threads) th.join();
-		double minScore = -999;
+		float minScore = -999;
                 int bestTrial = -1;
                 for(int j = 0; j < ScoreRow.size(); j++) {
                         if(ScoreRow[j]<minScore || bestTrial == -1) {
@@ -606,7 +632,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	/*for(int i = 0; i < Scores.size(); i++) {
-		double minScore = -999;
+		float minScore = -999;
 		int bestTrial = -1;
 		for(int j = 0; j < Scores[i].size(); j++) {
 			if(Scores[i][j]<minScore || bestTrial == -1) {
@@ -617,7 +643,7 @@ int main(int argc, char* argv[]) {
 		bestClusters.push_back(bestTrial);
 		bestScores.push_back(minScore);
 	}*/
-	double minScore = -999;
+	float minScore = -999;
 	int bestClusterNum = -1;
 	for(int i = 0; i < bestScores.size(); i++) {
 		if(bestScores[i] < minScore || bestClusterNum==-1) {
