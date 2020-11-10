@@ -83,7 +83,7 @@ map<string, TSSsite>* parseGtfFile(string gtfFileName, string geneidtype, bool X
 						}
 					} else if(geneidtype.compare("gene_name")==0) {
 					
-						if(pairItems[1].compare("gene_name")==0) {
+						if(pairItems[1].compare("gene_id")==0) {
 							vector<string> splitz2 = split(pairItems[2].substr(1,pairItems[2].size()-2),'.');
 							geneName = pairItems[2].substr(1,pairItems[2].size()-2);
 //						cout<<geneName<<endl;
@@ -206,11 +206,16 @@ string createKey(int row1, int col1, int row2, int col2) {
 	return SSTR(row1)+"_"+SSTR(col1)+"_"+SSTR(row2)+"_"+SSTR(col2);
 }
 
-vector<genomicRegion> GetRegRegions(map<string, TSSsite>* TSSsites, vector<string> genes, string CompareType, int SearchRange) {
+vector<genomicRegion> GetRegRegions(map<string, TSSsite>* TSSsites, vector<string> genes, string CompareType, int SearchRange,bool underscore) {
 	vector<genomicRegion> regions;
 	//cout<<genes.size()<<" Passed in."<<endl;
 	for(int i = 0; i < genes.size(); i++) {
-		vector<string> splitz = split(genes[i],'-');
+		vector<string> splitz;
+		if(!underscore) {
+			splitz = split(genes[i],'-');
+		} else {
+			splitz = split(genes[i],'_');
+		}
 		map<string, TSSsite>::iterator it = TSSsites->find(genes[i]);
 		TSSsite TSS;
 		if(it!=TSSsites->end()) {
@@ -322,6 +327,7 @@ int main(int argc, char* argv[]) {
 	bool Xeno = false;
 	int SearchRange=1000000;
 	bool addChr = false;
+	bool underscore=false;
 	for(int i = 0; i < argc; i++) {
         	string temp = argv[i];
 	        if(temp.compare("-UnitPrefix1")==0)
@@ -352,8 +358,10 @@ int main(int argc, char* argv[]) {
 			istringstream(argv[i+1])>>SearchRange;
 		if(temp.compare("-AddChr")==0)
 			addChr = true;
+		if(temp.compare("-Underscore")==0)
+			underscore = true;
 	}
-	cout<<geneidtype<<endl;
+
 	cout<<prefix1<<" rows: "<<row1<<" cols: "<<col1<<endl;
 	cout<<prefix2<<" rows: "<<row2<<" cols: "<<col2<<endl;
 	ofstream outfile(outfileName.c_str());
@@ -487,7 +495,7 @@ int main(int argc, char* argv[]) {
 						//cout<<"Genes: "<<genes.size()<<endl;
 						if(regions.size() < row2 * col2) {
 							//cout<<"Getting Reg Regions"<<endl;
-							regions.push_back(GetRegRegions(TSSsites, genes, CompareType,SearchRange));
+							regions.push_back(GetRegRegions(TSSsites, genes, CompareType,SearchRange,underscore));
 							//cout<<"Gotten"<<endl;
 						}
 						vector<string> overlaps;
