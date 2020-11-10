@@ -216,12 +216,12 @@ vector<genomicRegion> GetRegRegions(map<string, TSSsite>* TSSsites, vector<strin
 		} else {
 			splitz = split(genes[i],'_');
 		}
-		map<string, TSSsite>::iterator it = TSSsites->find(genes[i]);
+		map<string, TSSsite>::iterator it = TSSsites->find(splitz[0]);
 		TSSsite TSS;
 		if(it!=TSSsites->end()) {
 			TSS = it->second;
 		} else {
-			cout<<"Could not find: "<<genes[i]<<".  Skipping..."<<endl;
+			cout<<"Could not find: "<<splitz[0]<<".  Skipping..."<<endl;
 			continue;
 		}
 		//if(genes[i].compare("ENSMUSG00000075370")==0||genes[i].compare("ENSMUSG00000059305")==0) cout<<genes[i]<<'\t'<<TSS.pos<<endl;
