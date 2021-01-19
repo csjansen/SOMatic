@@ -13,7 +13,7 @@ Compile SOMatic
 
 `make`
 
-If this doesn't work, be sure your g++ version is >2.8.2
+If this doesn't work, be sure your g++ version is >4.7.3 (requires c++11 support)
 
 `gcc -version`
 
@@ -345,7 +345,7 @@ From base SOMatic folder
 
 ### Metacluster
 
-`./metaClusterSOM.sh -SOMName RNAdata -Rows 20 -Cols 30 -Metaclusters 5 -MetaclustersEnd 50 -Trials 10`
+`./metaClusterSOM.sh -SOMName RNAdata -Rows 20 -Cols 30 -Metaclusters 5 -MetaclustersEnd 50 -Trials 10 -Dimensionality <The number from above>`
 This step is multithreaded, so if you have the option to provide multiple cores to this program, it can use up to the number of Trials you specified.
 
 ### Generate Metacluster reports and build cluster heatmaps for website
