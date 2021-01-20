@@ -356,7 +356,7 @@ R with the following packages installed are required:
 reshape2
 ggplot2
 ggdendro
-grid
+optparse
 RColorBrewer
 plyr
 
