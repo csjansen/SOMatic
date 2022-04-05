@@ -121,6 +121,7 @@ int main(int argc, char* argv[]) {
 		for(int j = 0; j < numCols; j++) {
 			cout<<"Creating "<<prefix+'_'+NumberToString(i)+'_'+NumberToString(j)+".unit"<<endl;
 			ofstream outfile((prefix+'_'+NumberToString(i)+'_'+NumberToString(j)+".unit").c_str());
+			cout<<Scores[i][j].size()<<endl;
 			for(int k = 0; k < Scores[i][j].size(); k++) {
 				outfile<<Scores[i][j][k]<<'\t'<<Dists[i][j][k]<<endl;
 			}

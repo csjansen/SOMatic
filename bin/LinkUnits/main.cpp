@@ -254,22 +254,16 @@ vector<genomicRegion> GetRegRegions(map<string, TSSsite>* TSSsites, vector<strin
 			temp.stop = stop;
 			regions.push_back(temp);
 		} else if (CompareType.compare("OneClosest")==0) {
-			float distance1=SearchRange;
-			float distance2=SearchRange;
+			float distance1=2*SearchRange;
+			float distance2=2*SearchRange;
 			for(map<string, TSSsite>::iterator looper = TSSsites->begin(); looper != TSSsites->end(); looper++) {
 				TSSsite tester = looper->second;
 				if(TSS.chrom.compare(tester.chrom)!=0) continue;
 				if(TSS.pos < tester.pos && tester.pos-TSS.pos < distance1) distance1=tester.pos-TSS.pos;
 				if(TSS.pos > tester.pos && TSS.pos-tester.pos < distance2) distance2=TSS.pos-tester.pos;
 			}
-			if(distance2!=SearchRange)
-				start = TSS.pos-distance2/2;
-			else
-				start = TSS.pos-distance2;
-			if(distance1!=SearchRange)
-				stop = TSS.pos+distance1/2;
-			else
-				stop = TSS.pos+distance1;
+			start = TSS.pos-distance2/2;
+			stop = TSS.pos+distance1/2;
 			genomicRegion temp;
 			temp.gene = genes[i];
 			temp.chrom = TSS.chrom;
@@ -487,8 +481,8 @@ int main(int argc, char* argv[]) {
 						//	cout<<splitz[0]<<endl;
 							vector<string> splitz2 = split(splitz[0],'-');
 							vector<string> splitz3 = split(splitz2[0],'.');
-						//	cout<<splitz2[0]<<endl;
-							genes.push_back(splitz3[0]);
+							//cout<<splitz2[0]<<endl;
+							genes.push_back(splitz2[0]);
 							
 						}
 						RNASizeRow.push_back(genes.size());

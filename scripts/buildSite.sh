@@ -19,6 +19,7 @@ then
 fi
 Sparse=0
 LearningRate=.2
+Options=""
 while (( "$#" )); 
 do
   case "$1" in
@@ -29,7 +30,8 @@ do
 	-SampleList) SampleList=$2;;
 	-Epochs) Epochs=$2;;
 	-Trials) Trials=$2;;
-	-Sparse) Sparse=1;;
+	-Sparse) Options="$Options -Sparse";;
+	-Log2) Options="$Options -Log2";;
 	-LearningRate) LearningRate=$2;;
   esac
 
@@ -61,18 +63,10 @@ mv ../Som_Package ../$SOMName
 cp $SampleList ../$SOMName/data/sample.list
 sed -i -e "s/= 20/= $Rows/g" ../$SOMName/options.js
 sed -i -e "s/= 50/= $Cols/g" ../$SOMName/options.js
-if [ "$Sparse" = 0 ]
-then
+echo $Options
 echo ../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Epochs $Epochs -Topology toroid
-	../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Epochs $Epochs -Topology toroid -LearningRate $LearningRate
+../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Epochs $Epochs -Topology toroid -LearningRate $LearningRate $Options
 ../bin/score/scoresom -SOMFile ../$SOMName.som -TrainingMatrix $Matrix -ScoreFile ../$SOMName.score -col $Cols
-fi
-if [ "$Sparse" = 1 ]
-then
-echo ../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Epochs $Epochs -Topology toroid -Sparse 
-	../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Epochs $Epochs -Topology toroid -Sparse -LearningRate $LearningRate
-../bin/score/scoresom -SOMFile ../$SOMName.som -TrainingMatrix $Matrix -ScoreFile ../$SOMName.score -Sparse -col $Cols
-fi
 ../bin/map/mapsom -SOMFile ../$SOMName.som -SampleList $SampleList -Prefix ../$SOMName/data/som/ -col $Cols
 mv ../$SOMName/data/som/summery.map ../$SOMName/data/map_summery.map
 ../bin/units/getunits -ScoreFile ../$SOMName.score -Rows $Rows -Cols $Cols -Prefix ../$SOMName/data/som/units/unit -col $Cols
