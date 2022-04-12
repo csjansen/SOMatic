@@ -14,8 +14,23 @@
 #include <ctime>
 using namespace std;
 
-#define SSTR( x ) dynamic_cast< std::ostringstream & >( \
-        ( std::ostringstream() << std::dec << x ) ).str()
+//#define SSTR( x ) dynamic_cast< std::ostringstream & >( \
+//        ( std::ostringstream() << std::dec << x ) ).str()
+string SSTR(int a)
+{
+    ostringstream temp;
+    temp << a;
+    return temp.str();
+}
+
+string SSTRF(int a)
+{
+    ostringstream temp;
+    temp << a;
+    return temp.str();
+}
+
+
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss(s);
         std::string item;

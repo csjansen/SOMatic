@@ -10,8 +10,21 @@
 
 using namespace std;
 
-#define SSTR( x ) static_cast< std::ostringstream & >( \
-        ( std::ostringstream() << std::dec << x ) ).str()
+//#define SSTR( x ) static_cast< std::ostringstream & >( \
+//        ( std::ostringstream() << std::dec << x ) ).str()
+string SSTR(int a)
+{
+    ostringstream temp;
+    temp << a;
+    return temp.str();
+}
+
+string SSTRF(int a)
+{
+    ostringstream temp;
+    temp << a;
+    return temp.str();
+}
 
 class BedNode {
 public:
