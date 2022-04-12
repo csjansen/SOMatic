@@ -35,7 +35,7 @@ From base SOMatic folder:
 
 `cd ../scripts`
 
-`./buildSite.sh -SOMName Example -Matrix ../examples/example.matrix -Rows 20 -Cols 30 -SampleList ../examples/sample.list -Timesteps 4000000 -Trials 1`
+`./buildSite.sh -SOMName Example -Matrix ../examples/example.matrix -Rows 20 -Cols 30 -SampleList ../examples/sample.list -Epochs 10 -Trials 1`
 
 `cp ../Example (webserver location)`
 
