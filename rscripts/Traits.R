@@ -72,6 +72,7 @@ for(i in 0:clusternum) {
 #print(nrow(sample))
 #print(HeatAtac3)
 #print(sample)
+#HeatAtac3=2^HeatAtac3-1
 cors=cor(t(HeatAtac3),sample)
 #print(cors)
 pvals = 2*pt(-abs(cors/(sqrt((1-cors^2)/(clusternum-1)))),df=clusternum+1)
@@ -135,8 +136,8 @@ print(pvals)
 pvals[pvals>.05/((clusternum+1))]=1
 pvals=-1*log10(pvals)
 maxval = min(10,max(pvals))
-pvals=pvals/maxval
-pvals[pvals>1]=1
+#pvals=pvals/maxval
+pvals[pvals>maxval]=maxval
 
 cors = cors/abs(cors)
 pvals=pvals*cors
@@ -165,7 +166,7 @@ col_limits=col_labels
 df = melt(as.matrix(pvals))
 p1 = ggplot(df, aes(x=Var2, y=Var1))
 p1 = p1 + geom_tile(aes(fill=value))
-p1 = p1 + scale_fill_gradientn(colours=matrix_palette, limits=c(-1,1))
+p1 = p1 + scale_fill_gradientn(colours=matrix_palette, limits=c(-1*maxval,maxval))
 p1 = p1 + theme(axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
 p1 = p1 + scale_y_discrete(expand=c(0,0), limits=row_limits, labels=row_labels)
 p1 = p1 + scale_x_discrete(expand=c(0,0), limits=col_limits, labels=col_labels)

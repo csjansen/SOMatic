@@ -15,7 +15,7 @@
 #clusters2<- read.delim("/bio/csjansen/SOM_Meta_Clusters/BennyRNAAIC4060.300.cluster", header=F)
 #clusters2<- read.delim("/bio/csjansen/SOMatic/xenoRNA.40x60.v1/data/MetaClusters", header=F)
 #clusters2<- read.delim("/bio/csjansen/SOMatic/FusionATAC.CosDist.40x60.v11/data/MetaClusters", header=F)
-#Atac <- read.delim(opt$SOMFile,header=F,comment.char="#")
+Atac <- read.delim(opt$SOMFile,header=F,comment.char="#")
 #clusters2 <- read.delim(opt$MetaClusterFile,header=F,comment.char="#")
 #Atac <- read.delim("/samlab/csjansen/SOMatic/statATAC.20x30.v3.som", header=F, comment.char="#")
 #Atac <- read.delim("/bio/zengw/SOM/SOMatic/Bcl11b_SOM_combat_Gata3KD_removed_log_scale_40by60.som", header=F, comment.char="#")
@@ -25,23 +25,24 @@
 
 #samples <- read.delim("/bio/zengw/SOM/SOMatic/Bcl11b_SOM_combat_Gata3KD_removed_log_scale_40by60/data/sample.list", header=F, comment.char="#")
 #samples <- read.delim("/samlab/csjansen/SOMatic/FusionATAC.CosDist.40x60.v11/data/sample.list", header=F, comment.char="#")
-#samples <- read.delim(opt$SampleList, header=F, comment.char="#")
-samples <- read.table("/bio/csjansen/SOMatic/statATAC.20x30.v3/data/sample.list", header=F, comment.char="#",stringsAsFactors=F)
+samples <- read.delim(opt$SampleList, header=F, comment.char="#")
+#samples <- read.table("/bio/csjansen/SOMatic/statATAC.20x30.v3/data/sample.list", header=F, comment.char="#",stringsAsFactors=F)
 #asamples <- read.delim("/bio/csjansen/SOMatic/XenoRNAFusion.20x30.v10/data/Beta-catenin-Morphs7", header=F, comment.char="#")
 #bsamples <- read.delim("/bio/csjansen/SOMatic/XenoRNAFusion.20x30.v10/data/Beta-catenin-Control7", header=F, comment.char="#")
 #OutputName <- "/pub/public-www/csjansen/xenoRNA.40x60.v1-Hypo.pdf"
 #clusternum <- 17-1
-Atac <- read.table("/share/samdata/csjansen/SOMatic/statATAC.20x30.v3.som", header=F,stringsAsFactors=F)
+#Atac <- read.table("/share/samdata/csjansen/SOMatic/statATAC.20x30.v3.som", header=F,stringsAsFactors=F)
 #Atac=Atac[-1,]
-MetaClusters <- read.delim("/share/samdata/csjansen/SOMatic/statATAC.20x30.v3/data/MetaClusters", header=F)
+MetaClusters <- read.delim(opt$MetaClusters, header=F)
+#MetaClusters <- read.delim("/share/samdata/csjansen/SOMatic/statATAC.20x30.v3/data/MetaClusters", header=F)
 MetaClusters = MetaClusters[-1,]
 clusters2=MetaClusters
-#OutputName <- opt$OutputName
-OutputName <- "/pub/public-www/csjansen/statATAC.20x30.v3-Hypo.pdf"
-#clusternum <- opt$ClusterNum-1
-clusternum =  102
-SOMrows = 19
-SOMcols = 29
+OutputName <- opt$OutputName
+#OutputName <- "/pub/public-www/csjansen/statATAC.20x30.v3-Hypo.pdf"
+clusternum <- opt$ClusterNum-1
+#clusternum =  102
+SOMrows = 39
+SOMcols = 59
 rowcol=c()
 colcol=c()
 Atac=data.matrix(Atac)

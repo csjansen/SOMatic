@@ -224,11 +224,17 @@ vector<genomicRegion> GetRegRegions(map<string, TSSsite>* TSSsites, vector<strin
 	//cout<<genes.size()<<" Passed in."<<endl;
 	for(int i = 0; i < genes.size(); i++) {
 		vector<string> splitz;
+//		cout<<underscore<<endl;
 		if(!underscore) {
-			splitz = split(genes[i],'-');
+			vector<string> splitz2;
+			splitz2 = split(genes[i],'-');
+			splitz = split(splitz2[0],'.');
+//			cout<<1<<endl;
 		} else {
 			splitz = split(genes[i],'_');
+//			cout<<2<<endl;
 		}
+		//	cout<<splitz[0]<<endl;
 		map<string, TSSsite>::iterator it = TSSsites->find(splitz[0]);
 		TSSsite TSS;
 		if(it!=TSSsites->end()) {
@@ -492,10 +498,10 @@ int main(int argc, char* argv[]) {
 						while(getline(RnaUnit, line)) {
 							vector<string> splitz=split(line,'\t');
 						//	cout<<splitz[0]<<endl;
-							vector<string> splitz2 = split(splitz[0],'-');
-							vector<string> splitz3 = split(splitz2[0],'.');
+							//vector<string> splitz2 = split(splitz[0],'-');
+							//vector<string> splitz3 = split(splitz2[0],'.');
 							//cout<<splitz2[0]<<endl;
-							genes.push_back(splitz2[0]);
+							genes.push_back(splitz[0]);
 							
 						}
 						RNASizeRow.push_back(genes.size());

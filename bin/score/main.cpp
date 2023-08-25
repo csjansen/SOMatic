@@ -123,12 +123,13 @@ vector<double> propagate(vector<double>* trainingVector, int numRows, int numCol
 
 int main(int argc, char *argv[]) {
 	if(argc < 2) {
-        cout << "Usage: ./scoresom -TrainingMatrix <Training Matrix File Location> -SOMFile <SOM File Location> -ScoreFile <Output Score File Location> -col <Number of Cols in SOM>" <<endl;
+        cout << "Usage: ./scoresom -TrainingMatrix <Training Matrix File Location> -SOMFile <SOM File Location> -ScoreFile <Output Score File Location> -col <Number of Cols in SOM> -Log2" <<endl;
         return 0;
     }
 	string somFileName;
     string dataFileName;
     string scoreFileName;
+    bool Log2 = false;
 	bool sparse = false;
 	bool sub1 = false;
 	int cols = 60;
@@ -146,6 +147,8 @@ int main(int argc, char *argv[]) {
 			sparse=true;
 		if(temp.compare("-col")==0)
 			istringstream(argv[i+1])>>cols;
+		if(temp.compare("-Log2")==0)
+			Log2=true;
 	}
 
 	cout<<"Opening SOM file"<<endl;
@@ -209,12 +212,14 @@ int main(int argc, char *argv[]) {
                 if(input==1) input=0;
                 else input--;
             }
+		if(Log2==true)
+			input=log(input)/log(2);
             temp.push_back(input);
         }
         dataMap[fields[0]]=temp;
         dataKeys.push_back(fields[0]);
         count++;
-        if(count%100000==0)
+        if(count%10000==0)
         cout<<"line: "<<count<<endl;
     }
     cout<<"Done!"<<endl;
@@ -255,10 +260,10 @@ int main(int argc, char *argv[]) {
             print = true;
             cout<<"59305"<<endl;
         }*/
-	//cout<<dataKeys[i]<<endl;
-	//cout<<dataMap[dataKeys[i]].size()<<endl;	
+//	cout<<dataKeys[i]<<endl;
+//	cout<<dataMap[dataKeys[i]].size()<<endl;	
     	vector<double> winunit = propagate(&(dataMap[dataKeys[i]]),numRows,cols, &inputMap,sparse,print);
-	//cout<<(int)(winunit)[0]<<'\t'<<(int)(winunit)[1]<<endl;
+//	cout<<(int)(winunit)[0]<<'\t'<<(int)(winunit)[1]<<endl;
     	winnerMap[(int)(winunit)[0]][(int)(winunit)[1]].push_back(dataKeys[i]);
 		if(sparse) 
 			winnerDist[(int)(winunit)[0]][(int)(winunit)[1]].push_back((winunit)[2]);
@@ -275,6 +280,7 @@ int main(int argc, char *argv[]) {
 				scoreFile<<'\t'<<inputMap[row][col][i];
 			}
 			scoreFile<<endl;
+		cout<<winnerMap[row][col].size()<<endl;
         	for(int k = 0; k < winnerMap[row][col].size(); k++) {
             	double tempScore = 0;
 				if(!sparse) {

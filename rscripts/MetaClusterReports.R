@@ -8,7 +8,8 @@ option_list = list(
   make_option(c("--GeneFilePrefix"),type="character",default=NULL,help="Folder that contains output fron MetaClusterGO"),
   make_option(c("--OutputPrefix"),type="character",default="Traits.pdf",help="Outfile File Name"),
   make_option(c("--OutputHeatmap"),type="character",default="Heatmap",help="Heatmap location"),
-  make_option(c("--ShowSegments"),type="character",default="1",help="Show segments")
+  make_option(c("--ShowSegments"),type="character",default="1",help="Show segments"),
+  make_option(c("--DistanceMetric"),type="character",default="euclidian",help="Distance Metric used")
 );
 opt_parser = OptionParser(option_list=option_list);
 opt=parse_args(opt_parser);
@@ -27,7 +28,7 @@ samples <- read.delim(opt$SampleList, header=F, comment.char="#")
 print(1)
 #samples <- read.delim("/samlab/csjansen/SOMatic/XenoRNAFusion.20x30.v9/data/sample.list", header=F, comment.char="#")
 if(opt$ShowSegments=="1") {
-	trainingMatrix <- read.delim(opt$TrainingMatrix, header=T, comment.char="#")
+	trainingMatrix <- read.delim(opt$TrainingMatrix, header=F, comment.char="#")
 	colnames(trainingMatrix)=c("ProbeID",as.matrix(samples))
 }
 #trainingMatrix <- read.delim("/samlab/csjansen/RSemToTrainingMatrix/TrainingMatrixFixed",header=F, comment.char="#")
@@ -95,16 +96,16 @@ for(i in 0:clusternum) {
   HeatAtac3 = rbind(HeatAtac3,HeatAtac2)
 }
 write.table(HeatAtac3, file=opt$OutputHeatmap,sep="\t",col.names=FALSE,quote=FALSE,row.names=FALSE)
-dist = "euclidean"
+dist = opt$DistanceMetric
 hclust = "complete"
-print(HeatAtac3)
+#print(HeatAtac3)
 df2 = melt(as.matrix(HeatAtac3))
 
-colDist = dist(t(HeatAtac3))
+colDist = dist(t(HeatAtac3),method=dist)
 
 colHC = hclust(colDist, method=hclust)
 write.table(colHC$order, file=paste0(opt$OutputHeatmap,"Order"),sep="\t",col.names=FALSE,quote=FALSE,row.names=FALSE)
-rowDist = dist(HeatAtac3)
+rowDist = dist(HeatAtac3, method=dist)
 rowHC = hclust(rowDist, method=hclust)
 write.table(rowHC$order, file=paste0(opt$OutputHeatmap,"RowOrder"),sep="\t",col.names=FALSE,quote=FALSE,row.names=FALSE)
 base_size = 8
@@ -123,8 +124,12 @@ if(file.info(paste0(GeneFilePrefix,toString(i)))$size == 0) {
 if(opt$ShowSegments=="1") {
 geneListFile = read.delim(paste0(GeneFilePrefix,toString(i)), header=F, comment.char="#")
 colnames(geneListFile)=c("ProbeID","row","col")
-trainingMatrix[trainingMatrix>Maxsig]=Maxsig
-geneList = join(geneListFile,trainingMatrix)
+#trainingMatrix[trainingMatrix>Maxsig,2:ncol(trainingMatrix)]=Maxsig
+#print(Maxsig)
+#print(trainingMatrix)
+#print(geneListFile)
+geneList = join(geneListFile,trainingMatrix,by="ProbeID")
+#print(geneList)
 geneList2 = geneList[,-1]
 geneList2 = geneList2[,-1]
 geneList2 = geneList2[,-1]
@@ -255,7 +260,8 @@ grow_labels = make.unique(as.character(paste0(paste0(paste0(paste0(paste0(geneLi
 grow_limits = grow_labels
 grow_labels_inches = 1.5*max(strwidth(grow_labels, units="in", cex=base_size*(as.numeric(theme_get()$axis.text$size))*par()$cex/par()$ps))
 
-
+dfgenes$value[dfgenes$value>Maxsig] = Maxsig
+#print(dfgenes)
 genebox=ggplot(dfgenes, aes(x=Var2, y=Var1))
 genebox=genebox+geom_tile(aes(fill=value))
 genebox=genebox+theme(axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
@@ -295,7 +301,7 @@ matrix_genes_x=0
 matrix_genes_y=0
 matrix_genes_h=0
 matrix_genes_w=0
-matrix_genes_w = .15* ncol(HeatAtac) + row_labels_inches
+matrix_genes_w = .2* ncol(HeatAtac) + row_labels_inches
 if(opt$ShowSegments=="1") {
 matrix_genes_x = .1
 matrix_genes_y = 0

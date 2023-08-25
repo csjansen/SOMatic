@@ -388,7 +388,6 @@ Solution: Your SOM is too large, and you are overclustering the differences betw
 A SOM needs to have been trained with the metaclustering step done.  In this tutorial, we will assume it is RNAdata from above.
 
 Also, R with the following packages installed are required:
-optparse
 reshape2
 ggplot2
 ggdendro

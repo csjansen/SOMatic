@@ -101,7 +101,7 @@ int** hexSurround(double input[], int radius, int numRows, int numCols, int* cou
 	return result;
 }
 
-double* propagate(double* trainingVector, int numRows, int numCols, int colsTraining, double*** trainingMap, bool sparse) {
+double* propagate(double* trainingVector, int numRows, int numCols, int colsTraining, double*** trainingMap, string distanceMetric) {
 	double* winUnit=new double[5];
     winUnit[0]=0;
     winUnit[1]=0;
@@ -110,14 +110,14 @@ double* propagate(double* trainingVector, int numRows, int numCols, int colsTrai
     winUnit[4]=0;
 	double secondsmallest = -999;
     double smallest = -999;
-	if(!sparse) {
+	if(distanceMetric == "Euclid") {
 	    for(int row = 0; row < numRows; row++) {
-		  	for(int col = 0; col < numCols; col++) {
-				double magSquared=0;
-				for(int num = 0; num < colsTraining; num++) {
-					magSquared += pow(trainingVector[num] - trainingMap[row][col][num],2);
+		for(int col = 0; col < numCols; col++) {
+			double magSquared=0;
+			for(int num = 0; num < colsTraining; num++) {
+				magSquared += pow(trainingVector[num] - trainingMap[row][col][num],2);
 	           	}
-				if(smallest == -999 || magSquared < smallest) {
+			if(smallest == -999 || magSquared < smallest) {
                     winUnit[2] = winUnit[0];
                     winUnit[3] = winUnit[1];
                     secondsmallest = smallest;
@@ -133,7 +133,7 @@ double* propagate(double* trainingVector, int numRows, int numCols, int colsTrai
 
 			}
 		}
-	} else {
+	} else if(distanceMetric=="Cosin") {
 		for(int row = 0; row < numRows; row++) {
             for(int col = 0; col < numCols; col++) {
 				double similarity=0;
@@ -165,7 +165,48 @@ double* propagate(double* trainingVector, int numRows, int numCols, int colsTrai
 				}
 			}
 		}
-	}	
+	} else if(distanceMetric == "Pearson") {
+		for(int row = 0; row < numRows; row++) {
+            		for(int col = 0; col < numCols; col++) {
+
+				double Ex = 0;
+				double Ey = 0;
+				for(int num = 0; num < colsTraining; num++) {
+					Ex += trainingVector[num];
+					Ey += trainingMap[row][col][num];
+				}
+				Ex /= colsTraining;
+				Ey /= colsTraining;
+				double stdDevX=0;
+				double stdDevY=0;
+				double cov = 0;
+				for(int num = 0; num < colsTraining; num++) {
+					stdDevX += pow(trainingVector[num]-Ex,2);
+					stdDevY += pow(trainingMap[row][col][num]-Ey,2);
+					cov += (trainingVector[num]-Ex)*(trainingMap[row][col][num]-Ey);
+				}
+				stdDevX = sqrt(stdDevX/colsTraining);
+				stdDevY = sqrt(stdDevY/colsTraining);
+				cov = cov/colsTraining;
+				
+				double magSquared = 1-(cov/(stdDevX*stdDevY));
+				if(smallest == -999 || magSquared < smallest) {
+                                        winUnit[2] = winUnit[0];
+                                        winUnit[3] = winUnit[1];
+                                        secondsmallest = smallest;
+                	                winUnit[0] = row;
+                        	        winUnit[1] = col;
+                                        smallest = magSquared;
+                                        winUnit[4] = smallest;
+                        	} else if(secondsmallest == -999 | magSquared < secondsmallest) {
+                                        winUnit[2] = row;
+                                        winUnit[3] = col;
+                                        secondsmallest = magSquared;
+                                }
+                        }
+		}
+
+	}
 	return winUnit;
 }
 
@@ -195,7 +236,7 @@ int hexdist(int row1, int col1, int row2, int col2, int rows, int cols, string t
 	return (abs(x1-x2) + abs(y1-y2) + abs(z1-z2))/2;
 }
 
-void runTrial(int seed, int* dataOrder, int linesTraining, int colsTraining, int numRows, int numCols, double** dataMap, int radius, int timesteps, float learningRate, bool sparse, string topology, double**** trainingMap, double* scores, int index, string* dataKeys) {
+void runTrial(int seed, int* dataOrder, int linesTraining, int colsTraining, int numRows, int numCols, double** dataMap, int radius, int timesteps, float learningRate, string distanceMetric, string topology, double**** trainingMap, double* scores, int index, string* dataKeys) {
 	cout<<"Trial "<<index<<" started"<<endl;
 	if(seed==-1)
         	srand(time(0));
@@ -233,7 +274,7 @@ void runTrial(int seed, int* dataOrder, int linesTraining, int colsTraining, int
                 double timeLearningRate = learningRate * decay;
                 int timeRadius = int(radius * decay);
                 // Finding Winning Unit
-                double* winUnit = propagate(trainingVector,numRows,numCols,colsTraining, trainingMap[index], sparse);
+                double* winUnit = propagate(trainingVector,numRows,numCols,colsTraining, trainingMap[index], distanceMetric);
                 int neighborCount=0;
                 int** winUnitNeighbors = hexSurround(winUnit,timeRadius,numRows, numCols,&neighborCount,topology);
                 for(int k = 0; k < colsTraining; k++) {
@@ -270,11 +311,11 @@ void runTrial(int seed, int* dataOrder, int linesTraining, int colsTraining, int
                 	winVect[k]=dataMap[i][k];
             	}
 
-            	double* winUnit = propagate(winVect,numRows,numCols,colsTraining, trainingMap[index], sparse);
+            	double* winUnit = propagate(winVect,numRows,numCols,colsTraining, trainingMap[index], distanceMetric);
             	totalScore += winUnit[4];
         }
         totalScore/=(double)linesTraining;
-        if(!sparse) totalScore /= colsTraining;
+        totalScore /= colsTraining;
 	scores[index] = totalScore;	
 }
 
@@ -289,7 +330,8 @@ int main(int argc, char *argv[]) {
 		cout << "-Topology: Topology for your SOM. (Only toroid currently supported) <toroid>"<<endl;
 		cout << "-Seed: Set seed for random initialization."<<endl;
 		cout << "-LearningRate: Set Learning Rate <.2>"<<endl; 
-		cout << "-Log2: Log2(x+1) correct data"<<endl; 
+		cout << "-Log2: Log2(x+1) correct data"<<endl;
+		cout << "-DistanceMetric: Distance metric to use <Euclid> [Euclid,Pearson,CosinSim]"<<endl; 
 		return 0;
 	}
 	double bestScore = -1;
@@ -302,10 +344,10 @@ int main(int argc, char *argv[]) {
 	int epochs=100;
 	string topology="toroid";
 	int seed=-1;
-	bool sparse=false;
 	bool sub1=false;
 	float learningRate = 0.2;
 	bool Log2=false;
+	string distanceMetric="Euclid";
 	for(int i = 0; i < argc; i++) {
 		string temp = argv[i];
 		if(temp.compare("-Rows")==0) 
@@ -326,12 +368,12 @@ int main(int argc, char *argv[]) {
 			topology=argv[i+1];
 		if(temp.compare("-Seed")==0)
 			istringstream(argv[i+1])>>seed;
-		if(temp.compare("-Sparse")==0) 
-			sparse=true;
 		if(temp.compare("-Log2")==0) 
 			Log2=true;
 		if(temp.compare("-LearningRate")==0)
 			istringstream(argv[i+1])>>learningRate;
+		if(temp.compare("-DistanceMetric")==0)
+			distanceMetric=argv[i+1];
 	}
 	int dimension = -1;
 	string line;
@@ -390,7 +432,7 @@ int main(int argc, char *argv[]) {
 	double* scores=new double[trials];
 	for(int i = 0; i < trials; i++) {
 		// make new map
-		threads.push_back(thread(runTrial, seed, dataOrder, linesTraining, colsTraining, numRows, numCols, dataMap, radius, timesteps, learningRate, sparse, topology, trainingMap,scores,i,dataKeys));
+		threads.push_back(thread(runTrial, seed, dataOrder, linesTraining, colsTraining, numRows, numCols, dataMap, radius, timesteps, learningRate, distanceMetric, topology, trainingMap,scores,i,dataKeys));
 	}
 	for (auto& th : threads) th.join();
 	for(int i = 0; i < trials; i++) {
