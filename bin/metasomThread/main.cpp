@@ -48,7 +48,7 @@ std::vector<std::string> split(const std::string &s, char delim) {
         return elems;
 }
 
-void ClusterAndScore(vector<vector<float> >* allpoints, vector<vector<float> >* Som1, int Dimensionality, int clusternum, bool sparse, vector<int>* clusterIndex, float* score, int row1, int col1, int trial) {
+void ClusterAndScore(vector<vector<float> >* allpoints, vector<vector<float> >* Som1, int Dimensionality, int clusternum, string DistanceMetric, vector<int>* clusterIndex, float* score, int row1, int col1, int trial) {
 	vector<vector<float> > allpoints2=*allpoints;
 	// Make random shuffle
 	vector<int> index;
@@ -112,7 +112,45 @@ void ClusterAndScore(vector<vector<float> >* allpoints, vector<vector<float> >* 
             int lowestk1=-1;
             int lowestk2=-1;
             for(int m = 0; m < clusternum; m++) {
-            	float similarity=0;
+		float dist = 0;
+		if(DistanceMetric == "Euclid") {
+	                for(int num = 0; num < Som1->at(0).size(); num++) {
+                        	dist += pow(MidPoints[m][num]-Som1->at((int)(allpoints->at(k)[0])*col1+(int)(allpoints->at(k)[1]))[num],2);
+                	}
+			dist = dist/Som1->at(0).size();
+                	dist = sqrt(dist);	
+		} else if(DistanceMetric == "Pearson") {
+			double Ex = 0;
+                        double Ey = 0;
+			for(int num = 0; num < Som1->at(0).size(); num++) {
+                        	Ex += MidPoints[m][num];
+                                Ey += Som1->at((int)(allpoints->at(k)[0])*col1+(int)(allpoints->at(k)[1]))[num];
+                        }
+                        Ex /= Som1->at(0).size();
+                        Ey /= Som1->at(0).size();
+                        double stdDevX=0;
+                        double stdDevY=0;
+                        double cov = 0;
+			for(int num = 0; num < Som1->at(0).size(); num++) {
+	                        stdDevX += pow(MidPoints[m][num]-Ex,2);
+                                stdDevY += pow(Som1->at((int)(allpoints->at(k)[0])*col1+(int)(allpoints->at(k)[1]))[num]-Ey,2);
+                                cov += (MidPoints[m][num]-Ex)*(Som1->at((int)(allpoints->at(k)[0])*col1+(int)(allpoints->at(k)[1]))[num]-Ey);
+                        }
+                        stdDevX = sqrt(stdDevX/Som1->at(0).size());
+                        stdDevY = sqrt(stdDevY/Som1->at(0).size());
+                        cov = cov/Som1->at(0).size();
+
+                        dist = 1-(cov/(stdDevX*stdDevY));
+
+		}
+                if(lowestdist1>dist) {
+                        lowestdist1 = dist;
+                    lowestk1 = m;
+                    lowestdist=dist;
+                }
+
+		
+            	/*float similarity=0;
                 float mag1 = 0;
                 float mag2 = 0;
                 float dist = 0;
@@ -138,7 +176,7 @@ void ClusterAndScore(vector<vector<float> >* allpoints, vector<vector<float> >* 
                 	lowestdist1 = dist1;
                     lowestk1 = m;
                     lowestdist=dist1;
-                }
+                }*/
             }
             if(allpoints2.at(k)[2] != lowestk1) {
             	count++;
@@ -204,8 +242,8 @@ void ClusterAndScore(vector<vector<float> >* allpoints, vector<vector<float> >* 
     for(int n = 0; n < N; n++) {
 		vector<float> DistMatrixRow;
     	for(int k = 0; k < K; k++) {
-			DistMatrixRow.push_back(0);
-           	if(!sparse) {
+		//	DistMatrixRow.push_back(0);
+/*           	if(!sparse) {
             	for(int p = 0; p < P; p++) {
                 	DistMatrixRow[k]+=pow(Som1->at((int)(allpoints->at(n)[0])*col1+(int)(allpoints->at(n)[1]))[p]-MidPoints[k][p],2);
             	}
@@ -228,9 +266,43 @@ void ClusterAndScore(vector<vector<float> >* allpoints, vector<vector<float> >* 
                 float dist1 = 1-similarity;
                 DistMatrixRow.push_back(dist1);
 
-            }
+            }*/
+		float dist = 0;
+                if(DistanceMetric == "Euclid") {
+                        for(int p = 0; p < P; p++) {
+                                dist += pow(Som1->at((int)(allpoints->at(n)[0])*col1+(int)(allpoints->at(n)[1]))[p]-MidPoints[k][p],2);
+                        }
+                        dist = dist/Som1->at(0).size();
+                        dist = sqrt(dist);
+			
+                } else if(DistanceMetric == "Pearson") {
+                        double Ex = 0;
+                        double Ey = 0;
+                        for(int p = 0; p < P; p++) {
+                                Ex += Som1->at((int)(allpoints->at(n)[0])*col1+(int)(allpoints->at(n)[1]))[p];
+                                Ey += MidPoints[k][p];
+                        }
+                        Ex /= P;
+                        Ey /= P;
+                        double stdDevX=0;
+                        double stdDevY=0;
+                        double cov = 0;
+                        for(int p = 0; p < P; p++) {
+                                stdDevX += pow(Som1->at((int)(allpoints->at(n)[0])*col1+(int)(allpoints->at(n)[1]))[p]-Ex,2);
+                                stdDevY += pow(MidPoints[k][p]-Ey,2);
+                                cov += (Som1->at((int)(allpoints->at(n)[0])*col1+(int)(allpoints->at(n)[1]))[p]-Ex)*(MidPoints[k][p]-Ey);
+                        }
+                        stdDevX = sqrt(stdDevX/P);
+                        stdDevY = sqrt(stdDevY/P);
+                        cov = cov/P;
+
+                        dist = 1-(cov/(stdDevX*stdDevY));
+
+                }
+		DistMatrixRow.push_back(dist);
+
         }
-		DistMatrix.push_back(DistMatrixRow);
+	DistMatrix.push_back(DistMatrixRow);
     }
     for(int k = 0; k < row1; k++) {
     	for(int n = 0; n < col1; n++) {
@@ -522,7 +594,6 @@ int main(int argc, char* argv[]) {
 		cout << "-Metaclusters: Number of metaclusters to start with. <20>"<<endl;
 		cout << "-MetaclustersEnd: Number of metaclusters to end with. <20>"<<endl;
         cout << "-Trials: Number of trials for your metaclustering. The best clustering will be chosen.  <20>"<<endl;
-		cout << "-Sparse: Show this option to use Cos Distance"<<endl;
 		cout << "-Dimensionality: Effective number of dimensions in your sample set. Defaults to the total number of samples."<<endl;
         return 0;
     }
@@ -535,7 +606,7 @@ int main(int argc, char* argv[]) {
 	int numberOfTrials=20;
 	string ATACSom;
 	string BestClusterName;
-	bool Sparse = false;
+	string DistanceMetric="Euclid";
 	string geneFilePrefix="";
 	int dimensionality=-1;
 	for(int i = 0; i < argc; i++) {
@@ -554,12 +625,12 @@ int main(int argc, char* argv[]) {
             ATACSom = argv[i+1];
 		if(temp.compare("-Outfile")==0)
             BestClusterName = argv[i+1];
-		if(temp.compare("-Sparse")==0)
-			Sparse = true;
 		if(temp.compare("-genePrefix")==0) 
 			geneFilePrefix=argv[i+1];
 		if(temp.compare("-Dimensionality")==0) 
 			istringstream(argv[i+1])>>dimensionality;
+		if(temp.compare("-DistanceMetric")==0)
+			DistanceMetric=argv[i+1];
 	}
 	cout<<"Opening Gene Files"<<endl;
 	vector<vector<int> > geneCounts;
@@ -629,7 +700,7 @@ int main(int argc, char* argv[]) {
 		int count = 0;
 		cout<<"Pushing threads"<<endl;
 		for(int j = 0; j < numberOfTrials; j++) {
-			threads.push_back(thread(ClusterAndScore,&allpoints, &Som1, dimensionality, i, Sparse, &(IndexRow[j]), &(ScoreRow[j]), row1, col1,j));
+			threads.push_back(thread(ClusterAndScore,&allpoints, &Som1, dimensionality, i, DistanceMetric, &(IndexRow[j]), &(ScoreRow[j]), row1, col1,j));
 		}
 		for (auto& th : threads) th.join();
 		float minScore = -999;

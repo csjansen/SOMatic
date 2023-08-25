@@ -17,7 +17,6 @@ then
                             # Usage: scriptname -options
                             # Note: dash (-) necessary
 fi
-Sparse=0
 LearningRate=.2
 Options=""
 while (( "$#" )); 
@@ -30,9 +29,9 @@ do
 	-SampleList) SampleList=$2;;
 	-Epochs) Epochs=$2;;
 	-Trials) Trials=$2;;
-	-Sparse) Options="$Options -Sparse";;
 	-Log2) Options="$Options -Log2";;
 	-LearningRate) LearningRate=$2;;
+	-DistanceMetric) Options="$Options -DistanceMetric $2";;
   esac
 
   shift
@@ -40,8 +39,8 @@ done
 
 sed -i -e 's/\r/\n/g' $Matrix
 mac2unix $SampleList
-awk '{$1=$1;print}' $SampleList > temp.samples
-SampleList="temp.samples"
+awk '{$1=$1;print}' $SampleList > ${SOMName}.temp.samples
+SampleList="${SOMName}.temp.samples"
 #sed -i -e 's/\r/\n/g' $SampleList
 
 if [ "$Rows" = "auto" ]
@@ -64,9 +63,9 @@ cp $SampleList ../$SOMName/data/sample.list
 sed -i -e "s/= 20/= $Rows/g" ../$SOMName/options.js
 sed -i -e "s/= 50/= $Cols/g" ../$SOMName/options.js
 echo $Options
-echo ../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Epochs $Epochs -Topology toroid
-../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Epochs $Epochs -Topology toroid -LearningRate $LearningRate $Options
-../bin/score/scoresom -SOMFile ../$SOMName.som -TrainingMatrix $Matrix -ScoreFile ../$SOMName.score -col $Cols
+echo ../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Epochs $Epochs -Topology toroid -LearningRate $LearningRate $Options
+#../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Epochs $Epochs -Topology toroid -LearningRate $LearningRate $Options
+#../bin/score/scoresom -SOMFile ../$SOMName.som -TrainingMatrix $Matrix -ScoreFile ../$SOMName.score -col $Cols
 ../bin/map/mapsom -SOMFile ../$SOMName.som -SampleList $SampleList -Prefix ../$SOMName/data/som/ -col $Cols
 mv ../$SOMName/data/som/summery.map ../$SOMName/data/map_summery.map
 ../bin/units/getunits -ScoreFile ../$SOMName.score -Rows $Rows -Cols $Cols -Prefix ../$SOMName/data/som/units/unit -col $Cols

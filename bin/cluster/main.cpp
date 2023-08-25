@@ -75,6 +75,7 @@ int main(int argc, char *argv[]) {
     string outFileName2;
 	int cols=60;
 	bool Normalize = true;
+	string DistanceMetric="Euclid";
 	for(int i = 0; i < argc; i++) {
         string temp = argv[i];
         if(temp.compare("-Clusters1")==0)
@@ -87,6 +88,8 @@ int main(int argc, char *argv[]) {
 			Normalize = false;
 		if(temp.compare("-Col")==0)
 			istringstream(argv[i+1])>>cols;
+		if(temp.compare("-DistanceMetric")==0)
+			DistanceMetric=argv[i+1];
 	}
 	int numRows = 0;
 	int numCols = cols;
@@ -163,15 +166,39 @@ int main(int argc, char *argv[]) {
 	for(int i = 0; i < Clusters.size(); i++) {
 		vector<double> temp;
 		for(int j = 0; j<Clusters.size(); j++) {
-			double dist = 0;
-			for(int q = 0; q<inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]].size(); q++) {
-                dist += pow(inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]][q]-inputMap[Clusters[j].contents[0][0]][Clusters[j].contents[0][1]][q],2);
+			if(DistanceMetric == "Euclid") {
+				double dist = 0;
+				for(int q = 0; q<inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]].size(); q++) {
+                			dist += pow(inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]][q]-inputMap[Clusters[j].contents[0][0]][Clusters[j].contents[0][1]][q],2);
+				}
+				dist /= inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]].size();
+				dist=sqrt(dist);
+				temp.push_back(dist);
+			} else if(DistanceMetric == "Pearson") {
+                                double Ex = 0;
+                                double Ey = 0;
+				for(int q = 0; q<inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]].size(); q++) {
+                                
+                                        Ex += inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]][q];
+                                        Ey += inputMap[Clusters[j].contents[0][0]][Clusters[j].contents[0][1]][q];
+                                }
+                                Ex /= inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]].size();
+                                Ey /= inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]].size();
+                                double stdDevX=0;
+                                double stdDevY=0;
+                                double cov = 0;
+				for(int q = 0; q<inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]].size(); q++) {
+                                        stdDevX += pow(inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]][q]-Ex,2);
+                                        stdDevY += pow(inputMap[Clusters[j].contents[0][0]][Clusters[j].contents[0][1]][q]-Ey,2);
+                                        cov += (inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]][q]-Ex)*(inputMap[Clusters[j].contents[0][0]][Clusters[j].contents[0][1]][q]-Ey);
+                                }
+                                stdDevX = sqrt(stdDevX/inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]].size());
+                                stdDevY = sqrt(stdDevY/inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]].size());
+                                cov = cov/inputMap[Clusters[i].contents[0][0]][Clusters[i].contents[0][1]].size();
+
+                                double magSquared = 1-(cov/(stdDevX*stdDevY));
+				temp.push_back(magSquared);
 			}
-			if(dist<0) {
-				cout<<dist<<endl;
-			}
-			dist=sqrt(dist);
-			temp.push_back(dist);
 		}
 		distances.push_back(temp);
 	}

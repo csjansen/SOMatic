@@ -16,7 +16,7 @@ then
                             # Usage: scriptname -options
                             # Note: dash (-) necessary
 fi
-Sparse=0
+Options=""
 Dimensionality=-1
 while (( "$#" ));
 do
@@ -27,24 +27,15 @@ do
     -Metaclusters) Metaclusters=$2;;
     -MetaclustersEnd) MetaclustersEnd=$2;;
     -Trials) Trials=$2;;
-    -Sparse) Sparse=1;;
 	-Dimensionality) Dimensionality=$2;;
+    -DistanceMetric) Options="$Options -DistanceMetric $2";;
   esac
 
   shift
 done
 
-if [ "$Sparse" = 0 ]
-then
-echo "../bin/metasomThread/metasom -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -MetaclustersEnd $MetaclustersEnd -Trials $Trials -Outfile ../$SOMName/data/MetaClusters -genePrefix ../$SOMName/data/som/units/unit -Dimensionality $Dimensionality"
-../bin/metasomThread/metasom -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -MetaclustersEnd $MetaclustersEnd -Trials $Trials -Outfile ../$SOMName/data/MetaClusters -genePrefix ../$SOMName/data/som/units/unit -Dimensionality $Dimensionality
-fi
-
-if [ "$Sparse" = 1 ]
-then
-#../bin/metaSOMTree/metaSOMTree -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -MetaclustersEnd $MetaclustersEnd -Trials $Trials -Outfile ../$SOMName/data/MetaClusters -genePrefix ../$SOMName/data/som/units/unit -Sparse -Dimensionality $Dimensionality
-../bin/metasomTread/metasom -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -MetaclustersEnd $MetaclustersEnd -Trials $Trials -Outfile ../$SOMName/data/MetaClusters -genePrefix ../$SOMName/data/som/units/unit -Sparse -Dimensionality $Dimensionality
-fi
+echo "../bin/metasomThread/metasom -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -MetaclustersEnd $MetaclustersEnd -Trials $Trials -Outfile ../$SOMName/data/MetaClusters -genePrefix ../$SOMName/data/som/units/unit -Dimensionality $Dimensionality $Options"
+../bin/metasomThread/metasom -Rows $Rows -Cols $Cols -SOMFile ../$SOMName.som -Metaclusters $Metaclusters -MetaclustersEnd $MetaclustersEnd -Trials $Trials -Outfile ../$SOMName/data/MetaClusters -genePrefix ../$SOMName/data/som/units/unit -Dimensionality $Dimensionality $Options
 
 #../bin/metasomgene/metasomgene -UnitPrefix ../$SOMName/data/som/units/unit -MetaclusterFile ../$SOMName/data/MetaClusters -OutPrefix ../$SOMName/data/ -Rows $Rows -Cols $Cols -Metaclusters $Metaclusters
 Meta=`head -n 1 ../$SOMName/data/MetaClusters | sed "s/.*: \(.*\)/\1/g"`
