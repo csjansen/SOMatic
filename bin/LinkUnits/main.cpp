@@ -93,6 +93,7 @@ map<string, TSSsite>* parseGtfFile(string gtfFileName, string geneidtype, bool X
 						if(pairItems[1].compare("gene_name")==0) {
 							//geneName = temptext+"-"+pairItems[2].substr(1,pairItems[2].size()-2);
 							geneName = temptext;
+//							cout<<geneName<<endl;
 						}
 					} else if(geneidtype.compare("gene_name")==0) {
 					
@@ -219,9 +220,60 @@ string createKey(int row1, int col1, int row2, int col2) {
 	return SSTR(row1)+"_"+SSTR(col1)+"_"+SSTR(row2)+"_"+SSTR(col2);
 }
 
-vector<genomicRegion> GetRegRegions(map<string, TSSsite>* TSSsites, vector<string> genes, string CompareType, int SearchRange,bool underscore) {
+vector<genomicRegion> GetRegRegions(map<string, TSSsite>* TSSsites, vector<string> genes, string CompareType, int SearchRange,bool underscore,string ChIPEnrichFile) {
 	vector<genomicRegion> regions;
 	//cout<<genes.size()<<" Passed in."<<endl;
+	map<string, vector<string> > geneRegionPairs;
+	if (CompareType.compare("ChIPEnrich")==0) {
+//		cout<<"Opening "<<ChIPEnrichFile<<endl;
+        	ifstream ChIPEnrich(ChIPEnrichFile.c_str());
+                string line;
+                bool first = true;
+                while(getline(ChIPEnrich,line)) {
+		//	cout<<line<<endl;
+                	if(first) {
+				first = false;
+                        	continue;
+			}
+                        vector<string> splitz = split(line,'\t');
+			int tempStart;
+			istringstream(splitz[2])>>tempStart;
+			tempStart-=1;
+			string region = splitz[1]+":"+SSTR(tempStart)+"-"+splitz[3];
+			string gene = splitz[5];
+			bool done = false;
+			while(!done) {
+				map<string, vector<string> >::iterator it = geneRegionPairs.find(gene);
+				if(it!=geneRegionPairs.end()) {
+					vector<string> temp = it->second;
+					bool found = false;
+					for(int i = 0; i < temp.size(); i++) {
+						if(temp[i]==region) {
+							found = true;
+							break;
+						}
+					}
+					if(!found) {
+						temp.push_back(region);
+					}
+					it->second = temp;
+        	        	} else {
+					vector<string> temp;
+					geneRegionPairs[gene]=temp;
+					geneRegionPairs[gene].push_back(region);
+				}
+				if(gene != splitz[11]) {
+					gene = splitz[11];
+				} else {
+					done=true;
+				}
+			}
+			//geneRegionPairs[gene]=region;
+		}
+		ChIPEnrich.close();
+//		cout<<geneRegionPairs.size()<<endl;
+	}
+                                                                                                                                                        
 	for(int i = 0; i < genes.size(); i++) {
 		vector<string> splitz;
 //		cout<<underscore<<endl;
@@ -235,13 +287,17 @@ vector<genomicRegion> GetRegRegions(map<string, TSSsite>* TSSsites, vector<strin
 //			cout<<2<<endl;
 		}
 		//	cout<<splitz[0]<<endl;
-		map<string, TSSsite>::iterator it = TSSsites->find(splitz[0]);
+	//	map<string, TSSsite>::iterator it = TSSsites->find(splitz[0]);
+		cout<<genes[i]<<endl;
+		map<string, TSSsite>::iterator it = TSSsites->find(genes[i]);
 		TSSsite TSS;
+		if(CompareType.compare("ChIPEnrich")!=0) {
 		if(it!=TSSsites->end()) {
 			TSS = it->second;
 		} else {
 			cout<<"Could not find: "<<splitz[0]<<".  Skipping..."<<endl;
 			continue;
+		}
 		}
 		//if(genes[i].compare("ENSMUSG00000075370")==0||genes[i].compare("ENSMUSG00000059305")==0) cout<<genes[i]<<'\t'<<TSS.pos<<endl;
 		int start;
@@ -293,6 +349,32 @@ vector<genomicRegion> GetRegRegions(map<string, TSSsite>* TSSsites, vector<strin
 //			cout<<temp.chrom<<endl;
 //			cout<<temp.start<<endl;
 //			cout<<temp.stop<<endl;
+		} else if (CompareType.compare("ChIPEnrich")==0) {
+			
+			genomicRegion temp;
+			temp.gene = genes[i];
+
+			vector<string> ChIPregions;
+			map<string, vector<string> >::iterator it = geneRegionPairs.find(genes[i]);
+	                if(it!=geneRegionPairs.end()) {
+        	                ChIPregions = it->second;
+                	} else {
+                        	cout<<"Could not find: "<<genes[i]<<" in ChIPEnrich File.  Skipping..."<<endl;
+	                        continue;
+        	        }
+			for(int i = 0; i < ChIPregions.size(); i++) {
+				string region = ChIPregions[i];
+				vector<string> splitz = split(region,':');
+				vector<string> splitz2=split(splitz[1],'-');
+				int start;
+				int stop;
+				istringstream(splitz2[0])>>start;
+				istringstream(splitz2[1])>>stop;
+				temp.start=start;
+				temp.stop=stop;
+				temp.chrom=splitz[0];
+				regions.push_back(temp);
+			}
 		}
 	}
 //	int temp;
@@ -320,14 +402,18 @@ int main(int argc, char* argv[]) {
         cout << "Usage: ./LinkUnits -UnitPrefix1 <Prefix of Unit Files from First SOM> -Row1 <Rows from First SOM> -Col1 <Cols from First SOM> -UnitPrefix2 <Prefix of Unit Files from Second SOM> -Rows2 <Rows from Second SOM> -Col2 <Cols from Second SOM> -Output <Output File Location> [options]"<<endl;
         cout << "Options: <default>[options]" <<endl;
         cout << "-Type: What type of data is being compared.  First SOM comes first part of type. e.g. ATACxRNA means that the first SOM is ATAC and the second SOM is RNA.<ATACxRNA>[ATACxRNA]"<<endl;
-        cout << "ATACxRNA options:\n\t-Algorithm: Which GREAT algorithm is used. <OneClosest>[OneClosest,TwoClosest]"<<endl;
+        cout << "ATACxRNA options:\n\t-Algorithm: Which GREAT algorithm is used. <OneClosest>[OneClosest,TwoClosest,ChIPEnrich]"<<endl;
+	cout << "\t-ChIPEnrichFile: tab file from ATAC peaks."<<endl;
         cout << "\t-GTFFile: GTF File for your organism."<<endl;
         cout << "\t-GeneIDType: Type of gene ID in RNA SOM unit files. <gene_id>[gene_id,gene_name]"<<endl;
 	cout << "\t-SearchRange: The distance from a gene to use for GREAT <1000000>"<<endl;
+	cout << "\t-RNAUnitNameChange: Extra characters on unit names if there are multiple sets of units to analyze"<<endl;
         return 0;
     }
+    string RNAUnitNameChange = "";
     string type = "ATACxRNA";
 	string CompareType="OneClosest";
+	string ChIPEnrichFile = "";
 	string geneidtype="gene_id";
 	string prefix1;
 	int row1;
@@ -373,6 +459,10 @@ int main(int argc, char* argv[]) {
 			addChr = true;
 		if(temp.compare("-Underscore")==0)
 			underscore = true;
+        	if(temp.compare("-ChIPEnrichFile")==0)
+			ChIPEnrichFile = argv[i+1];	
+        	if(temp.compare("-RNAUnitNameChange")==0)
+			RNAUnitNameChange = argv[i+1];	
 	}
 
 	cout<<prefix1<<" rows: "<<row1<<" cols: "<<col1<<endl;
@@ -489,15 +579,15 @@ int main(int argc, char* argv[]) {
 					vector<int> RNASizeRow;
 					for(int RnaCol = 0; RnaCol < col2; RnaCol++) {
 						//cout<<"RNA col: "<<RnaCol<<endl;
-				//		cout<<"Opening "<<prefix2+"_"+SSTR(RnaRow)+"_"+SSTR(RnaCol)+".unit"<<endl;
-						ifstream RnaUnit((prefix2+"_"+SSTR(RnaRow)+"_"+SSTR(RnaCol)+".unit").c_str());
-						//cout<<"Opened: "<<(prefix2+"_"+SSTR(RnaRow)+"_"+SSTR(RnaCol)+".unit")<<endl;
+						//cout<<"Opening "<<prefix2+"_"+SSTR(RnaRow)+"_"+SSTR(RnaCol)+".unit"+RNAUnitNameChange<<endl;
+						ifstream RnaUnit((prefix2+"_"+SSTR(RnaRow)+"_"+SSTR(RnaCol)+".unit"+RNAUnitNameChange).c_str());
+//						cout<<"Opened: "<<(prefix2+"_"+SSTR(RnaRow)+"_"+SSTR(RnaCol)+".unit"+RNAUnitNameChange)<<endl;
 						string line;
 						vector<string> genes;
 						vector<string> genes2;
 						while(getline(RnaUnit, line)) {
 							vector<string> splitz=split(line,'\t');
-						//	cout<<splitz[0]<<endl;
+//							cout<<splitz[0]<<endl;
 							//vector<string> splitz2 = split(splitz[0],'-');
 							//vector<string> splitz3 = split(splitz2[0],'.');
 							//cout<<splitz2[0]<<endl;
@@ -508,13 +598,13 @@ int main(int argc, char* argv[]) {
 						//cout<<"Genes: "<<genes.size()<<endl;
 						if(regions.size() < row2 * col2) {
 							//cout<<"Getting Reg Regions"<<endl;
-							regions.push_back(GetRegRegions(TSSsites, genes, CompareType,SearchRange,underscore));
+							regions.push_back(GetRegRegions(TSSsites, genes, CompareType,SearchRange,underscore,ChIPEnrichFile));
 							//cout<<"Gotten"<<endl;
 						}
 						vector<string> overlaps;
 						vector<string> genomicOverlaps;
-						//cout<<"Calculating overlaps"<<endl;
-						//cout<<AtacRegions.size()<<'\t'<<regions[RnaRow*col2+RnaCol].size()<<endl;
+					//	cout<<"Calculating overlaps"<<endl;
+					//	cout<<AtacRegions.size()<<'\t'<<regions[RnaRow*col2+RnaCol].size()<<endl;
 						for(int Atacs = 0; Atacs < AtacRegions.size(); Atacs++) {
 							for(int RNAs = 0; RNAs < regions[RnaRow*col2+RnaCol].size(); RNAs++) {
 					//			cout<< AtacRegions[Atacs].start<<'\t'<<regions[RnaRow*col2+RnaCol][RNAs].start<<endl;
@@ -522,13 +612,14 @@ int main(int argc, char* argv[]) {
 								if(addChr)
 									if(regions[RnaRow*col2+RnaCol][RNAs].chrom[0]!='c')
 										regions[RnaRow*col2+RnaCol][RNAs].chrom="chr"+regions[RnaRow*col2+RnaCol][RNAs].chrom;
-								//cout<<AtacRegions[Atacs].chrom<<'\t'<<regions[RnaRow*col2+RnaCol][RNAs].chrom<<endl;
-								//cin>>temp;
+					//			cin>>temp;
 								if(AtacRegions[Atacs].chrom.compare(regions[RnaRow*col2+RnaCol][RNAs].chrom)==0) {
 									if((AtacRegions[Atacs].start>=regions[RnaRow*col2+RnaCol][RNAs].start && AtacRegions[Atacs].start<=regions[RnaRow*col2+RnaCol][RNAs].stop)||(AtacRegions[Atacs].start>=regions[RnaRow*col2+RnaCol][RNAs].stop && AtacRegions[Atacs].stop <= regions[RnaRow*col2+RnaCol][RNAs].stop)||(AtacRegions[Atacs].start<=regions[RnaRow*col2+RnaCol][RNAs].start && AtacRegions[Atacs].stop >= regions[RnaRow*col2+RnaCol][RNAs].stop)) {
 										int midDist = abs((AtacRegions[Atacs].stop-AtacRegions[Atacs].start)-(regions[RnaRow*col2+RnaCol][RNAs].stop-regions[RnaRow*col2+RnaCol][RNAs].start));
 										overlaps.push_back(regions[RnaRow*col2+RnaCol][RNAs].gene);
 										genomicOverlaps.push_back(AtacRegions[Atacs].chrom+":"+SSTR(AtacRegions[Atacs].start)+"-"+SSTR(AtacRegions[Atacs].stop));
+								//cout<<AtacRegions[Atacs].chrom<<'\t'<<regions[RnaRow*col2+RnaCol][RNAs].chrom<<endl;
+								//cout<<AtacRegions[Atacs].start<<'\t'<<regions[RnaRow*col2+RnaCol][RNAs].start<<endl;
 									}
 								}
 							}

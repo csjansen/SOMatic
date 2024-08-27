@@ -4,7 +4,8 @@ option_list = list(
   make_option(c("--MetaClusterFile"),type="character",default=NULL,help="Meta Cluster File from MetaClusters in SOMatic",metavar="character"),
   make_option(c("--SOMFile"),type="character",default=NULL,help="SOM file from SOMatic",metavar="character"),
   make_option(c("--ClusterNum"),type="integer",default=1,help="Number of Meta Clusters in Meta CLuster File",metavar="character"),
-  make_option(c("--OutputName"),type="character",default="Traits.pdf",help="Outfile File Name")
+  make_option(c("--OutputName"),type="character",default="Traits.pdf",help="Outfile File Name"),
+  make_option(c("--skip"),type="integer",default=0,help="number of sample to skip")
   );
 opt_parser = OptionParser(option_list=option_list);
 opt=parse_args(opt_parser);
@@ -35,7 +36,7 @@ if (!require("plyr")) {
   library(plyr)
 }
 print(samples)
-sample = samples[,-1]
+sample = as.matrix(samples[,-1])
 #colnames(sample) = samples[1,-1]
 rownames(sample) = samples[,1]
 print(sample)
@@ -47,8 +48,8 @@ cols = ncol(sample)
 HeatAtac3=c()
 rowcol = c()
 colcol = c()
-SOMrows = 39
-SOMcols = 59
+SOMrows = 19
+SOMcols = 29
 for(i in 0:SOMrows) {
         for(j in 0:SOMcols) {
                 rowcol = c(rowcol, i)
@@ -132,7 +133,6 @@ pvals = 2*pt(-abs(cors/(sqrt((1-cors^2)/(clusternum-1)))),df=clusternum+1)
 #}
 #traitpvals=t(traitpvals)
 #traitnegs=t(traitnegs)
-print(pvals)
 pvals[pvals>.05/((clusternum+1))]=1
 pvals=-1*log10(pvals)
 maxval = min(10,max(pvals))
@@ -144,27 +144,34 @@ pvals=pvals*cors
 #cors[pvals==1]=0
 rownames(pvals)=0:clusternum
 colnames(pvals)=traitnames
-rownames(pvals) <- make.names(rownames(pvals))
+rownames(pvals) <- factor(rownames(pvals))
+print(pvals)
 pvals=pvals[rowSums(abs(pvals))>0,]
 #print(pvals)
 matrix_palette <- colorRampPalette(c("blue", "white", "red"))(n = 299)
 matrix_fill_limits = NULL  
 
 rowDist = dist(pvals, method="euclidean")
-rowHC = hclust(rowDist, method="complete")
-rowHC_data = dendro_data(as.dendrogram(rowHC))
-
-
-row_labels=row.names(pvals)
+rowHC = 0
+rowHC_data = 0
+row_labels=factor(0:clusternum)
 row_limits=row_labels
+if(ncol(sample)>1) {
+	rowHC = hclust(rowDist, method="complete")
+	rowHC_data = dendro_data(as.dendrogram(rowHC))
 row_limits = row_limits[rowHC$order]
 row_labels = row_labels[rowHC$order]
+} else {
+	row_limits = names(pvals)[order(pvals)]
+	row_labels=row_limits
+}
+print(row_labels)
 
 col_labels=colnames(pvals)
 col_limits=col_labels
 
 df = melt(as.matrix(pvals))
-p1 = ggplot(df, aes(x=Var2, y=Var1))
+p1 = ggplot(df, aes(x=Var2, y=factor(Var1)))
 p1 = p1 + geom_tile(aes(fill=value))
 p1 = p1 + scale_fill_gradientn(colours=matrix_palette, limits=c(-1*maxval,maxval))
 p1 = p1 + theme(axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
@@ -175,11 +182,11 @@ p1 = p1 + labs(x="Trait", y="Cluster #")
 
 matrix_vp_y = 0
 #matrix_vp_x = max(0, as.numeric(strwidth(colSide_by, "in")) - row_labels_inches)
-matrix_vp_x = 0
+matrix_vp_x = .05
 #matrix_vp_h =0
 #matrix_vp_w =0
-matrix_vp_h = 8/72.27 * nrow(cors) +2
-matrix_vp_w = .15* ncol(cors) +2
+matrix_vp_h = 7/72.27 * nrow(cors) +2
+matrix_vp_w = .1* ncol(cors) +2
 matrix_vp = viewport(
   y = matrix_vp_y,
   x = matrix_vp_x, 

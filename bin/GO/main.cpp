@@ -416,7 +416,7 @@ cout<<"Getting Go terms"<<endl;
 
 	cout<<"Go Heirarchy Number: "<<GOTermNumber<<endl;
     map<string, string> geneIds;
-    map<string, string> geneNames;
+  //  map<string, string> geneNames;
     vector<string> AllGenes;
     int AllGenesSize=0;
     cout<<"Getting gene ids"<<endl;
@@ -428,17 +428,33 @@ cout<<"Getting Go terms"<<endl;
         if(line[0]=='#') continue;
         vector<string> splitz = split(line,'\t');
         if(tax_id.compare("")==0) tax_id = splitz[0];
-        string temp = splitz[2];
-        string upper="";
-        locale loc;
-        for(string::size_type i = 0; i < temp.length(); i++)
-            upper+=toupper(temp[i],loc);
-        geneIds[upper]=splitz[1];
-        geneNames[splitz[1]]=upper;
+        string temp = splitz[5];
+//	cout<<temp<<endl;
+	vector<string> splitz2=split(temp,'|');
+	bool found = false;
+	string geneID="";
+	for(int i = 0; i < splitz2.size(); i++) {
+//		cout<<splitz2[i]<<endl;
+		vector<string> splitz3=split(splitz2[i],':');
+		if(splitz3[0][0]=='E') {
+			found = true;
+			geneID=splitz3[1];
+			break;
+		}
+	}
+	if(!found) continue;
+//	cout<<found<<endl;
+//	vector<string> splitz3=split(splitz2[2],':');
+//        string upper="";
+//        locale loc;
+//        for(string::size_type i = 0; i < temp.length(); i++)
+//            upper+=toupper(temp[i],loc);
+        geneIds[geneID]=splitz[1];
+//        geneNames[splitz[1]]=splitz3[1];
         //cout<<upper<<endl;
         //int temp2;
         //cin>>temp2;
-        AllGenes.push_back(upper);
+        AllGenes.push_back(geneID);
         AllGenesSize++;
         totalGenes++;
     }
@@ -528,14 +544,15 @@ cout<<"Getting Go terms"<<endl;
                 //cout<<splitz[0]<<endl;
                 //int temp;
                 //cin>>temp;
+		vector<string> splitz2 = split(splitz[0],'.');
                 for(int k = 0; k < genes.size(); k++) {
-                    if(genes[k].compare(splitz[0])==0) {
+                    if(genes[k].compare(splitz2[0])==0) {
                         found = true;
                         break;
                     }
                 }
                 if(!found)
-                    genes.push_back(splitz[0]);
+                    genes.push_back(splitz2[0]);
             }
             cout<<"Genes: "<<genes.size()<<endl;
 			vector<string> GOlist;
@@ -564,7 +581,7 @@ cout<<"Getting Go terms"<<endl;
                         //cout<<GenesInEachCluster[i][j][k]<<endl;
                         for(int u = 0; u < temp.size(); u++) {
                             if(GO2Genes[temp[u]].size()<2000 && GO2Genes[temp[u]].size()>10) {
-                            //cout<<temp[u]<<'\t'<<GOIDconversion[temp[u]]<<endl;
+//                            cout<<temp[u]<<'\t'<<GOIDconversion[temp[u]]<<endl;
                                 int foundp = -1;
                                 for(int p = 0; p < GOlist.size(); p++) {
                                     if(GOlist[p].compare(temp[u])==0) {
