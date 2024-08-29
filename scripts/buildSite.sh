@@ -13,7 +13,7 @@ then
   echo "-Trials <Number of trials you'd like to run.  The best SOM will be chosen.>"
   echo "-Sparse"
   echo "-LearningRate <Learning Rate for your program. default .2>"
-  echo "-DistanceMetric <[Euclid],Pearson,Cosine>
+  echo "-DistanceMetric <[Euclid],Pearson,Cosine>"
   exit          # Exit and explain usage.
                             # Usage: scriptname -options
                             # Note: dash (-) necessary

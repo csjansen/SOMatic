@@ -71,7 +71,9 @@ Required Options:
 -SampleList <File with list of samples>
 -Epochs <Number of Epochs for your SOM (Number of times that the trainer will be shown each segment; recommend 100 on RNA data and 10 on DNA data)>
 -Trials <Number of trials you'd like to run.  The best SOM will be chosen (recommend 100, but fewer is fine for initial analysis)>
+Options:
 -Log2 <Log2 correct data>
+-DistanceMetic <Distance metric to run the SOM on, [Euclid],Pearson,Cosine >
 ```
 From base SOMatic folder:
 
