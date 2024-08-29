@@ -13,6 +13,7 @@ then
   echo "-Trials <Number of trials you'd like to run.  The best SOM will be chosen.>"
   echo "-Sparse"
   echo "-LearningRate <Learning Rate for your program. default .2>"
+  echo "-DistanceMetric <[Euclid],Pearson,Cosine>
   exit          # Exit and explain usage.
                             # Usage: scriptname -options
                             # Note: dash (-) necessary
@@ -65,7 +66,7 @@ sed -i -e "s/= 50/= $Cols/g" ../$SOMName/options.js
 echo $Options
 echo ../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Epochs $Epochs -Topology toroid -LearningRate $LearningRate $Options
 ../bin/trainThread/trainsom -Rows $Rows -Cols $Cols -TrainingMatrix $Matrix -SOMFile ../$SOMName.som -Trials $Trials -Epochs $Epochs -Topology toroid -LearningRate $LearningRate $Options
-../bin/score/scoresom -SOMFile ../$SOMName.som -TrainingMatrix $Matrix -ScoreFile ../$SOMName.score -col $Cols
+../bin/score/scoresom -SOMFile ../$SOMName.som -TrainingMatrix $Matrix -ScoreFile ../$SOMName.score -col $Cols $Options
 ../bin/map/mapsom -SOMFile ../$SOMName.som -SampleList $SampleList -Prefix ../$SOMName/data/som/ -col $Cols
 mv ../$SOMName/data/som/summery.map ../$SOMName/data/map_summery.map
 ../bin/units/getunits -ScoreFile ../$SOMName.score -Rows $Rows -Cols $Cols -Prefix ../$SOMName/data/som/units/unit -col $Cols

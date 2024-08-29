@@ -57,13 +57,14 @@ vector <vector<int> > merge(vector <vector<int> > lhs, vector<vector<int> > rhs)
     return result;
 }
 
-vector<double> propagate(vector<double>* trainingVector, int numRows, int numCols, vector<vector<vector<double> > >* trainingMap, bool sparse,bool print) {
+vector<double> propagate(vector<double>* trainingVector, int numRows, int numCols, vector<vector<vector<double> > >* trainingMap, string distanceMetric, bool print) {
     vector<double> winUnit;
     winUnit.push_back(0);
     winUnit.push_back(0);
     winUnit.push_back(0);
     double smallest = -999;
-	if(!sparse) {
+//	if(!sparse) {
+	if(distanceMetric == "Euclid") {
 	    for(int row = 0; row < numRows; row++) {
 			    for(int col = 0; col < numCols; col++) {
 				double magSquared=0;
@@ -78,7 +79,7 @@ vector<double> propagate(vector<double>* trainingVector, int numRows, int numCol
 				}
 			}
 		}
-	} else {
+	} else if(distanceMetric=="Cosine") {
 		for(int row = 0; row < numRows; row++) {
             for(int col = 0; col < numCols; col++) {
                 /*double magSquared = 0;
@@ -115,7 +116,41 @@ vector<double> propagate(vector<double>* trainingVector, int numRows, int numCol
                     smallest = magSquared;
                 }
             }
-        }	
+        	}	
+	} else if(distanceMetric == "Pearson") {
+		int colsTraining = trainingVector->size();
+		 for(int row = 0; row < numRows; row++) {
+                        for(int col = 0; col < numCols; col++) {
+				double Ex = 0;
+                                double Ey = 0;
+                                for(int num = 0; num < colsTraining; num++) {
+                                        Ex += (*trainingVector)[num];
+                                        Ey += (*trainingMap)[row][col][num];
+                                }
+                                Ex /= colsTraining;
+                                Ey /= colsTraining;
+                                double stdDevX=0;
+                                double stdDevY=0;
+                                double cov = 0;
+                                for(int num = 0; num < colsTraining; num++) {
+                                        stdDevX += pow((*trainingVector)[num]-Ex,2);
+                                        stdDevY += pow((*trainingMap)[row][col][num]-Ey,2);
+                                        cov += ((*trainingVector)[num]-Ex)*((*trainingMap)[row][col][num]-Ey);
+                                }
+                                stdDevX = sqrt(stdDevX/colsTraining);
+                                stdDevY = sqrt(stdDevY/colsTraining);
+                                cov = cov/colsTraining;
+
+                                double magSquared = 1-(cov/(stdDevX*stdDevY));
+                                if(smallest == -999 || magSquared < smallest) {
+                                        winUnit[0] = row;
+                                        winUnit[1] = col;
+                                        winUnit[4] = magSquared;
+                                        smallest = magSquared;
+                                }
+                        }
+                }
+
 	}
     return winUnit;
 }
@@ -133,6 +168,7 @@ int main(int argc, char *argv[]) {
 	bool sparse = false;
 	bool sub1 = false;
 	int cols = 60;
+	string distanceMetric="Euclid";
 	for(int i = 0; i < argc; i++) {
         string temp = argv[i];
         if(temp.compare("-TrainingMatrix")==0)
@@ -149,6 +185,9 @@ int main(int argc, char *argv[]) {
 			istringstream(argv[i+1])>>cols;
 		if(temp.compare("-Log2")==0)
 			Log2=true;
+		if(temp.compare("-DistanceMetric")==0)
+                        distanceMetric=argv[i+1];
+
 	}
 
 	cout<<"Opening SOM file"<<endl;
@@ -262,7 +301,7 @@ int main(int argc, char *argv[]) {
         }*/
 //	cout<<dataKeys[i]<<endl;
 //	cout<<dataMap[dataKeys[i]].size()<<endl;	
-    	vector<double> winunit = propagate(&(dataMap[dataKeys[i]]),numRows,cols, &inputMap,sparse,print);
+    	vector<double> winunit = propagate(&(dataMap[dataKeys[i]]),numRows,cols, &inputMap,distanceMetric,print);
 //	cout<<(int)(winunit)[0]<<'\t'<<(int)(winunit)[1]<<endl;
     	winnerMap[(int)(winunit)[0]][(int)(winunit)[1]].push_back(dataKeys[i]);
 		if(sparse) 
@@ -283,12 +322,13 @@ int main(int argc, char *argv[]) {
 		cout<<winnerMap[row][col].size()<<endl;
         	for(int k = 0; k < winnerMap[row][col].size(); k++) {
             	double tempScore = 0;
-				if(!sparse) {
+//				if(!sparse) {
+		if(distanceMetric == "Euclid") {
 	                for(int u = 0; u < dataMap[winnerMap[row][col][k]].size(); u++) {
 		            	tempScore+=pow(dataMap[winnerMap[row][col][k]][u]-inputMap[row][col][u],2);
 			        }
 					tempScore=sqrt(tempScore)/(double)dataMap[winnerMap[row][col][k]].size();
-				} else {					 
+				} else if(distanceMetric=="Cosine") {					 
 					/*for(int u = 0; u < dataMap[winnerMap[row][col][k]].size(); u++) {
 			            if(dataMap[winnerMap[row][col][k]][u]!=0) {
 	                        tempScore += dataMap[winnerMap[row][col][k]][u]*(dataMap[winnerMap[row][col][k]][u]-2*inputMap[row][col][u]);
@@ -314,7 +354,34 @@ int main(int argc, char *argv[]) {
 					double magSquared = 1-similarity;
 					//cout<<tempScore;
 					tempScore=magSquared;
-				}
+				
+		} else if(distanceMetric == "Pearson") {
+			int colsTraining = dataMap[winnerMap[row][col][k]].size();
+
+                                double Ex = 0;
+                                double Ey = 0;
+                                for(int num = 0; num < colsTraining; num++) {
+                                        Ex += dataMap[winnerMap[row][col][k]][num];
+                                        Ey += inputMap[row][col][num];
+                                }
+                                Ex /= colsTraining;
+                                Ey /= colsTraining;
+                                double stdDevX=0;
+                                double stdDevY=0;
+                                double cov = 0;
+                                for(int num = 0; num < colsTraining; num++) {
+                                        stdDevX += pow(dataMap[winnerMap[row][col][k]][num]-Ex,2);
+                                        stdDevY += pow(inputMap[row][col][num]-Ey,2);
+                                        cov += (dataMap[winnerMap[row][col][k]][num]-Ex)*(inputMap[row][col][num]-Ey);
+                                }
+                                stdDevX = sqrt(stdDevX/colsTraining);
+                                stdDevY = sqrt(stdDevY/colsTraining);
+                                cov = cov/colsTraining;
+
+                                double magSquared = 1-(cov/(stdDevX*stdDevY));
+				tempScore = magSquared;
+
+		}
 				scoreFile.precision(5);
 				scoreFile<<tempScore<<'\t'<<winnerMap[row][col][k];
 				for(int u = 0; u < dataMap[winnerMap[row][col][k]].size(); u++) {

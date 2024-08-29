@@ -133,7 +133,7 @@ double* propagate(double* trainingVector, int numRows, int numCols, int colsTrai
 
 			}
 		}
-	} else if(distanceMetric=="Cosin") {
+	} else if(distanceMetric=="Cosine") {
 		for(int row = 0; row < numRows; row++) {
             for(int col = 0; col < numCols; col++) {
 				double similarity=0;
@@ -331,7 +331,7 @@ int main(int argc, char *argv[]) {
 		cout << "-Seed: Set seed for random initialization."<<endl;
 		cout << "-LearningRate: Set Learning Rate <.2>"<<endl; 
 		cout << "-Log2: Log2(x+1) correct data"<<endl;
-		cout << "-DistanceMetric: Distance metric to use <Euclid> [Euclid,Pearson,CosinSim]"<<endl; 
+		cout << "-DistanceMetric: Distance metric to use <Euclid> [Euclid,Pearson,Cosine]"<<endl; 
 		return 0;
 	}
 	double bestScore = -1;
